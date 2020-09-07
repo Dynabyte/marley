@@ -27,20 +27,19 @@ function startMedia() {
 
 video.addEventListener('play', () => {
   setInterval(async () => {
-    const detections = await faceapi.detectAllFaces(
-      video,
-      new faceapi.TinyFaceDetectorOptions()
-    );
-    console.log(detections);
-
-    if(detections.length > 0 
-      && detections[0]._score > 0.5) {
-        console.log('Found face');
-        title.style.display = 'block';
+    const detection = await faceapi.detectSingleFace(
+      video, 
+      new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.1 }));
+    if(detection == null) {
+      title.style.display = 'none';
+      return;
     }
-    else{
+    if (detection._score > 0.5) {
+      title.style.display = 'block';
+    }
+    else {
       title.style.display = 'none';      
     }
-
-  }, 100);
+    console.log('Detection score: ' + detection._score.toFixed(2));      
+  }, 500);
 });
