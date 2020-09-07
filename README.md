@@ -12,6 +12,6 @@ Att lära oss mera om AI och att förpacka SaaS-tjänster.
 Olika nivåer (exempel/förslag):
 
 1. Marley på en skärm. Kamera som uppfattar rörelse och hälsar välkommen utskrivet på skärmen
-2. Marley ska kunna identifiera att det är en person som kom fram till kameran (ej en ballong t.ex)
+2. Marley ska kunna identifiera att det är en person som kom fram till kameran (ej en ballong eller en fotboll t.ex)
 3. Marley ska kunna identifiera om det är en tidigare känd person eller ny person och hälsa på dem därefter (”hej igen” eller ”välkommen hit”).
 4. Marley ska kunna identifiera vem det är som kommer och hälsa den personen med ett customiserat meddelande ”Hej Jonas, ditt möte med Anders är i rum 4 om 14 minuter. Sitt ner i sofforna så länge och ta gärna en kaffe medan du väntar.”
