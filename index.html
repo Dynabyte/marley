@@ -21,7 +21,13 @@
   </head>
   <body>
     <h1 id="title" style="font-size: 70px;opacity: 0;" >Välkommen till Dynabyte</h1>
-    <video style="opacity: 1;" id="video" width="720" height="560"  autoplay muted></video>
-    <h2>Using Tiny Face (<span id="score">null</span>)</h2>
+    <div style="opacity: 1;">
+      <video id="video" width="720" height="560"  autoplay muted></video>
+      <h2>Using <span id="selectedModel">Tiny Face</span> (<span id="score">null</span>)</h2>
+      <select id="model" onchange="changeModel()">
+        <option>Tiny Face</option>
+        <option>Ssd Mobile Net</option>
+      </select>
+    </div>
   </body>
 </html>
