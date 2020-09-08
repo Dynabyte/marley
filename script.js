@@ -1,15 +1,19 @@
 const video = document.getElementById('video');
 const title = document.getElementById('title');
+const score = document.getElementById('score');
 
-Promise.all([
-  faceapi.nets.tinyFaceDetector.loadFromUri('/models')
-]).then(startMedia)
+Promise
+  .all([
+    faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+    faceapi.nets.ssdMobilenetv1.loadFromUri('/models')
+  ]).then(startMedia)
   .catch(function (err) {
     console.error(err);
   });
 
 function startMedia() {
-  navigator.mediaDevices
+  navigator
+    .mediaDevices
     .getUserMedia({
       audio: false,
       video: {
@@ -27,19 +31,25 @@ function startMedia() {
 
 video.addEventListener('play', () => {
   setInterval(async () => {
-    const detection = await faceapi.detectSingleFace(
-      video, 
-      new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.1 }));
+    const detection = await faceapi
+      .detectSingleFace(
+        video, 
+        new faceapi
+          .TinyFaceDetectorOptions({ scoreThreshold: 0.1 }));
+          
     if(detection == null) {
-      title.style.display = 'none';
+      score.innerHTML = 'null';
+      title.style.opacity = '0';
       return;
     }
     if (detection._score > 0.5) {
-      title.style.display = 'block';
+      title.style.opacity = '1';
     }
     else {
-      title.style.display = 'none';      
+      score.innerHTML = 'null';
+      title.style.opacity = '0';
     }
     console.log('Detection score: ' + detection._score.toFixed(2));      
+    score.innerHTML = detection._score.toFixed(2);
   }, 500);
 });
