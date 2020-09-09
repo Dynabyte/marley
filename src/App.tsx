@@ -1,34 +1,47 @@
+import {
+  detectSingleFace,
+  loadSsdMobilenetv1Model,
+  SsdMobilenetv1Options,
+  TNetInput
+} from 'face-api.js';
 import React from 'react';
-import logo from './acnh-marlin-header-1.jpg';
 import './App.css';
 
 export const App = () => {
-  const [videoElement, setVideoElement] = React.useState<HTMLElement | null>(null);
+  const [videoElement, setVideoElement] = React.useState<HTMLElement | null>(
+    null
+  );
+
   React.useEffect(() => {
     setVideoElement(document.getElementById('video'));
-    const startMedia = () => {
-      if (videoElement === null) {
-        console.log("VideoElement doesn't exist");
-        return;
-      }
-      console.log('fasfasf');
-      navigator.mediaDevices
-        .getUserMedia({
-          audio: false,
-          video: {
-            width: { ideal: 720 },
-            height: { ideal: 560 },
-          },
-        })
-        .then((stream) => {
-          (videoElement as HTMLVideoElement).srcObject = stream;
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    };
-    startMedia();
+    videoElement?.addEventListener('play', onPlay, { once: true });
+    loadSsdMobilenetv1Model('/models')
+      .then(() => startMedia())
+      .catch((err) => {
+        console.log(err);
+      });
   }, [videoElement]);
+
+  const startMedia = () => {
+    if (videoElement === null) {
+      console.log("VideoElement doesn't exist");
+      return;
+    }
+    navigator.mediaDevices
+      .getUserMedia({
+        audio: false,
+        video: {
+          width: { ideal: 720 },
+          height: { ideal: 560 },
+        },
+      })
+      .then((stream: MediaStream) => {
+        (videoElement as HTMLVideoElement).srcObject = stream;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   const onPlay: () => void = () => {
     setInterval(async () => {
@@ -36,45 +49,37 @@ export const App = () => {
         console.log("Element doesn't exist");
         return;
       }
-      // const detections = await faceApi.detectAllFaces(
-      //   videoElement as faceApi.TNetInput,
-      //   new faceApi.TinyFaceDetectorOptions()
-      // );
-      // console.log(detections);
-
-      console.log('ON PLAY');
-
-      // if (detections.length > 0 && detections[0].score > 0.5) {
-      //   console.log('Found face');
-      //   title.style.display = 'block';
-      // } else {
-      //   title.style.display = 'none';
-      // }
-    }, 100);
+      console.log('Hejsan');
+      const detection = await detectSingleFace(
+        videoElement as TNetInput,
+        new SsdMobilenetv1Options({ minConfidence: 0.1 })
+      );
+      if (detection == null) {
+        // score.innerHTML = 'null';
+        // title.style.opacity = '0';
+        return;
+      }
+      if (detection.score > 0.5) {
+        // title.style.opacity = '1';
+      } else {
+        // score.innerHTML = 'null';
+        // title.style.opacity = '0';
+      }
+      console.log('Detection score: ' + detection.score.toFixed(2));
+      // score.innerHTML = detection.score.toFixed(2);
+    }, 10000);
   };
-
-  // Promise.all([faceApi.nets.tinyFaceDetector.loadFromUri('/models')])
-  //   .then(startMedia)
-  //   .catch((err) => {
-  //     console.error(err);
-  //   });
 
   return (
     <div className='App'>
-      <header className='App-header'>
-        <img src={logo} className='App-logo' alt='logo' />
-        <p>
-          <video
-            style={{ opacity: 1 }}
-            id='video'
-            width='720'
-            height='560'
-            autoPlay={true}
-            muted={true}
-            onPlay={onPlay}
-          ></video>
-        </p>
-      </header>
+      <video
+        style={{ opacity: 1 }}
+        id='video'
+        width='720'
+        height='560'
+        autoPlay={true}
+        muted={true}
+      ></video>
     </div>
   );
 };
