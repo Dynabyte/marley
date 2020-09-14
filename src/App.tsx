@@ -1,8 +1,7 @@
 import {
   detectSingleFace,
   loadSsdMobilenetv1Model,
-  SsdMobilenetv1Options,
-  TNetInput
+  SsdMobilenetv1Options
 } from 'face-api.js';
 import React from 'react';
 import './App.css';
@@ -14,19 +13,12 @@ export const App = () => {
 
   React.useEffect(() => {
     setVideoElement(document.getElementById('video'));
-    videoElement?.addEventListener('play', onPlay, { once: true });
-    loadSsdMobilenetv1Model('/models')
-      .then(() => startMedia())
-      .catch((err) => {
-        console.log(err);
-      });
-  }, [videoElement]);
 
-  const startMedia = () => {
     if (videoElement === null) {
       console.log("VideoElement doesn't exist");
       return;
     }
+
     navigator.mediaDevices
       .getUserMedia({
         audio: false,
@@ -35,40 +27,22 @@ export const App = () => {
           height: { ideal: 560 },
         },
       })
-      .then((stream: MediaStream) => {
+      .then(async (stream) => {
         (videoElement as HTMLVideoElement).srcObject = stream;
+        await startDetection();
       })
       .catch((err) => {
         console.log(err);
       });
-  };
 
-  const onPlay: () => void = () => {
-    setInterval(async () => {
-      if (videoElement === null) {
-        console.log("Element doesn't exist");
-        return;
-      }
-      console.log('Hejsan');
-      const detection = await detectSingleFace(
-        videoElement as TNetInput,
-        new SsdMobilenetv1Options({ minConfidence: 0.1 })
-      );
-      if (detection == null) {
-        // score.innerHTML = 'null';
-        // title.style.opacity = '0';
-        return;
-      }
-      if (detection.score > 0.5) {
-        // title.style.opacity = '1';
-      } else {
-        // score.innerHTML = 'null';
-        // title.style.opacity = '0';
-      }
-      console.log('Detection score: ' + detection.score.toFixed(2));
-      // score.innerHTML = detection.score.toFixed(2);
-    }, 10000);
-  };
+    loadSsdMobilenetv1Model('/models')
+      .then(() => {
+        console.log('model loaded');
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [videoElement]);
 
   return (
     <div className='App'>
@@ -77,11 +51,33 @@ export const App = () => {
         id='video'
         width='720'
         height='560'
-        autoPlay={true}
         muted={true}
+        autoPlay={true}
       ></video>
     </div>
   );
+};
+
+const startDetection = async () => {
+  const ve = 'video';
+  setInterval(async () => {
+    
+    const detection = await detectSingleFace(
+      ve,
+      new SsdMobilenetv1Options({ minConfidence: 0.1 })
+    );
+
+    if (detection === undefined) {
+      console.log('detection is null');
+      return;
+    }
+    if (detection.score > 0.5) {
+      console.log('Found face');
+    } else {
+      console.log('Didn´t find face');
+    }
+    console.log('Detection score: ' + detection.score.toFixed(2));
+  }, 500);
 };
 
 export default App;
