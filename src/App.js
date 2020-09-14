@@ -1,14 +1,14 @@
 import {
   detectSingleFace,
   loadSsdMobilenetv1Model,
-  SsdMobilenetv1Options
+  SsdMobilenetv1Options,
 } from 'face-api.js';
 import React from 'react';
 import './App.css';
 
-
 function App() {
   const [videoElement, setVideoElement] = React.useState(null);
+  const [isDetected, setIsDetected] = React.useState(false);
 
   React.useEffect(() => {
     setVideoElement(document.getElementById('video'));
@@ -42,39 +42,50 @@ function App() {
       });
   }, [videoElement]);
 
+  async function startDetection() {
+    const videoElement = document.getElementById('video');
+    setInterval(async () => {
+      const detection = await detectSingleFace(
+        videoElement,
+        new SsdMobilenetv1Options({ minConfidence: 0.1 })
+      );
+
+      if (detection == null) {
+        setIsDetected(false);
+        console.log('detection is null');
+        return;
+      }
+      if (detection._score > 0.5) {
+        setIsDetected(true);
+        console.log('Found face');
+      } else {
+        setIsDetected(false);
+        console.log('Didn´t find face');
+      }
+      console.log('Detection score: ' + detection._score.toFixed(2));
+    }, 500);
+  }
+
   return (
-    <div className="App">
+    <div className='App'>
+      <h1
+        style={{
+          fontSize: '70px',
+          visibility: isDetected ? 'visible' : 'hidden',
+        }}
+      >
+        Välkommen till Dynabyte
+      </h1>
       <video
         style={{ opacity: 1 }}
         id='video'
         width='720'
         height='560'
         autoPlay={true}
-        muted={true}></video>
+        muted={true}
+      ></video>
     </div>
   );
-}
-
-async function startDetection() {
-  const videoElement = document.getElementById('video');
-  setInterval(async () => {
-    const detection = await
-      detectSingleFace(
-        videoElement,
-        new SsdMobilenetv1Options({ minConfidence: 0.1 }));
-
-    if (detection == null) {
-      console.log('detection is null');
-      return;
-    }
-    if (detection._score > 0.5) {
-      console.log('Found face');
-    }
-    else {
-      console.log('Didn´t find face');
-    }
-    console.log('Detection score: ' + detection._score.toFixed(2));
-  }, 500);
 }
 
 export default App;
