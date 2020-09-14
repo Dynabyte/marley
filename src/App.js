@@ -2,16 +2,17 @@ import {
   detectSingleFace,
   loadSsdMobilenetv1Model,
   SsdMobilenetv1Options,
-} from 'face-api.js';
-import React from 'react';
-import './App.css';
+} from "face-api.js";
+import React from "react";
+import "./App.css";
+import dynabyteLogo from "./dynabyte_white.png";
 
 function App() {
   const [videoElement, setVideoElement] = React.useState(null);
   const [isDetected, setIsDetected] = React.useState(false);
 
   React.useEffect(() => {
-    setVideoElement(document.getElementById('video'));
+    setVideoElement(document.getElementById("video"));
 
     if (videoElement === null) {
       console.log("VideoElement doesn't exist");
@@ -33,9 +34,9 @@ function App() {
         console.log(err);
       });
 
-    loadSsdMobilenetv1Model('/models')
+    loadSsdMobilenetv1Model("/models")
       .then(() => {
-        console.log('model loaded');
+        console.log("model loaded");
       })
       .catch((err) => {
         console.log(err);
@@ -43,7 +44,7 @@ function App() {
   }, [videoElement]);
 
   async function startDetection() {
-    const videoElement = document.getElementById('video');
+    const videoElement = document.getElementById("video");
     setInterval(async () => {
       const detection = await detectSingleFace(
         videoElement,
@@ -52,38 +53,52 @@ function App() {
 
       if (detection == null) {
         setIsDetected(false);
-        console.log('detection is null');
+        console.log("detection is null");
         return;
       }
       if (detection._score > 0.5) {
         setIsDetected(true);
-        console.log('Found face');
+        console.log("Found face");
       } else {
         setIsDetected(false);
-        console.log('Didn´t find face');
+        console.log("Didn´t find face");
       }
-      console.log('Detection score: ' + detection._score.toFixed(2));
+      console.log("Detection score: " + detection._score.toFixed(2));
     }, 500);
   }
 
   return (
-    <div className='App'>
+    <div className="wrapper">
       <h1
+        id="title"
         style={{
-          fontSize: '70px',
-          visibility: isDetected ? 'visible' : 'hidden',
+          fontSize: "70px",
+          visibility: isDetected ? "visible" : "hidden",
         }}
       >
-        Välkommen till Dynabyte
+        Välkommen till
       </h1>
+      <img src={dynabyteLogo} alt="logo" width="200" height="80" />
       <video
-        style={{ opacity: 1 }}
-        id='video'
-        width='720'
-        height='560'
+        style={{ opacity: 0 }}
+        id="video"
+        width="720"
+        height="560"
         autoPlay={true}
         muted={true}
       ></video>
+      <footer>
+        <span>
+          Photo by{" "}
+          <a href="https://unsplash.com/@freetousesoundscom?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">
+            Free To Use Sounds
+          </a>{" "}
+          on{" "}
+          <a href="https://unsplash.com/s/photos/grass?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">
+            Unsplash
+          </a>
+        </span>
+      </footer>
     </div>
   );
 }

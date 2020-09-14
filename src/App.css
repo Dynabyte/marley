@@ -1,34 +1,45 @@
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.wrapper {
+  background: linear-gradient(rgb(239, 87, 227, 0.9), rgba(239, 87, 227, 0.1)),
+    var(--image-url) center center;
+  height: 100vh;
+  overflow-y: hidden;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  align-items: center;
+  position: relative;
+}
+
+#title {
+  font-family: "Playfair Display", serif;
+  margin-top: 25vh;
+  text-align: center;
+  font-size: 3.5rem;
   color: white;
+  animation: 2s ease-in-out 0s 1 slideInFromTop;
 }
 
-.App-link {
-  color: #61dafb;
+@keyframes slideInFromTop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+footer {
+  font-size: 0.8rem;
+  z-index: 1;
+  position: absolute;
+  bottom: 0;
+}
+
+a {
+  color: #aba9a9;
 }
