@@ -4,8 +4,35 @@ import {
   SsdMobilenetv1Options,
 } from "face-api.js";
 import React from "react";
+import styled, { keyframes } from "styled-components";
 import "./App.css";
 import dynabyteLogo from "./dynabyte_white.png";
+
+const slideIn = keyframes`
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+`;
+
+const Title = styled.h1`
+  font-family: "Playfair Display", serif;
+  margin-top: ${(props) => (props.isDetected ? "25vh" : 0)};
+  text-align: center;
+  font-size: 4rem;
+  color: white;
+  animation: 2s ease-in-out 0s 1 ${slideIn};
+  order: ${(props) => (props.isDetected ? 1 : 2)};
+  opacity: ${(props) => (props.isDetected ? 1 : 0)};
+`;
+
+const Logo = styled.img`
+  order: ${(props) => (props.isDetected ? 2 : 1)};
+  transform: ${(props) => (props.isDetected ? "scale(1)" : "scale(0.5)")};
+  margin-top: ${(props) => (props.isDetected ? 0 : "10vh")};
+`;
 
 function App() {
   const [videoElement, setVideoElement] = React.useState(null);
@@ -69,16 +96,14 @@ function App() {
 
   return (
     <div className="wrapper">
-      <h1
-        id="title"
-        style={{
-          fontSize: "70px",
-          visibility: isDetected ? "visible" : "hidden",
-        }}
-      >
-        Välkommen till
-      </h1>
-      <img src={dynabyteLogo} alt="logo" width="200" height="80" />
+      <Title isDetected={isDetected}>Välkommen till</Title>
+      <Logo
+        src={dynabyteLogo}
+        alt="logo"
+        width="200"
+        height="80"
+        isDetected={isDetected}
+      />
       <video
         style={{ opacity: 0 }}
         id="video"

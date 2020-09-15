@@ -10,27 +10,8 @@
   position: relative;
 }
 
-#title {
-  font-family: "Playfair Display", serif;
-  margin-top: 25vh;
-  text-align: center;
-  font-size: 3.5rem;
-  color: white;
-  animation: 2s ease-in-out 0s 1 slideInFromTop;
-}
-
-@keyframes slideInFromTop {
-  0% {
-    transform: scale(0.5);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(0.5);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-  }
+video {
+  order: 3;
 }
 
 footer {
