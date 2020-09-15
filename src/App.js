@@ -18,7 +18,7 @@ const slideIn = keyframes`
 `;
 
 const complexMixin = css`
-  ${(props) => props.isDetected && `animation: 2s ease-in-out 0s 1 ${slideIn}`}
+  animation: 2s ease-in-out 0s 1 ${slideIn};
 `;
 
 const Title = styled.h1`
@@ -27,7 +27,7 @@ const Title = styled.h1`
   text-align: center;
   font-size: 4rem;
   color: white;
-  ${(props) => props.complex && complexMixin};
+  ${(props) => props.isDetected && complexMixin};
   order: ${(props) => (props.isDetected ? 1 : 2)};
   opacity: ${(props) => (props.isDetected ? 1 : 0)};
 `;
