@@ -4,7 +4,7 @@ import {
   SsdMobilenetv1Options,
 } from "face-api.js";
 import React from "react";
-import styled, { keyframes } from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 import "./App.css";
 import dynabyteLogo from "./dynabyte_white.png";
 
@@ -17,13 +17,17 @@ const slideIn = keyframes`
   }
 `;
 
+const complexMixin = css`
+  ${(props) => props.isDetected && `animation: 2s ease-in-out 0s 1 ${slideIn}`}
+`;
+
 const Title = styled.h1`
   font-family: "Playfair Display", serif;
   margin-top: ${(props) => (props.isDetected ? "25vh" : 0)};
   text-align: center;
   font-size: 4rem;
   color: white;
-  animation: 2s ease-in-out 0s 1 ${slideIn};
+  ${(props) => props.complex && complexMixin};
   order: ${(props) => (props.isDetected ? 1 : 2)};
   opacity: ${(props) => (props.isDetected ? 1 : 0)};
 `;
