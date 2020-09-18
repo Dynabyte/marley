@@ -64,25 +64,27 @@ Promise
       loadFaceDetectionArrayAndGetDetectionStatistics("Daniel1", imagesHtmlDaniel1, faceDetectionsDaniel1);
       loadFaceDetectionArrayAndGetDetectionStatistics("Daniel2", imagesHtmlDaniel2, faceDetectionsDaniel2);
       loadFaceDetectionArrayAndGetDetectionStatistics("Niklas1", imagesHtmlNiklas1, faceDetectionsNiklas1);
-      setTimeout(()=> {
+      setTimeout(()=> { //Try to make sure it runs after detectionArrays have loaded
         console.log(faceDetectionsDaniel1);
         console.log(faceDetectionsDaniel2);
         console.log(faceDetectionsNiklas1);
         compareTwoDetectionArrays(faceDetectionsDaniel1, faceDetectionsDaniel1);
         //compareTwoDetectionArrays(faceDetectionsDaniel1, faceDetectionsDaniel2);
         //compareTwoDetectionArrays(faceDetectionsDaniel1, faceDetectionsNiklas1);
-      }, 20000);
+      }, 30000);
     })
     .catch(function (err) {
       console.error(err);
     });
+  
 
-
-    function loadFaceDetectionArrayAndGetDetectionStatistics(folderName, imageHtmlArray, detectionArray) {
+      function loadFaceDetectionArrayAndGetDetectionStatistics(folderName, imageHtmlArray, detectionArray) {
         const detectionThreshold = 0.5;
         let nrOfConfidentDetections = 0;
         let nrOfWeakDetections = 0;
         let nrOfNullDetections = 0;
+        const allDetectionScores = [];
+        const confidentDetectionScores = [];
 
         const options = new faceapi.SsdMobilenetv1Options({ minConfidence: 0.1 });
 
@@ -97,11 +99,12 @@ Promise
               console.log("(" + folderName + ") Image " + fileNumber + " null detection!")
           }
           else {
-              //console.log(detectionResult);
+              allDetectionScores.push(detectionResult.detection.score);
               console.log("(" + folderName + ") Image " + fileNumber + " has detection score: " + detectionResult.detection.score.toFixed(2));
 
               if(detectionResult.detection.score > detectionThreshold){
                 detectionArray.push({fileNumber: fileNumber, folderName: folderName, detectionResult: detectionResult});
+                confidentDetectionScores.push(detectionResult.detection.score);
                 nrOfConfidentDetections++;
               }
               else {
@@ -112,12 +115,18 @@ Promise
           if(i == imageHtmlArray.length - 1){ //Do at the end of the for loop
             const endTime = new Date().getTime();
             const executionTime = endTime - startTime;
-            console.log("Confident detections: " + nrOfConfidentDetections);
-            console.log("Weak detections: " + nrOfWeakDetections);
-            console.log("Null detections: " + nrOfNullDetections);
-            console.log("Confident detection percentage: " + (nrOfConfidentDetections/imageHtmlArray.length*100).toFixed(2) + "%")
-            console.log("Execution Time: " + executionTime + " ms");
-            console.log(folderName + " ------ END DETECTION REPORT ------------");
+
+            const detectionReport =
+`Confident detections: ${nrOfConfidentDetections}
+Weak detections: ${nrOfWeakDetections}
+Null detections: ${nrOfNullDetections}
+Confident detection percentage: ${(nrOfConfidentDetections/imageHtmlArray.length*100).toFixed(2)}%
+Average confident detection rate: ${(sum(confidentDetectionScores)/nrOfConfidentDetections).toFixed(2)}
+Average detection rate: ${(sum(allDetectionScores)/(nrOfWeakDetections+nrOfConfidentDetections)).toFixed(2)}
+Execution Time: ${executionTime/1000} seconds
+${folderName} ------ END DETECTION REPORT ------------`;
+            
+            console.log(detectionReport);
           }   
         }) 
     }
@@ -155,7 +164,7 @@ Euclidean Distance: ${euclideanDistance.toFixed(2)}`;
       const fullComparisonReport =
 `--- Full Comparison report (${detectionArray1[0].folderName} compared to ${detectionArray2[0].folderName}) ---
 Minimum euclidean distance: ${minEuclideanDistance.toFixed(2)} - ${minEuclideanDistanceImagesInfo}
-Average euclidean distance: ${(euclideanDistancesArray.reduce((a, b) => a + b, 0)/euclideanDistancesArray.length).toFixed(2)}
+Average euclidean distance: ${(sum(euclideanDistancesArray)/euclideanDistancesArray.length).toFixed(2)}
 Number of comparisons: ${euclideanDistancesArray.length}`;
 
       console.log(fullComparisonReport);
@@ -164,77 +173,6 @@ Number of comparisons: ${euclideanDistancesArray.length}`;
       
     }
 
-
-
-  
-/*
-document.addEventListener('DOMContentLoaded', (event) => {
-  console.log('DOM fully loaded and parsed');
-});
-async function doCompare() {
-  console.log("doing compare");
-  const results2 = await faceapi.detectAllFaces(image2).withFaceLandmarks().withFaceDescriptors();
-  const results3 = await faceapi.detectAllFaces(image3).withFaceLandmarks().withFaceDescriptors();
-  const results4 = await faceapi.detectAllFaces(image4).withFaceLandmarks().withFaceDescriptors();
-  const results5 = await faceapi.detectAllFaces(image5).withFaceLandmarks().withFaceDescriptors();
-  const results6 = await faceapi.detectAllFaces(image6).withFaceLandmarks().withFaceDescriptors();
-  const results7 = await faceapi.detectAllFaces(image7).withFaceLandmarks().withFaceDescriptors();
-  const results8 = await faceapi.detectAllFaces(image8).withFaceLandmarks().withFaceDescriptors();
-  const results9 = await faceapi.detectAllFaces(image9).withFaceLandmarks().withFaceDescriptors();
-  const results10 = await faceapi.detectAllFaces(image10).withFaceLandmarks().withFaceDescriptors();
-  const results11 = await faceapi.detectAllFaces(image11).withFaceLandmarks().withFaceDescriptors();
-  const results12 = await faceapi.detectAllFaces(image12).withFaceLandmarks().withFaceDescriptors();
-  const results13 = await faceapi.detectAllFaces(image13).withFaceLandmarks().withFaceDescriptors();
-  const results14 = await faceapi.detectAllFaces(image14).withFaceLandmarks().withFaceDescriptors();
-  const results15 = await faceapi.detectAllFaces(image15).withFaceLandmarks().withFaceDescriptors();
-  const results16 = await faceapi.detectAllFaces(image16).withFaceLandmarks().withFaceDescriptors();
-  const results17 = await faceapi.detectAllFaces(image17).withFaceLandmarks().withFaceDescriptors();
-  const results18 = await faceapi.detectAllFaces(image18).withFaceLandmarks().withFaceDescriptors();
-  const results19 = await faceapi.detectAllFaces(image19).withFaceLandmarks().withFaceDescriptors();
-  const results20 = await faceapi.detectAllFaces(image20).withFaceLandmarks().withFaceDescriptors();
-  const time1 = new Date().getTime();
-  const results1 = await faceapi.detectAllFaces(image1).withFaceLandmarks().withFaceDescriptors();
-  for (var i = 0; i < 10000; i++) {
-    var dist2 = faceapi.euclideanDistance(results1[0].descriptor, results2[0].descriptor);
-    var dist3 = faceapi.euclideanDistance(results1[0].descriptor, results3[0].descriptor);
-    var dist4 = faceapi.euclideanDistance(results1[0].descriptor, results4[0].descriptor);
-    var dist5 = faceapi.euclideanDistance(results1[0].descriptor, results5[0].descriptor);
-    var dist6 = faceapi.euclideanDistance(results1[0].descriptor, results6[0].descriptor);
-    var dist7 = faceapi.euclideanDistance(results1[0].descriptor, results7[0].descriptor);
-    var dist8 = faceapi.euclideanDistance(results1[0].descriptor, results8[0].descriptor);
-    var dist9 = faceapi.euclideanDistance(results1[0].descriptor, results9[0].descriptor);
-    var dist10 = faceapi.euclideanDistance(results1[0].descriptor, results10[0].descriptor);
-    var dist11 = faceapi.euclideanDistance(results1[0].descriptor, results11[0].descriptor);
-    var dist12 = faceapi.euclideanDistance(results1[0].descriptor, results12[0].descriptor);
-    var dist13 = faceapi.euclideanDistance(results1[0].descriptor, results13[0].descriptor);
-    var dist14 = faceapi.euclideanDistance(results1[0].descriptor, results14[0].descriptor);
-    var dist15 = faceapi.euclideanDistance(results1[0].descriptor, results15[0].descriptor);
-    var dist16 = faceapi.euclideanDistance(results1[0].descriptor, results16[0].descriptor);
-    var dist17 = faceapi.euclideanDistance(results1[0].descriptor, results17[0].descriptor);
-    var dist18 = faceapi.euclideanDistance(results1[0].descriptor, results18[0].descriptor);
-    var dist19 = faceapi.euclideanDistance(results1[0].descriptor, results19[0].descriptor);
-    var dist20 = faceapi.euclideanDistance(results1[0].descriptor, results20[0].descriptor);
-  }
-  const time2 = new Date().getTime();
-  console.log(dist2);
-  /*  console.log(dist3);
-    console.log(dist4);
-    console.log(dist5);
-    console.log(dist6);
-    console.log(dist7);
-    console.log(dist8);
-    console.log(dist9);
-    console.log(dist10);*/
-  /*  console.log(dist11);
-    console.log(dist12);
-    console.log(dist13);
-    console.log(dist14);
-    console.log(dist15);
-    console.log(dist16);
-    console.log(dist17);
-    console.log(dist18);
-    console.log(dist19);
-    console.log(dist20);
-  console.log("milliseconds taken:");
-  console.log(time2 - time1);
-*/
+function sum(array){
+  return array.reduce((a, b) => a + b, 0);
+}
