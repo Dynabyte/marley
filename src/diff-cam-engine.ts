@@ -1,43 +1,53 @@
 //ÄNDRA INGET HÄR UTAN ATT PRATA IHOP MED ANDRA
 
+import {
+  ICapturePayload,
+  ICoordinates,
+  IDiffCamEngine,
+  IDiffCamEngineOptions,
+  IMotionBox,
+} from "./models/diffCamEngine.models";
+
 export const DiffCamEngine: () => IDiffCamEngine = () => {
-  let stream: any; // stream obtained from webcam
-  let video: any; // shows stream
-  let captureCanvas: any; // internal canvas for capturing full images from video
-  let captureContext: any; // context for capture canvas
-  let diffCanvas: any; // internal canvas for diffing downscaled captures
-  let diffContext: any; // context for diff canvas
-  let motionCanvas: any; // receives processed diff images
-  let motionContext: any; // context for motion canvas
+  let stream: MediaStream; // stream obtained from webcam
+  let video: HTMLVideoElement; // shows stream
+  let captureCanvas: HTMLCanvasElement; // internal canvas for capturing full images from video
+  let captureContext: CanvasRenderingContext2D | null; // context for capture canvas
+  let diffCanvas: HTMLCanvasElement; // internal canvas for diffing downscaled captures
+  let diffContext: CanvasRenderingContext2D | null; // context for diff canvas
+  let motionCanvas: HTMLCanvasElement; // receives processed diff images
+  let motionContext: CanvasRenderingContext2D | null; // context for motion canvas
 
-  let initSuccessCallback: any; // called when init succeeds
+  let initSuccessCallback: () => void; // called when init succeeds
   let initErrorCallback: (error: any) => void; // called when init fails
-  let startCompleteCallback: any; // called when start is complete
-  let captureCallback: any; // called when an image has been captured and diffed
+  let startCompleteCallback: () => void; // called when start is complete
+  let captureCallback: (payload: ICapturePayload) => void; // called when an image has been captured and diffed
 
-  let captureInterval: any; // interval for continuous captures
-  let captureIntervalTime: any; // time between captures, in ms
-  let captureWidth: any; // full captured image width
-  let captureHeight: any; // full captured image height
-  let diffWidth: any; // downscaled width for diff/motion
-  let diffHeight: any; // downscaled height for diff/motion
-  let isReadyToDiff: any; // has a previous capture been made to diff against?
-  let pixelDiffThreshold: any; // min for a pixel to be considered significant
-  let scoreThreshold: any; // min for an image to be considered significant
-  let includeMotionBox: any; // flag to calculate and draw motion bounding box
-  let includeMotionPixels: any; // flag to create object denoting pixels with motion
+  let captureInterval: number; // interval for continuous captures
+  let captureIntervalTime: number; // time between captures, in ms
+  let captureWidth: number; // full captured image width
+  let captureHeight: number; // full captured image height
+  let diffWidth: number; // downscaled width for diff/motion
+  let diffHeight: number; // downscaled height for diff/motion
+  let isReadyToDiff: boolean; // has a previous capture been made to diff against?
+  let pixelDiffThreshold: number; // min for a pixel to be considered significant
+  let scoreThreshold: number; // min for an image to be considered significant
+  let includeMotionBox: boolean; // flag to calculate and draw motion bounding box
+  let includeMotionPixels: boolean; // flag to create object denoting pixels with motion
 
-  let coords: { x: number; y: number };
+  let coords: ICoordinates;
 
-  const init = (options: any) => {
+  const emptyFunction = () => {};
+
+  const init = (options: IDiffCamEngineOptions) => {
     // sanity check
     if (!options) {
-      throw new Error('No options object provided');
+      throw new Error("No options object provided");
     }
 
     // incoming options with defaults
-    video = options.video || document.createElement('video');
-    motionCanvas = options.motionCanvas || document.createElement('canvas');
+    video = options.video || document.createElement("video");
+    motionCanvas = options.motionCanvas || document.createElement("canvas");
     captureIntervalTime = options.captureIntervalTime || 100;
     captureWidth = options.captureWidth || 640;
     captureHeight = options.captureHeight || 480;
@@ -49,14 +59,14 @@ export const DiffCamEngine: () => IDiffCamEngine = () => {
     includeMotionPixels = options.includeMotionPixels || false;
 
     // callbacks
-    initSuccessCallback = options.initSuccessCallback || function () {};
-    initErrorCallback = options.initErrorCallback || function () {};
-    startCompleteCallback = options.startCompleteCallback || function () {};
-    captureCallback = options.captureCallback || function () {};
+    initSuccessCallback = options.initSuccessCallback || emptyFunction;
+    initErrorCallback = options.initErrorCallback || emptyFunction;
+    startCompleteCallback = options.startCompleteCallback || emptyFunction;
+    captureCallback = options.captureCallback || emptyFunction;
 
     // non-configurable
-    captureCanvas = document.createElement('canvas');
-    diffCanvas = document.createElement('canvas');
+    captureCanvas = document.createElement("canvas");
+    diffCanvas = document.createElement("canvas");
     isReadyToDiff = false;
 
     // prep video
@@ -65,17 +75,17 @@ export const DiffCamEngine: () => IDiffCamEngine = () => {
     // prep capture canvas
     captureCanvas.width = captureWidth;
     captureCanvas.height = captureHeight;
-    captureContext = captureCanvas.getContext('2d');
+    captureContext = captureCanvas.getContext("2d");
 
     // prep diff canvas
     diffCanvas.width = diffWidth;
     diffCanvas.height = diffHeight;
-    diffContext = diffCanvas.getContext('2d');
+    diffContext = diffCanvas.getContext("2d");
 
     // prep motion canvas
     motionCanvas.width = diffWidth;
     motionCanvas.height = diffHeight;
-    motionContext = motionCanvas.getContext('2d');
+    motionContext = motionCanvas.getContext("2d");
 
     requestWebcam();
   };
@@ -93,7 +103,7 @@ export const DiffCamEngine: () => IDiffCamEngine = () => {
       .catch(initError);
   };
 
-  const initSuccess = (requestedStream: any) => {
+  const initSuccess = (requestedStream: MediaStream) => {
     console.log(requestedStream);
     stream = requestedStream;
     initSuccessCallback();
@@ -106,77 +116,85 @@ export const DiffCamEngine: () => IDiffCamEngine = () => {
 
   const start = () => {
     if (!stream) {
-      throw new Error('Cannot start after init fail');
+      throw new Error("Cannot start after init fail");
     }
 
     // streaming takes a moment to start
-    video.addEventListener('canplay', startComplete);
+    video.addEventListener("canplay", startComplete);
     video.srcObject = stream;
   };
 
   const startComplete = () => {
-    video.removeEventListener('canplay', startComplete);
+    video.removeEventListener("canplay", startComplete);
     captureInterval = setInterval(capture, captureIntervalTime);
     startCompleteCallback();
   };
 
   const stop = () => {
     clearInterval(captureInterval);
-    video.src = '';
-    motionContext.clearRect(0, 0, diffWidth, diffHeight);
+    video.src = "";
+    motionContext && motionContext.clearRect(0, 0, diffWidth, diffHeight);
     isReadyToDiff = false;
   };
 
   const capture = () => {
     // save a full-sized copy of capture
-    captureContext.drawImage(video, 0, 0, captureWidth, captureHeight);
-    let captureImageData = captureContext.getImageData(
-      0,
-      0,
-      captureWidth,
-      captureHeight
-    );
+    captureContext &&
+      captureContext.drawImage(video, 0, 0, captureWidth, captureHeight);
+    let captureImageData: ImageData | null =
+      captureContext &&
+      captureContext.getImageData(0, 0, captureWidth, captureHeight);
 
     // diff current capture over previous capture, leftover from last time
-    diffContext.globalCompositeOperation = 'difference';
-    diffContext.drawImage(video, 0, 0, diffWidth, diffHeight);
-    let diffImageData = diffContext.getImageData(0, 0, diffWidth, diffHeight);
+    if (diffContext) {
+      diffContext.globalCompositeOperation = "difference";
+      diffContext.drawImage(video, 0, 0, diffWidth, diffHeight);
+    }
+    let diffImageData: ImageData | null =
+      diffContext && diffContext.getImageData(0, 0, diffWidth, diffHeight);
 
     if (isReadyToDiff) {
       let diff = processDiff(diffImageData);
 
-      motionContext.putImageData(diffImageData, 0, 0);
-      if (diff.motionBox) {
-        motionContext.strokeStyle = '#fff';
-        motionContext.strokeRect(
-          diff.motionBox.x.min + 0.5,
-          diff.motionBox.y.min + 0.5,
-          diff.motionBox.x.max - diff.motionBox.x.min,
-          diff.motionBox.y.max - diff.motionBox.y.min
-        );
+      if (diffImageData && motionContext) {
+        motionContext.putImageData(diffImageData, 0, 0);
+        if (diff.motionBox) {
+          motionContext.strokeStyle = "#fff";
+          motionContext.strokeRect(
+            diff.motionBox.x.min + 0.5,
+            diff.motionBox.y.min + 0.5,
+            diff.motionBox.x.max - diff.motionBox.x.min,
+            diff.motionBox.y.max - diff.motionBox.y.min
+          );
+        }
+        captureCallback({
+          imageData: captureImageData,
+          score: diff.score,
+          hasMotion: diff.score >= scoreThreshold,
+          motionBox: diff.motionBox,
+          motionPixels: diff.motionPixels,
+          getURL: function () {
+            return getCaptureUrl(this.imageData);
+          },
+          checkMotionPixel: function (x: number, y: number) {
+            return checkMotionPixel(this.motionPixels, x, y);
+          },
+        });
       }
-      captureCallback({
-        imageData: captureImageData,
-        score: diff.score,
-        hasMotion: diff.score >= scoreThreshold,
-        motionBox: diff.motionBox,
-        motionPixels: diff.motionPixels,
-        getURL: function () {
-          return getCaptureUrl(this.imageData);
-        },
-        checkMotionPixel: function (x: any, y: any) {
-          return checkMotionPixel(this.motionPixels, x, y);
-        },
-      });
     }
 
-    // draw current capture normally over diff, ready for next time
-    diffContext.globalCompositeOperation = 'source-over';
-    diffContext.drawImage(video, 0, 0, diffWidth, diffHeight);
+    if (diffContext) {
+      // draw current capture normally over diff, ready for next time
+      diffContext.globalCompositeOperation = "source-over";
+      diffContext.drawImage(video, 0, 0, diffWidth, diffHeight);
+    }
     isReadyToDiff = true;
   };
 
-  const processDiff = (diffImageData: any) => {
+  const processDiff = (diffImageData: ImageData | null) => {
+    if (diffImageData === null) {
+      throw new Error("Couldn't find Image Data");
+    }
     let rgba = diffImageData.data;
 
     // pixel adjustments are done by reference directly on diffImageData
@@ -202,8 +220,7 @@ export const DiffCamEngine: () => IDiffCamEngine = () => {
           motionPixels = calculateMotionPixels(
             motionPixels,
             coords.x,
-            coords.y,
-            pixelDiff
+            coords.y
           );
         }
       }
@@ -216,16 +233,20 @@ export const DiffCamEngine: () => IDiffCamEngine = () => {
     };
   };
 
-  const calculateCoordinates = (pixelIndex: any) => {
+  const calculateCoordinates = (pixelIndex: number) => {
     return {
       x: pixelIndex % diffWidth,
       y: Math.floor(pixelIndex / diffWidth),
     };
   };
 
-  const calculateMotionBox = (currentMotionBox: any, x: any, y: any) => {
+  const calculateMotionBox = (
+    currentMotionBox: IMotionBox | undefined,
+    x: number,
+    y: number
+  ) => {
     // init motion box on demand
-    let motionBox = currentMotionBox || {
+    let motionBox: IMotionBox | undefined = currentMotionBox || {
       x: { min: coords.x, max: x },
       y: { min: coords.y, max: y },
     };
@@ -238,41 +259,43 @@ export const DiffCamEngine: () => IDiffCamEngine = () => {
     return motionBox;
   };
 
-  const calculateMotionPixels = (
-    motionPixels: any,
-    x: number,
-    y: number,
-    pixelDiff: any
-  ) => {
+  const calculateMotionPixels = (motionPixels: any, x: number, y: number) => {
     motionPixels[x] = motionPixels[x] || [];
     motionPixels[x][y] = true;
 
     return motionPixels;
   };
 
-  const getCaptureUrl = (captureImageData: any) => {
+  const getCaptureUrl = (captureImageData: ImageData | null) => {
+    if (!captureImageData) {
+      throw new Error("Couldn't find Image Data");
+    }
     // may as well borrow captureCanvas
-    captureContext.putImageData(captureImageData, 0, 0);
+    captureContext && captureContext.putImageData(captureImageData, 0, 0);
     return captureCanvas.toDataURL();
   };
 
-  const checkMotionPixel = (motionPixels: any, x: number, y: number) => {
+  const checkMotionPixel: (
+    motionPixels: any,
+    x: number,
+    y: number
+  ) => boolean = (motionPixels: any, x: number, y: number) => {
     return motionPixels && motionPixels[x] && motionPixels[x][y];
   };
 
-  const getPixelDiffThreshold = () => {
+  const getPixelDiffThreshold: () => number = () => {
     return pixelDiffThreshold;
   };
 
-  const setPixelDiffThreshold = (val: any) => {
+  const setPixelDiffThreshold: (val: number) => void = (val: number) => {
     pixelDiffThreshold = val;
   };
 
-  const getScoreThreshold = () => {
+  const getScoreThreshold: () => number = () => {
     return scoreThreshold;
   };
 
-  const setScoreThreshold = (val: any) => {
+  const setScoreThreshold: (val: number) => void = (val: number) => {
     scoreThreshold = val;
   };
 
@@ -289,23 +312,3 @@ export const DiffCamEngine: () => IDiffCamEngine = () => {
     stop: stop,
   };
 };
-
-export interface ICapturePayload {
-  imageData: any;
-  score: number;
-  hasMotion: boolean;
-  motionBox: any;
-  motionPixels: any;
-  getURL: () => string;
-  checkMotionPixel: (x: any, y: any) => any;
-}
-
-export interface IDiffCamEngine {
-  getPixelDiffThreshold: () => any;
-  setPixelDiffThreshold: (val: any) => void;
-  getScoreThreshold: () => any;
-  setScoreThreshold: (val: any) => void;
-  init: (options: any) => void;
-  start: () => void;
-  stop: () => void;
-}

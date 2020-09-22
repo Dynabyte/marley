@@ -1,111 +1,87 @@
 import React from "react";
-import styled, { css, keyframes } from "styled-components";
+// import styled, { css, keyframes } from "styled-components";
 import "./App.css";
-import dynabyteLogo from "./dynabyte_white.png";
-import {
-  DiffCamEngine,
-  ICapturePayload,
-  IDiffCamEngine,
-} from "./diff-cam-engine";
+// import dynabyteLogo from "./dynabyte_white.png";
+import { DiffCamEngine } from "./diff-cam-engine";
+import { ICapturePayload, IDiffCamEngine } from "./models/diffCamEngine.models";
 
-const slideIn = keyframes`
-  0% {
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-`;
+//TODO: Use these styling when we are ready.
+// const slideIn = keyframes`
+//   0% {
+//     opacity: 0;
+//   }
+//   50% {
+//     opacity: 1;
+//   }
+// `;
 
-const complexMixin = css`
-  animation: 2s ease-in-out 0s 1 ${slideIn};
-`;
+// const complexMixin = css`
+//   animation: 2s ease-in-out 0s 1 ${slideIn};
+// `;
 
-interface Props {
-  isDetected?: boolean;
-}
+// interface Props {
+//   hasMotion?: boolean;
+// }
 
-const Title = styled.h1`
-  font-family: "Playfair Display", serif;
-  margin-top: ${(props: Props) => (props.isDetected ? "25vh" : 0)};
-  text-align: center;
-  font-size: 4rem;
-  color: white;
-  ${(props: Props) => props.isDetected && complexMixin};
-  order: ${(props: Props) => (props.isDetected ? 1 : 2)};
-  opacity: ${(props: Props) => (props.isDetected ? 1 : 0)};
-`;
+// const Title = styled.h1`
+//   font-family: "Playfair Display", serif;
+//   margin-top: ${(props: Props) => (props.hasMotion ? "25vh" : 0)};
+//   text-align: center;
+//   font-size: 4rem;
+//   color: white;
+//   ${(props: Props) => props.hasMotion && complexMixin};
+//   order: ${(props: Props) => (props.hasMotion ? 1 : 2)};
+//   opacity: ${(props: Props) => (props.hasMotion ? 1 : 0)};
+// `;
 
-const Logo = styled.img`
-  order: ${(props: Props) => (props.isDetected ? 2 : 1)};
-  transform: ${(props: Props) =>
-    props.isDetected ? "scale(1)" : "scale(0.5)"};
-  margin-top: ${(props: Props) => (props.isDetected ? 0 : "10vh")};
-`;
+// const Logo = styled.img`
+//   order: ${(props: Props) => (props.hasMotion ? 2 : 1)};
+//   transform: ${(props: Props) => (props.hasMotion ? "scale(1)" : "scale(0.5)")};
+//   margin-top: ${(props: Props) => (props.hasMotion ? 0 : "10vh")};
+// `;
 
 export const App = () => {
-  const [videoElement, setVideoElement] = React.useState<HTMLElement | null>(
-    null
-  );
-  const [canvasElement, setCanvasElement] = React.useState<HTMLElement | null>(
-    null
-  );
+  const [dataUrl, setDataUrl] = React.useState<string>("");
+  const [hasMotion, setHasMotion] = React.useState<boolean>(false);
 
-  const [isDetected, setIsDetected] = React.useState(false);
-  // const [dataUrl, setDataUrl] = React.useState<string>('');
+  const diffCamEngine: IDiffCamEngine = DiffCamEngine();
+  const initSuccess: () => void = () => {
+    diffCamEngine.start();
+  };
 
-  React.useEffect(() => {
-    setVideoElement(document.getElementById("video"));
-    setCanvasElement(document.getElementById("canvas"));
+  const initError: (error: any) => void = (error: any) => {
+    console.log(error);
+  };
 
-    const diffCamEngine: IDiffCamEngine = DiffCamEngine();
-    const initSuccess = () => {
-      diffCamEngine.start();
-    };
-
-    const initError = (error: any) => {
-      console.log(error);
-    };
-
-    const capture = (payload: ICapturePayload) => {
-      if (payload.hasMotion) {
-        setIsDetected(true);
-        console.log(payload.hasMotion, payload.getURL());
-      } else {
-        setIsDetected(false);
-      }
-    };
-
-    diffCamEngine.init({
-      video: videoElement,
-      motionCanvas: canvasElement,
-      initSuccessCallback: initSuccess,
-      initErrorCallback: initError,
-      captureCallback: capture,
-      captureIntervalTime: 5000,
-    });
-  }, [videoElement, canvasElement]);
-
+  const capture: (payload: ICapturePayload) => void = (
+    payload: ICapturePayload
+  ) => {
+    setHasMotion(payload.hasMotion);
+    setDataUrl(payload.hasMotion ? payload.getURL() : "");
+  };
+  const videoElement: HTMLVideoElement = document.createElement("video");
+  const canvasElement: HTMLCanvasElement = document.createElement("canvas");
+  diffCamEngine.init({
+    video: videoElement,
+    motionCanvas: canvasElement,
+    initSuccessCallback: initSuccess,
+    initErrorCallback: initError,
+    captureCallback: capture,
+    captureIntervalTime: 2000,
+  });
   return (
     <div className="wrapper">
-      <Title isDetected={isDetected}>Välkommen till</Title>
+      {hasMotion ? <h1>Has motion</h1> : <h1>No motion detected</h1>}
+      {/* <Title hasMotion={hasMotion}>Välkommen till</Title>
       <Logo
         src={dynabyteLogo}
         alt="logo"
         width="200"
         height="80"
-        isDetected={isDetected}
-      />
-      <span style={{ opacity: 0, position: "fixed" }}>
-        <canvas id="canvas"></canvas>
-        <video
-          id="video"
-          width="640"
-          height="480"
-          muted={true}
-          autoPlay={true}
-        ></video>
-      </span>
+        hasMotion={hasMotion}
+      /> */}
+      <span style={{ opacity: 0, position: "fixed" }}></span>
+      <img src={dataUrl} alt="Bilden som skickas" />
       <footer>
         <span>
           Photo by{" "}
