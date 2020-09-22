@@ -1,6 +1,10 @@
 import React from 'react';
 import './App.css';
-import { DiffCamEngine, ICapturePayload, IDiffCamEngine } from './diff-cam-engine';
+import {
+  DiffCamEngine,
+  ICapturePayload,
+  IDiffCamEngine,
+} from './diff-cam-engine';
 
 export const App = () => {
   const [videoElement, setVideoElement] = React.useState<HTMLElement | null>(
@@ -9,7 +13,8 @@ export const App = () => {
   const [canvasElement, setCanvasElement] = React.useState<HTMLElement | null>(
     null
   );
-  // const [dataUrl, setDataUrl] = React.useState<string>('');
+
+  const [hasMotion, setHasMotion] = React.useState<boolean>(false);
 
   React.useEffect(() => {
     setVideoElement(document.getElementById('video'));
@@ -26,7 +31,10 @@ export const App = () => {
 
     const capture = (payload: ICapturePayload) => {
       if (payload.hasMotion) {
+        setHasMotion(true);
         console.log(payload.hasMotion, payload.getURL());
+      } else {
+        setHasMotion(false);
       }
     };
 
@@ -42,6 +50,7 @@ export const App = () => {
 
   return (
     <div className='App'>
+      {hasMotion ? <h1>Has motion</h1> : <h1>No motion detected</h1>}
       <span style={{ opacity: 0, position: 'fixed' }}>
         <canvas id='canvas'></canvas>
         <video
