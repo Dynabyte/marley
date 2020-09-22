@@ -1,6 +1,6 @@
 //ÄNDRA INGET HÄR UTAN ATT PRATA IHOP MED ANDRA
 
-export const DiffCamEngine = () => {
+export const DiffCamEngine: () => IDiffCamEngine = () => {
   let stream: any; // stream obtained from webcam
   let video: any; // shows stream
   let captureCanvas: any; // internal canvas for capturing full images from video
@@ -298,4 +298,14 @@ export interface ICapturePayload {
   motionPixels: any;
   getURL: () => string;
   checkMotionPixel: (x: any, y: any) => any;
+}
+
+export interface IDiffCamEngine {
+  getPixelDiffThreshold: () => any;
+  setPixelDiffThreshold: (val: any) => void;
+  getScoreThreshold: () => any;
+  setScoreThreshold: (val: any) => void;
+  init: (options: any) => void;
+  start: () => void;
+  stop: () => void;
 }

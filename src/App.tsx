@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import { DiffCamEngine, ICapturePayload } from './diff-cam-engine';
+import { DiffCamEngine, ICapturePayload, IDiffCamEngine } from './diff-cam-engine';
 
 export const App = () => {
   const [videoElement, setVideoElement] = React.useState<HTMLElement | null>(
@@ -15,7 +15,7 @@ export const App = () => {
     setVideoElement(document.getElementById('video'));
     setCanvasElement(document.getElementById('canvas'));
 
-    const diffCamEngine = DiffCamEngine();
+    const diffCamEngine: IDiffCamEngine = DiffCamEngine();
     const initSuccess = () => {
       diffCamEngine.start();
     };
