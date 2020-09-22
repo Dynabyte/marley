@@ -33,7 +33,7 @@ for (var i = 150; i <= 350; i++) {
 }
 
 imageNumbersFilm2.forEach( (imageNumber, i) => {
-    divFilm2.innerHTML += '<img id="film2Image' + i + '" src="images/kontor-kaffe-daniel-720p/0' + imageNumber + '.jpg"/>';
+    divFilm2.innerHTML += '<img id="film2Image' + i + '" src="images/kontor-kaffe-daniel1/0' + imageNumber + '.jpg"/>';
     imagesHtmlFilm2.push(document.getElementById("film2Image" + i));
 })
 
@@ -53,7 +53,7 @@ Promise
         compareTwoDetectionArrays(faceDetectionsFilm1, faceDetectionsFilm2);
         compareTwoDetectionArrays(faceDetectionsFilm2, faceDetectionsFilm2);
         compareTwoDetectionArrays(faceDetectionsFilm2, faceDetectionsFilm1);
-      }, 200000);
+      }, 130000);
     })
     .catch(function (err) {
       console.error(err);
@@ -115,18 +115,20 @@ ${folderName} ------ END DETECTION REPORT ------------`;
 
     function compareTwoDetectionArrays(detectionArray1, detectionArray2){
       console.log("Running comparisons");
-      const euclideanDistancesArray = [];
+      const allEuclideanDistancesArray = [];
+      const singleEuclideanDistancesArray = [];
+      let singleIndex = 0;
       let minEuclideanDistance = 1;
       let minEuclideanDistanceImagesInfo = "";
 
       detectionArray1.forEach(detection1 => {
         const descriptor1 = detection1.detectionResult.descriptor;
-
+        singleEuclideanDistancesArray.push([]);
           detectionArray2.forEach(detection2 => {
             const descriptor2 = detection2.detectionResult.descriptor;
             const euclideanDistance = faceapi.euclideanDistance(descriptor1, descriptor2);
-            
-            euclideanDistancesArray.push(euclideanDistance);
+            singleEuclideanDistancesArray[singleIndex].push(euclideanDistance);
+            allEuclideanDistancesArray.push(euclideanDistance);
 
             if(euclideanDistance < minEuclideanDistance 
               && !(detection1.folderName == detection2.folderName && detection1.fileNumber == detection2.fileNumber)){
@@ -141,13 +143,27 @@ Euclidean Distance: ${euclideanDistance.toFixed(2)}`;
             
             console.log(imageComparisonReport);
           })
+          singleIndex = singleIndex + 1;
       });
       
+      const allAverageEuclideanDistance = sum(allEuclideanDistancesArray)/allEuclideanDistancesArray.length;
+      const singleEuclideanDistanceAverages = [];
+      singleEuclideanDistancesArray.forEach(singleEuclideanDistances =>
+        singleEuclideanDistanceAverages.push(
+          sum(singleEuclideanDistances)/singleEuclideanDistances.length));
+
+      const singleEuclideanDistanceDiffs = 
+        singleEuclideanDistanceAverages
+          .map((singleAverage, i) => 
+            Math.abs(allAverageEuclideanDistance - singleAverage));
+
       const fullComparisonReport =
 `--- Full Comparison report (${detectionArray1[0].folderName} compared to ${detectionArray2[0].folderName}) ---
 Minimum euclidean distance: ${minEuclideanDistance.toFixed(2)} - ${minEuclideanDistanceImagesInfo}
-Average euclidean distance: ${(sum(euclideanDistancesArray)/euclideanDistancesArray.length).toFixed(2)}
-Number of comparisons: ${euclideanDistancesArray.length}`;
+Average all euclidean distance: ${allAverageEuclideanDistance.toFixed(2)}
+Max single euclidean distance diff: ${Math.max(...singleEuclideanDistanceDiffs).toFixed(2)}
+Average single euclidean distance diff: ${(sum(singleEuclideanDistanceDiffs)/singleEuclideanDistanceDiffs.length).toFixed(2)}
+Number of comparisons: ${allEuclideanDistancesArray.length}`;
 
       console.log(fullComparisonReport);
       
