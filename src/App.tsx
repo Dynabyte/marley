@@ -4,7 +4,7 @@ import { DiffCamEngine } from './diff-cam-engine';
 import { ICapturePayload, IDiffCamEngine } from './models/diffCamEngine.models';
 
 export const App = () => {
-  // const [dataUrl, setDataUrl] = React.useState<string>('');
+  const [dataUrl, setDataUrl] = React.useState<string>('');
   const [hasMotion, setHasMotion] = React.useState<boolean>(false);
 
   const diffCamEngine: IDiffCamEngine = DiffCamEngine();
@@ -19,7 +19,8 @@ export const App = () => {
   const capture: (payload: ICapturePayload) => void = (
     payload: ICapturePayload
   ) => {
-      setHasMotion(payload.hasMotion);
+    setHasMotion(payload.hasMotion);
+    setDataUrl(payload.hasMotion ? payload.getURL() : '');
   };
   const videoElement: HTMLVideoElement = document.createElement('video');
   const canvasElement: HTMLCanvasElement = document.createElement('canvas');
@@ -35,7 +36,7 @@ export const App = () => {
     <div className='App'>
       {hasMotion ? <h1>Has motion</h1> : <h1>No motion detected</h1>}
       <span style={{ opacity: 0, position: 'fixed' }}></span>
-      {/* <img src={dataUrl} alt='Bilden som skickas' /> */}
+      <img src={dataUrl} alt='Bilden som skickas' />
     </div>
   );
 };
