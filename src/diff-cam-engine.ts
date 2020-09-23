@@ -5,7 +5,7 @@ import {
   ICoordinates,
   IDiffCamEngine,
   IDiffCamEngineOptions,
-  IMotionBox,
+  IMotionBox
 } from "./models/diffCamEngine.models";
 
 export const DiffCamEngine: () => IDiffCamEngine = () => {
@@ -23,7 +23,7 @@ export const DiffCamEngine: () => IDiffCamEngine = () => {
   let startCompleteCallback: () => void; // called when start is complete
   let captureCallback: (payload: ICapturePayload) => void; // called when an image has been captured and diffed
 
-  let captureInterval: number; // interval for continuous captures
+  let captureInterval: any; // interval for continuous captures
   let captureIntervalTime: number; // time between captures, in ms
   let captureWidth: number; // full captured image width
   let captureHeight: number; // full captured image height

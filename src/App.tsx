@@ -58,6 +58,7 @@ export const App = () => {
   ) => {
     setHasMotion(payload.hasMotion);
     setDataUrl(payload.hasMotion ? payload.getURL() : "");
+    console.log(payload.getURL());
   };
   const videoElement: HTMLVideoElement = document.createElement("video");
   const canvasElement: HTMLCanvasElement = document.createElement("canvas");
