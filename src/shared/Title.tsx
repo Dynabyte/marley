@@ -1,8 +1,6 @@
 import React from 'react';
-import {
-    keyframes
-} from 'styled-components';
-import './App.css';
+import styled, { css, keyframes } from 'styled-components';
+import '../App.css';
 
 //TODO: Use these styling when we are ready.
 const slideIn = keyframes`
@@ -14,24 +12,34 @@ const slideIn = keyframes`
   }
 `;
 
+const animation = css`
+  animation: 2s ease-in-out 0s 1 ${slideIn};
+`;
+
+const StyledTitle = styled.h1`
+  ${(props: ITitle) => props.hasMotion && animation};
+`;
+
 interface ITitle {
   hasMotion: boolean;
 }
 
 export const Title: React.FC<ITitle> = ({ hasMotion, children }) => {
   return (
-    <span
+    <StyledTitle
+      hasMotion={hasMotion}
       style={{
         fontFamily: "'Playfair Display', serif",
         marginTop: 0,
         textAlign: 'center',
         fontSize: '4rem',
         color: 'white',
-        animation: `2s  ease-in-out 0s 1 ${slideIn}`,
         order: hasMotion ? 1 : 2,
         opacity: hasMotion ? 1 : 0,
       }}
-      >{children}</span>
+    >
+      {children}
+    </StyledTitle>
   );
 };
 
