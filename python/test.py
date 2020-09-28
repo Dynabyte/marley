@@ -85,18 +85,25 @@ def predict():
         face_recognition.load_image_file(
             io.BytesIO(
                 base64.b64decode(
-                    req['image']))))[0]
-    person_face_distance_means = []
+                    req['image']))))
+    if len(face_encoding_input) == 0:
+        return '{"isFace":false, "faceId":null}'
+    
+    face_distance_means = []
 
-    for person_face_encoding in get_person_face_encodings():
-        person_face_distance_means.append(
-            (person_face_encoding[0],
+    for face_encoding in get_face_encodings():
+        face_distance_means.append(
+            (face_encoding[0],
             np.mean(
                 face_recognition.face_distance(
-                    person_face_encoding[1],
-                    face_encoding_input))))
+                    face_encoding[1],
+                    face_encoding_input[0]))))
     
-    return f"{round(person_face_distance_means[0][1], 2)}"
+    min_face_distance = min(face_distance_means, key=lambda x: x[1])
+    if min_face_distance[1] > 0.5:
+        return '{"isFace":true, "faceId":null}'
 
-def get_person_face_encodings():
+    return f'{{"isFace":true, "faceId":{min_face_distance[0]}}}'
+
+def get_face_encodings():
     return [(1, [niklas_face_encoding, niklas_face_encoding2])]
