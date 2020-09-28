@@ -1,47 +1,13 @@
 import React from "react";
-// import styled, { css, keyframes } from "styled-components";
 import "./App.css";
-// import dynabyteLogo from "./dynabyte_white.png";
 import { DiffCamEngine } from "./diff-cam-engine";
+import dynabyteLogo from "./dynabyte_white.png";
 import { ICapturePayload, IDiffCamEngine } from "./models/diffCamEngine.models";
-
-//TODO: Use these styling when we are ready.
-// const slideIn = keyframes`
-//   0% {
-//     opacity: 0;
-//   }
-//   50% {
-//     opacity: 1;
-//   }
-// `;
-
-// const complexMixin = css`
-//   animation: 2s ease-in-out 0s 1 ${slideIn};
-// `;
-
-// interface Props {
-//   hasMotion?: boolean;
-// }
-
-// const Title = styled.h1`
-//   font-family: "Playfair Display", serif;
-//   margin-top: ${(props: Props) => (props.hasMotion ? "25vh" : 0)};
-//   text-align: center;
-//   font-size: 4rem;
-//   color: white;
-//   ${(props: Props) => props.hasMotion && complexMixin};
-//   order: ${(props: Props) => (props.hasMotion ? 1 : 2)};
-//   opacity: ${(props: Props) => (props.hasMotion ? 1 : 0)};
-// `;
-
-// const Logo = styled.img`
-//   order: ${(props: Props) => (props.hasMotion ? 2 : 1)};
-//   transform: ${(props: Props) => (props.hasMotion ? "scale(1)" : "scale(0.5)")};
-//   margin-top: ${(props: Props) => (props.hasMotion ? 0 : "10vh")};
-// `;
+import Logo from "./shared/Logo";
+import Title from "./shared/Title";
 
 export const App = () => {
-  const [dataUrl, setDataUrl] = React.useState<string>("");
+  // const [dataUrl, setDataUrl] = React.useState<string>("");
   const [hasMotion, setHasMotion] = React.useState<boolean>(false);
 
   const diffCamEngine: IDiffCamEngine = DiffCamEngine();
@@ -57,7 +23,6 @@ export const App = () => {
     payload: ICapturePayload
   ) => {
     setHasMotion(payload.hasMotion);
-    setDataUrl(payload.hasMotion ? payload.getURL() : "");
     console.log(payload.getURL());
   };
   const videoElement: HTMLVideoElement = document.createElement("video");
@@ -72,17 +37,14 @@ export const App = () => {
   });
   return (
     <div className="wrapper">
-      {hasMotion ? <h1>Has motion</h1> : <h1>No motion detected</h1>}
-      {/* <Title hasMotion={hasMotion}>Välkommen till</Title>
+      <Title hasMotion={hasMotion}>Välkommen till</Title>
       <Logo
         src={dynabyteLogo}
         alt="logo"
         width="200"
         height="80"
         hasMotion={hasMotion}
-      /> */}
-      <span style={{ opacity: 0, position: "fixed" }}></span>
-      <img src={dataUrl} alt="Bilden som skickas" />
+      />
       <footer>
         <span>
           Photo by{" "}
