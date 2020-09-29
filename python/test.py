@@ -5,6 +5,7 @@ import io
 import base64
 from PIL import Image
 import face_recognition
+import time
 
 
 niklas_face_encoding = np.array([
@@ -80,30 +81,57 @@ app = Flask(__name__)
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    req = request.get_json()
-    face_encoding_input = face_recognition.face_encodings(
-        face_recognition.load_image_file(
-            io.BytesIO(
-                base64.b64decode(
-                    req['image']))))
+    start = time.time()
+    face_encoding_input = face_encodings(
+        load_image(
+                request.get_json()['image']))
+
     if len(face_encoding_input) == 0:
         return '{"isFace":false, "faceId":null}'
     
-    face_distance_means = []
+    min_face_distance_result = min_face_distance(
+        euclidean_distance_means(
+            face_encoding_input[0],
+            get_face_encodings()))
 
-    for face_encoding in get_face_encodings():
-        face_distance_means.append(
-            (face_encoding[0],
-            np.mean(
-                face_recognition.face_distance(
-                    face_encoding[1],
-                    face_encoding_input[0]))))
-    
-    min_face_distance = min(face_distance_means, key=lambda x: x[1])
-    if min_face_distance[1] > 0.5:
+    if min_face_distance_result[1] > 0.5:
         return '{"isFace":true, "faceId":null}'
 
-    return f'{{"isFace":true, "faceId":{min_face_distance[0]}}}'
+    print(f"Predict took: '{round((time.time()-start) * 1000, 0)}' ms")
+    return f'{{"isFace":true, "faceId":{min_face_distance_result[0]}}}'
+
+def min_face_distance(euclidean_distance_means):
+    start = time.time()
+    min_face_distance = min(
+        euclidean_distance_means,
+        key=lambda x: x[1])
+    print(f"min_face_distance took: '{round((time.time()-start) * 1000, 0)}' ms")
+    return min_face_distance
 
 def get_face_encodings():
     return [(1, [niklas_face_encoding, niklas_face_encoding2])]
+
+def load_image(imageRequestParam):
+    start = time.time()
+    image = face_recognition.load_image_file(
+        io.BytesIO(
+            base64.b64decode(
+                imageRequestParam)))
+    print(f"load_image took: '{round((time.time()-start) * 1000, 0)}' ms")                
+    return image
+
+def face_encodings(image):
+    start = time.time()
+    face_encodings = face_recognition.face_encodings(
+        image)
+    print(f"face_encodings took: '{round((time.time()-start) * 1000, 0)}' ms")
+    return face_encodings
+
+def euclidean_distance_means(face_encoding_input, face_encoding_references):
+    for face_encoding in face_encoding_references:
+        yield (
+            face_encoding[0],
+            np.mean(
+                face_recognition.face_distance(
+                    face_encoding[1],
+                    face_encoding_input)))
