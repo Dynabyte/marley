@@ -25,16 +25,12 @@ mongo_client = pymongo \
 def label_endpoint():
     start = time.time()
     if request.method == 'POST':
-        _id = create_face(
-            face_encode(
-                to_numpy_array(
-                    request.get_json()['image'])))
+        _id = db_create_face(
+            face_encode_from_request(request))
     if request.method == 'PUT':
-        _id = update_face(
+        _id = db_update_face(
             request.get_json()['faceId'],
-            face_encode(
-                to_numpy_array(
-                    request.get_json()['image'])))
+            face_encode_from_request(request))
     print(f"Label took: '{round((time.time()-start) * 1000, 0)}' ms")
     return str(_id)
 
@@ -51,7 +47,7 @@ def predict_endpoint():
 
     face_id = predict(
         encoding_input,
-        get_faces())
+        db_get_faces())
     if face_id is None:
         return '{"isFace":true, "faceId":null}'
 
@@ -89,6 +85,12 @@ def to_numpy_array(image_base64):
     return image
 
 
+def face_encode_from_request(req):
+    return face_encode(
+        to_numpy_array(
+            req.get_json()['image']))
+
+
 def face_encode(image):
     start = time.time()
     face_encodings = face_recognition \
@@ -109,7 +111,7 @@ def compare(encoding, faces):
                     encoding)))
 
 
-def create_face(encoding):
+def db_create_face(encoding):
     start = time.time()
     _id = faces_db() \
         .insert_one({
@@ -120,7 +122,7 @@ def create_face(encoding):
     return _id
 
 
-def update_face(_id, encoding):
+def db_update_face(_id, encoding):
     start = time.time()
     faces_db() \
         .update(
@@ -131,7 +133,7 @@ def update_face(_id, encoding):
     return _id
 
 
-def get_faces():
+def db_get_faces():
     start = time.time()
     faces = faces_db() \
         .find({})
