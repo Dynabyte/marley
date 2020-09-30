@@ -8,7 +8,12 @@ import Title from "./shared/Title";
 
 export const App = () => {
   const [hasMotion, setHasMotion] = React.useState<boolean>(false);
+
+  const videoElement: HTMLVideoElement = document.createElement('video');
+  const canvasElement: HTMLCanvasElement = document.createElement('canvas');
+
   const diffCamEngine: IDiffCamEngine = DiffCamEngine();
+
   const initSuccess: () => void = () => {
     diffCamEngine.start();
   };
@@ -22,9 +27,11 @@ export const App = () => {
   ) => {
     setHasMotion(payload.hasMotion);
     console.log(payload.getURL(), moment().second());
+    if (payload.hasMotion) {
+      console.log(payload.getURL());
+    }
   };
-  const videoElement: HTMLVideoElement = document.createElement("video");
-  const canvasElement: HTMLCanvasElement = document.createElement("canvas");
+
   diffCamEngine.init({
     video: videoElement,
     motionCanvas: canvasElement,
@@ -34,23 +41,23 @@ export const App = () => {
     captureIntervalTime: 10000,
   });
   return (
-    <div className="wrapper">
+    <div className='wrapper'>
       <Title hasMotion={hasMotion}>Välkommen till</Title>
       <Logo
         src={dynabyteLogo}
-        alt="logo"
-        width="200"
-        height="80"
+        alt='logo'
+        width='200'
+        height='80'
         hasMotion={hasMotion}
       />
       <footer>
         <span>
-          Photo by{" "}
-          <a href="https://unsplash.com/@freetousesoundscom?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">
+          Photo by{' '}
+          <a href='https://unsplash.com/@freetousesoundscom?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText'>
             Free To Use Sounds
-          </a>{" "}
-          on{" "}
-          <a href="https://unsplash.com/s/photos/grass?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">
+          </a>{' '}
+          on{' '}
+          <a href='https://unsplash.com/s/photos/grass?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText'>
             Unsplash
           </a>
         </span>
