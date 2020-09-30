@@ -12,5 +12,5 @@ def test_predict():
     with open(json_file_name) as json_file:
         faces = json.load(json_file)
     
-    assert face_recognition_api.predict(encoding, faces) == '1'
+    assert face_recognition_api.predict(encoding, faces) == 'face1'
 
