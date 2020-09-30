@@ -1,5 +1,5 @@
+import moment from "moment";
 import React from "react";
-import "./App.css";
 import { DiffCamEngine } from "./diff-cam-engine";
 import dynabyteLogo from "./dynabyte_white.png";
 import { ICapturePayload, IDiffCamEngine } from "./models/diffCamEngine.models";
@@ -7,9 +7,7 @@ import Logo from "./shared/Logo";
 import Title from "./shared/Title";
 
 export const App = () => {
-  // const [dataUrl, setDataUrl] = React.useState<string>("");
   const [hasMotion, setHasMotion] = React.useState<boolean>(false);
-
   const diffCamEngine: IDiffCamEngine = DiffCamEngine();
   const initSuccess: () => void = () => {
     diffCamEngine.start();
@@ -23,7 +21,7 @@ export const App = () => {
     payload: ICapturePayload
   ) => {
     setHasMotion(payload.hasMotion);
-    console.log(payload.getURL());
+    console.log(payload.getURL(), moment().second());
   };
   const videoElement: HTMLVideoElement = document.createElement("video");
   const canvasElement: HTMLCanvasElement = document.createElement("canvas");
@@ -33,7 +31,7 @@ export const App = () => {
     initSuccessCallback: initSuccess,
     initErrorCallback: initError,
     captureCallback: capture,
-    captureIntervalTime: 2000,
+    captureIntervalTime: 10000,
   });
   return (
     <div className="wrapper">
