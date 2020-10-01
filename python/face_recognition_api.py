@@ -2,6 +2,7 @@ from collections import namedtuple
 import numpy as np
 from flask import Flask
 from flask import request
+from flask import Response
 import uuid
 import io
 import base64
@@ -9,6 +10,7 @@ import pymongo
 from PIL import Image
 import face_recognition
 from bson.objectid import ObjectId
+import json
 import time
 
 face_comparison = namedtuple(
@@ -20,10 +22,10 @@ app = Flask(__name__)
 mongo_client = pymongo \
     .MongoClient("mongodb+srv://marley-db-user:DUElFH0k35peHesM@marleycluster.42wu5.mongodb.net/marley?retryWrites=true&w=majority")
 
-
 @app.route('/label', methods=['POST', 'PUT'])
 def label_endpoint():
     start = time.time()
+
     if request.method == 'POST':
         _id = db_create_face(
             face_encode_from_request(request))
@@ -31,8 +33,9 @@ def label_endpoint():
         _id = db_update_face(
             request.get_json()['faceId'],
             face_encode_from_request(request))
+
     print(f"Label took: '{round((time.time()-start) * 1000, 0)}' ms")
-    return str(_id)
+    return make_response({"faceId":str(_id)})
 
 
 @app.route('/predict', methods=['POST'])
@@ -43,16 +46,16 @@ def predict_endpoint():
         to_numpy_array(
             request.get_json()['image']))
     if encoding_input is None:
-        return '{"isFace":false, "faceId":null}'
+        return make_response({"isFace": False, "faceId": None})
 
     face_id = predict(
         encoding_input,
         db_get_faces())
     if face_id is None:
-        return '{"isFace":true, "faceId":null}'
+        return make_response({"isFace":True, "faceId":None})
 
     print(f"Predict took: '{round((time.time()-start) * 1000, 0)}' ms")
-    return f'{{"isFace":true, "faceId":{face_id}}}'
+    return make_response({"isFace":True, "faceId":str(face_id)})
 
 
 def predict(encoding, faces):
@@ -145,3 +148,6 @@ def faces_db():
     return mongo_client \
         .marley \
         .faces
+
+def make_response(response):
+    return Response(json.dumps(response), mimetype='application/json')
