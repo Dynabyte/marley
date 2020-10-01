@@ -26,9 +26,8 @@ export const App = () => {
     payload: ICapturePayload
   ) => {
     setHasMotion(payload.hasMotion);
-    console.log(payload.getURL(), moment().second());
     if (payload.hasMotion) {
-      console.log(payload.getURL());
+      console.log(payload.getURL(), moment().second());
     }
   };
 
@@ -38,7 +37,7 @@ export const App = () => {
     initSuccessCallback: initSuccess,
     initErrorCallback: initError,
     captureCallback: capture,
-    captureIntervalTime: 10000,
+    captureIntervalTime: 5000,
   });
   return (
     <div className='wrapper'>

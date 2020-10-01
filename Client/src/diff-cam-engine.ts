@@ -1,4 +1,5 @@
 //ÄNDRA INGET HÄR UTAN ATT PRATA IHOP MED ANDRA
+//This code is taken from https://github.com/lonekorean/diff-cam-engine
 
 import {
   ICapturePayload,
@@ -23,7 +24,7 @@ export const DiffCamEngine: () => IDiffCamEngine = () => {
   let startCompleteCallback: () => void; // called when start is complete
   let captureCallback: (payload: ICapturePayload) => void; // called when an image has been captured and diffed
 
-  let captureInterval: any; // interval for continuous captures
+  let captureInterval: number; // interval for continuous captures
   let captureIntervalTime: number; // time between captures, in ms
   let captureWidth: number; // full captured image width
   let captureHeight: number; // full captured image height
