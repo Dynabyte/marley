@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Client
 
     steps:
       - uses: actions/checkout@v2
@@ -20,6 +23,7 @@ jobs:
         run: |
           npm install # Install Dependencies
           npm run build
+
       - name: Install Surge
         run: npm install -g surge
 
