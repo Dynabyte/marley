@@ -1,17 +1,14 @@
 package com.dynabyte.marleyjavarestapi.facerecognition.to;
 
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Represents a request for a prediction of a base64 encoded image.
  */
+@Data
 public class PredictionRequest {
 
     private String image;
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
 }

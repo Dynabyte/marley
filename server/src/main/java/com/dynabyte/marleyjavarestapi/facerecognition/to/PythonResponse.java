@@ -1,25 +1,13 @@
 package com.dynabyte.marleyjavarestapi.facerecognition.to;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
+@Data
 public class PythonResponse {
 
+    @JsonProperty
     private boolean isFace;
     private String faceId;
 
-    public boolean getIsFace() {
-        return isFace;
-    }
-
-    public String getFaceId() {
-        return faceId;
-    }
-
-
-    @Override
-    public String toString() {
-        return "PythonResponse{" +
-                "getIsFace=" + isFace +
-                ", faceId='" + faceId + '\'' +
-                '}';
-    }
 }
