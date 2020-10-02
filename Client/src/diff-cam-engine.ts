@@ -5,8 +5,8 @@ import {
   ICoordinates,
   IDiffCamEngine,
   IDiffCamEngineOptions,
-  IMotionBox
-} from "./models/diffCamEngine.models";
+  IMotionBox,
+} from './models/diffCamEngine.models';
 
 export const DiffCamEngine: () => IDiffCamEngine = () => {
   let stream: MediaStream; // stream obtained from webcam
@@ -42,12 +42,12 @@ export const DiffCamEngine: () => IDiffCamEngine = () => {
   const init = (options: IDiffCamEngineOptions) => {
     // sanity check
     if (!options) {
-      throw new Error("No options object provided");
+      throw new Error('No options object provided');
     }
 
     // incoming options with defaults
-    video = options.video || document.createElement("video");
-    motionCanvas = options.motionCanvas || document.createElement("canvas");
+    video = options.video || document.createElement('video');
+    motionCanvas = options.motionCanvas || document.createElement('canvas');
     captureIntervalTime = options.captureIntervalTime || 100;
     captureWidth = options.captureWidth || 640;
     captureHeight = options.captureHeight || 480;
@@ -65,8 +65,8 @@ export const DiffCamEngine: () => IDiffCamEngine = () => {
     captureCallback = options.captureCallback || emptyFunction;
 
     // non-configurable
-    captureCanvas = document.createElement("canvas");
-    diffCanvas = document.createElement("canvas");
+    captureCanvas = document.createElement('canvas');
+    diffCanvas = document.createElement('canvas');
     isReadyToDiff = false;
 
     // prep video
@@ -75,17 +75,17 @@ export const DiffCamEngine: () => IDiffCamEngine = () => {
     // prep capture canvas
     captureCanvas.width = captureWidth;
     captureCanvas.height = captureHeight;
-    captureContext = captureCanvas.getContext("2d");
+    captureContext = captureCanvas.getContext('2d');
 
     // prep diff canvas
     diffCanvas.width = diffWidth;
     diffCanvas.height = diffHeight;
-    diffContext = diffCanvas.getContext("2d");
+    diffContext = diffCanvas.getContext('2d');
 
     // prep motion canvas
     motionCanvas.width = diffWidth;
     motionCanvas.height = diffHeight;
-    motionContext = motionCanvas.getContext("2d");
+    motionContext = motionCanvas.getContext('2d');
 
     requestWebcam();
   };
@@ -104,7 +104,6 @@ export const DiffCamEngine: () => IDiffCamEngine = () => {
   };
 
   const initSuccess = (requestedStream: MediaStream) => {
-    console.log(requestedStream);
     stream = requestedStream;
     initSuccessCallback();
   };
@@ -116,23 +115,23 @@ export const DiffCamEngine: () => IDiffCamEngine = () => {
 
   const start = () => {
     if (!stream) {
-      throw new Error("Cannot start after init fail");
+      throw new Error('Cannot start after init fail');
     }
 
     // streaming takes a moment to start
-    video.addEventListener("canplay", startComplete);
+    video.addEventListener('canplay', startComplete);
     video.srcObject = stream;
   };
 
   const startComplete = () => {
-    video.removeEventListener("canplay", startComplete);
+    video.removeEventListener('canplay', startComplete);
     captureInterval = setInterval(capture, captureIntervalTime);
     startCompleteCallback();
   };
 
   const stop = () => {
     clearInterval(captureInterval);
-    video.src = "";
+    video.src = '';
     motionContext && motionContext.clearRect(0, 0, diffWidth, diffHeight);
     isReadyToDiff = false;
   };
@@ -147,7 +146,7 @@ export const DiffCamEngine: () => IDiffCamEngine = () => {
 
     // diff current capture over previous capture, leftover from last time
     if (diffContext) {
-      diffContext.globalCompositeOperation = "difference";
+      diffContext.globalCompositeOperation = 'difference';
       diffContext.drawImage(video, 0, 0, diffWidth, diffHeight);
     }
     let diffImageData: ImageData | null =
@@ -159,7 +158,7 @@ export const DiffCamEngine: () => IDiffCamEngine = () => {
       if (diffImageData && motionContext) {
         motionContext.putImageData(diffImageData, 0, 0);
         if (diff.motionBox) {
-          motionContext.strokeStyle = "#fff";
+          motionContext.strokeStyle = '#fff';
           motionContext.strokeRect(
             diff.motionBox.x.min + 0.5,
             diff.motionBox.y.min + 0.5,
@@ -185,7 +184,7 @@ export const DiffCamEngine: () => IDiffCamEngine = () => {
 
     if (diffContext) {
       // draw current capture normally over diff, ready for next time
-      diffContext.globalCompositeOperation = "source-over";
+      diffContext.globalCompositeOperation = 'source-over';
       diffContext.drawImage(video, 0, 0, diffWidth, diffHeight);
     }
     isReadyToDiff = true;

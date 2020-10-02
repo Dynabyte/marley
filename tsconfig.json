@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "noEmit": true,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true
+  },
+  "exclude": ["node_modules", "build"],
+  "include": ["Client", "Server"]
+}

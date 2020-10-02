@@ -1,13 +1,23 @@
-import moment from "moment";
-import React from "react";
-import { DiffCamEngine } from "./diff-cam-engine";
-import dynabyteLogo from "./dynabyte_white.png";
-import { ICapturePayload, IDiffCamEngine } from "./models/diffCamEngine.models";
-import Logo from "./shared/Logo";
-import Title from "./shared/Title";
+import moment from 'moment';
+import React from 'react';
+import './App.css';
+import { DiffCamEngine } from './diff-cam-engine';
+import dynabyteLogo from './dynabyte_white.png';
+import { ICapturePayload, IDiffCamEngine } from './models/diffCamEngine.models';
+import Logo from './shared/Logo';
+import Title from './shared/Title';
+
+interface IResult {
+  isKnownFace?: boolean;
+  isFace?: boolean;
+  isConfident?: boolean;
+  name?: string;
+  personId?: string;
+}
 
 export const App = () => {
   const [hasMotion, setHasMotion] = React.useState<boolean>(false);
+  const [result, setResult] = React.useState<IResult>({});
 
   const videoElement: HTMLVideoElement = document.createElement('video');
   const canvasElement: HTMLCanvasElement = document.createElement('canvas');
@@ -28,7 +38,14 @@ export const App = () => {
     setHasMotion(payload.hasMotion);
     console.log(payload.getURL(), moment().second());
     if (payload.hasMotion) {
-      console.log(payload.getURL());
+      //console.log(payload.getURL());
+      fetch('http://localhost:8000/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: payload.getURL() }),
+      })
+        .then((res) => res.json())
+        .then((data) => setResult(data));
     }
   };
 
@@ -40,9 +57,14 @@ export const App = () => {
     captureCallback: capture,
     captureIntervalTime: 10000,
   });
+
+  const { isKnownFace, isConfident, isFace, name } = result;
+
   return (
     <div className='wrapper'>
-      <Title hasMotion={hasMotion}>Välkommen till</Title>
+      {isConfident && isFace && isKnownFace && (
+        <Title hasMotion={hasMotion}>{`Välkommen ${name} till`}</Title>
+      )}
       <Logo
         src={dynabyteLogo}
         alt='logo'
