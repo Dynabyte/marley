@@ -23,6 +23,7 @@ jobs:
         run: |
           npm install # Install Dependencies
           npm run build
+
       - name: Install Surge
         run: npm install -g surge
 
