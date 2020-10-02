@@ -11,6 +11,8 @@ app.use(express.static(path.join(__dirname, 'build')));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+const PORT = process.env.PORT || 8000;
+
 const persons: Person[] = [
   {
     name: 'Alexandra Onegård',
@@ -37,4 +39,6 @@ app.post('/predict', (req: Request, res: Response) => {
   });
 });
 
-app.listen(process.env.PORT || 8000);
+app.listen(PORT, () => {
+  console.log(`App listening at port: ${PORT}`);
+});
