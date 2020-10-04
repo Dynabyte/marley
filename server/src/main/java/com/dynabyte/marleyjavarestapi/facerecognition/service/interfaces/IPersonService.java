@@ -1,4 +1,4 @@
-package com.dynabyte.marleyjavarestapi.facerecognition.service;
+package com.dynabyte.marleyjavarestapi.facerecognition.service.interfaces;
 
 import com.dynabyte.marleyjavarestapi.facerecognition.model.Person;
 

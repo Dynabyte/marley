@@ -5,9 +5,10 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 
+/**
+ * Repository for entity Person
+ */
 @Repository
 public interface PersonRepository extends CrudRepository<Person, String> {
 
-//    @Override
-//    Optional<Person> findById(String s);
 }

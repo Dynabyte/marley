@@ -1,5 +1,6 @@
 package com.dynabyte.marleyjavarestapi.facerecognition.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 import java.time.ZonedDateTime;
@@ -7,6 +8,7 @@ import java.time.ZonedDateTime;
 /**
  * This class is a report that gets served to the api user when certain exceptions occur during a request.
  */
+@Getter
 public class ApiExceptionReport {
     private final String exceptionClass;
     private final String message;
@@ -20,19 +22,4 @@ public class ApiExceptionReport {
         this.timestamp = timestamp;
     }
 
-    public String getExceptionClass() {
-        return exceptionClass;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
-    }
-
-    public ZonedDateTime getTimestamp() {
-        return timestamp;
-    }
 }

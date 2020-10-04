@@ -1,12 +1,12 @@
 package com.dynabyte.marleyjavarestapi.facerecognition.controller;
 
 import com.dynabyte.marleyjavarestapi.facerecognition.model.Person;
-import com.dynabyte.marleyjavarestapi.facerecognition.service.FaceRecognitionService;
-import com.dynabyte.marleyjavarestapi.facerecognition.service.IPersonService;
-import com.dynabyte.marleyjavarestapi.facerecognition.to.LabelRequest;
-import com.dynabyte.marleyjavarestapi.facerecognition.to.PredictionRequest;
-import com.dynabyte.marleyjavarestapi.facerecognition.to.ClientPredictionResponse;
-import com.dynabyte.marleyjavarestapi.facerecognition.to.PythonResponse;
+import com.dynabyte.marleyjavarestapi.facerecognition.service.interfaces.IFaceRecognitionService;
+import com.dynabyte.marleyjavarestapi.facerecognition.service.interfaces.IPersonService;
+import com.dynabyte.marleyjavarestapi.facerecognition.to.response.ClientPredictionResponse;
+import com.dynabyte.marleyjavarestapi.facerecognition.to.request.LabelRequest;
+import com.dynabyte.marleyjavarestapi.facerecognition.to.request.PredictionRequest;
+import com.dynabyte.marleyjavarestapi.facerecognition.to.response.PythonResponse;
 import com.dynabyte.marleyjavarestapi.facerecognition.utility.Validation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,20 +15,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
-import java.util.UUID;
-
 /**
  * Controller for the Marley rest api that is the communication hub for all requests.
  */
 @RestController
 public class MarleyRestController {
 
-    private final FaceRecognitionService faceRecognitionService = new FaceRecognitionService();
+    private final IFaceRecognitionService faceRecognitionService;
     private final IPersonService personService;
 
     @Autowired
-    public MarleyRestController(IPersonService personService) {
+    public MarleyRestController(IFaceRecognitionService faceRecognitionService, IPersonService personService) {
+        this.faceRecognitionService = faceRecognitionService;
         this.personService = personService;
     }
 
@@ -50,20 +48,20 @@ public class MarleyRestController {
         PythonResponse pythonResponse = faceRecognitionService.predict(predictionRequest);
         System.out.println(pythonResponse);
 
-        ClientPredictionResponse mockDataPredictionResponse =
+        ClientPredictionResponse predictionResponse =
                 new ClientPredictionResponse(null, "Unknown", pythonResponse.isFace(), false);
 
         if(pythonResponse.getFaceId() == null){
-            return ResponseEntity.ok(mockDataPredictionResponse);
+            return ResponseEntity.ok(predictionResponse);
         }
 
+
         personService.findById(pythonResponse.getFaceId()).ifPresent(person -> {
-            mockDataPredictionResponse.setId(UUID.randomUUID()); //TODO add UUID to the database?
-            mockDataPredictionResponse.setKnownFace(true);
-            mockDataPredictionResponse.setName(person.getName());
+            predictionResponse.setKnownFace(true);
+            predictionResponse.setName(person.getName());
         });
 
-
+        //TODO throw exception perhaps if a faceID is in the predictionResponse but not found in DB?
 
 //        //Mocking the database
 //        if(pythonResponse.getFaceId().equals("5f75cdb6d2b163f57228a203")){
@@ -77,7 +75,7 @@ public class MarleyRestController {
 //            mockDataPredictionResponse.setKnownFace(true);
 //        }
 
-        return ResponseEntity.ok(mockDataPredictionResponse);
+        return ResponseEntity.ok(predictionResponse);
     }
 
     //TODO make label method for put and for multiple images?

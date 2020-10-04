@@ -9,8 +9,4 @@ public class ImageEncodingException extends RuntimeException {
         super(message);
     }
 
-    //Not used but throwable might be necessary to give more information later
-    public ImageEncodingException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }
