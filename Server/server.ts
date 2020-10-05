@@ -31,11 +31,9 @@ app.post('/predict', (req: Request, res: Response) => {
   const base64String: string = body.split('base64,')[1];
 
   return res.send({
-    personId: persons[random].personId,
     name: persons[random].name,
-    isKnownFace: Math.random() >= 0.1,
-    isFace: Math.random() >= 0.1,
-    isConfident: Math.random() >= 0.1,
+    isKnownFace: Math.random() >= 0.5,
+    isFace: Math.random() >= 0.2,
   });
 });
 

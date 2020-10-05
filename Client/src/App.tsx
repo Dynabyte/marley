@@ -1,5 +1,5 @@
-import moment from 'moment';
-import React from 'react';
+import axios from 'axios';
+import React, { useEffect } from 'react';
 import './App.css';
 import { DiffCamEngine } from './diff-cam-engine';
 import dynabyteLogo from './dynabyte_white.png';
@@ -19,52 +19,53 @@ export const App = () => {
   const [hasMotion, setHasMotion] = React.useState<boolean>(false);
   const [result, setResult] = React.useState<IResult>({});
 
-  const videoElement: HTMLVideoElement = document.createElement('video');
-  const canvasElement: HTMLCanvasElement = document.createElement('canvas');
+  useEffect(() => {
+    const diffCamEngine: IDiffCamEngine = DiffCamEngine();
 
-  const diffCamEngine: IDiffCamEngine = DiffCamEngine();
+    const initSuccess: () => void = () => {
+      diffCamEngine.start();
+    };
 
-  const initSuccess: () => void = () => {
-    diffCamEngine.start();
-  };
+    const initError: (error: any) => void = (error: any) => {
+      console.log(error);
+    };
 
-  const initError: (error: any) => void = (error: any) => {
-    console.log(error);
-  };
+    const capture: (payload: ICapturePayload) => void = (
+      payload: ICapturePayload
+    ) => {
+      setHasMotion(payload.hasMotion);
 
-  const capture: (payload: ICapturePayload) => void = (
-    payload: ICapturePayload
-  ) => {
-    setHasMotion(payload.hasMotion);
-    console.log(payload.getURL(), moment().second());
-    if (payload.hasMotion) {
-      //console.log(payload.getURL());
-      fetch('http://localhost:8000/predict', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: payload.getURL() }),
-      })
-        .then((res) => res.json())
-        .then((data) => setResult(data));
-    }
-  };
+      if (payload.hasMotion) {
+        axios
+          .post(
+            'http://localhost:8000/predict',
+            { image: payload.getURL() },
+            {
+              headers: { 'Content-Type': 'application/json' },
+            }
+          )
+          .then(({ data }) => setResult(data));
+      }
+    };
 
-  diffCamEngine.init({
-    video: videoElement,
-    motionCanvas: canvasElement,
-    initSuccessCallback: initSuccess,
-    initErrorCallback: initError,
-    captureCallback: capture,
-    captureIntervalTime: 10000,
-  });
+    diffCamEngine.init({
+      initSuccessCallback: initSuccess,
+      initErrorCallback: initError,
+      captureCallback: capture,
+      captureIntervalTime: 2000,
+    });
 
-  const { isKnownFace, isConfident, isFace, name } = result;
+    return () => diffCamEngine.stop();
+  }, []);
+
+  const { isKnownFace, isFace, name } = result;
 
   return (
     <div className='wrapper'>
-      {isConfident && isFace && isKnownFace && (
+      {isKnownFace && (
         <Title hasMotion={hasMotion}>{`Välkommen ${name} till`}</Title>
       )}
+      {/* {!isKnownFace && isFace && <RegisterForm />} */}
       <Logo
         src={dynabyteLogo}
         alt='logo'
