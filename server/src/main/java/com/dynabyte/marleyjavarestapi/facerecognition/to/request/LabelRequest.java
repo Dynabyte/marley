@@ -3,14 +3,22 @@ package com.dynabyte.marleyjavarestapi.facerecognition.to.request;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Request to label a person with a name using an image that will be saved as a reference encoding and labeled based
- * on the faceId given in a pythonResponse
- */
+import javax.validation.constraints.NotNull;
+
+
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class LabelRequest extends ImageRequest {
+public class LabelRequest extends ImageRequest{
 
-    private String name;
+    String faceId;
+
+    public LabelRequest(@NotNull(message = "image must be included as a base64 string") String image) {
+        super(image);
+    }
+
+    public LabelRequest(@NotNull(message = "image must be included as a base64 string") String image, String faceId) {
+        super(image);
+        this.faceId = faceId;
+    }
 
 }

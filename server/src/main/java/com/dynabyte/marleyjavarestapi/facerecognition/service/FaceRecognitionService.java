@@ -1,6 +1,7 @@
 package com.dynabyte.marleyjavarestapi.facerecognition.service;
 
 import com.dynabyte.marleyjavarestapi.facerecognition.service.interfaces.IFaceRecognitionService;
+import com.dynabyte.marleyjavarestapi.facerecognition.to.request.ImageRequest;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.request.LabelRequest;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.request.PredictionRequest;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.response.PythonResponse;
@@ -28,10 +29,15 @@ public class FaceRecognitionService implements IFaceRecognitionService {
 
     /**
      * Sends a labeling request to save a the encoding of an image for a new person to the database
-     * @param labelRequest includes an image and a
+     * @param imageRequest includes an image in base64 format
      * @return response object including whether a face is detected and includes a faceID if a known person is detected
      */
-    public PythonResponse label(LabelRequest labelRequest){
-        return  restTemplate.postForObject(faceRecognitionURL + "label", labelRequest, PythonResponse.class);
+    public PythonResponse postLabel(ImageRequest imageRequest){
+        return  restTemplate.postForObject(faceRecognitionURL + "label", imageRequest, PythonResponse.class);
+    }
+
+    @Override
+    public void putLabel(LabelRequest labelRequest) {
+        restTemplate.put(faceRecognitionURL + "label", labelRequest);
     }
 }

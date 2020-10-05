@@ -12,17 +12,13 @@ import java.util.UUID;
 @Data
 public class ClientPredictionResponse {
 
-    //TODO include person object instead of just name?
-
-    private UUID id;
     private String name;
     @JsonProperty(value = "isFace")
     private boolean isFace;
     @JsonProperty(value = "isKnownFace")
     private boolean isKnownFace;
 
-    public ClientPredictionResponse(UUID id, String name, boolean isFace, boolean isKnownFace) {
-        this.id = id;
+    public ClientPredictionResponse(String name, boolean isFace, boolean isKnownFace) {
         this.name = name;
         this.isFace = isFace;
         this.isKnownFace = isKnownFace;

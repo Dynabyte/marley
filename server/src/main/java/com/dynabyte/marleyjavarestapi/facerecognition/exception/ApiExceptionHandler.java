@@ -2,6 +2,7 @@ package com.dynabyte.marleyjavarestapi.facerecognition.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -24,6 +25,19 @@ public class ApiExceptionHandler {
     public ResponseEntity<Object> handleBadRequestExceptions(Exception e){
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         String exceptionClass = e.getClass().toString().substring(63);
+        ApiExceptionReport apiExceptionReport = new ApiExceptionReport(
+                exceptionClass,
+                e.getMessage(),
+                httpStatus,
+                ZonedDateTime.now(ZoneId.of("+02:00"))
+        );
+        return new ResponseEntity<>(apiExceptionReport, httpStatus);
+    }
+
+    @ExceptionHandler(value = {MethodArgumentNotValidException.class})
+    public ResponseEntity<Object> handleValidationException(Exception e){
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        String exceptionClass = e.getClass().toString().substring(35);
         ApiExceptionReport apiExceptionReport = new ApiExceptionReport(
                 exceptionClass,
                 e.getMessage(),

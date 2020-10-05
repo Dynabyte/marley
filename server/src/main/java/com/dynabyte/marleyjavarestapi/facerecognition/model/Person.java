@@ -18,7 +18,7 @@ public class Person implements Serializable {
 
     @Id
     private String faceId;
-    @Size(min = 1, max = 50)
+    @Size(min = 1, max = 50, message = "name must be between 1-50 characters long")
     private String name;
 
     public Person(String faceId, @Size(min = 1, max = 50) String name) {
