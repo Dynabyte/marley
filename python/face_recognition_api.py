@@ -1,61 +1,61 @@
 from collections import namedtuple
 import numpy as np
-from flask import Flask
-from flask import request
-from flask import Response
-import uuid
+import flask as fl
 import io
 import base64
 import pymongo
-from PIL import Image
 import face_recognition
 from bson.objectid import ObjectId
 import json
 import time
+import threading
 
 face_comparison = namedtuple(
     "face_comparison",
     ["face_id", "euclidean_distance_mean"])
 
-app = Flask(__name__)
-
+app = fl.Flask(__name__)
+lock = threading.Lock()
+faces_collection = []
 mongo_client = pymongo \
     .MongoClient("mongodb+srv://marley-db-user:DUElFH0k35peHesM@marleycluster.42wu5.mongodb.net/marley?retryWrites=true&w=majority")
+
 
 @app.route('/label', methods=['POST', 'PUT'])
 def label_endpoint():
     start = time.time()
 
-    if request.method == 'POST':
-        _id = db_create_face(
-            face_encode_from_request(request))
-    if request.method == 'PUT':
+    encoding_input = face_encode_from_request(fl.request)
+    if encoding_input is None:
+        return response({"faceId": None})
+
+    if fl.request.method == 'POST':
+        _id = db_create_face(encoding_input)
+    if fl.request.method == 'PUT':
         _id = db_update_face(
-            request.get_json()['faceId'],
-            face_encode_from_request(request))
+            fl.request.get_json()['faceId'],
+            encoding_input)
 
     print(f"Label took: '{round((time.time()-start) * 1000, 0)}' ms")
-    return make_response({"faceId":str(_id)})
+    return response({"faceId": str(_id)})
 
 
 @app.route('/predict', methods=['POST'])
 def predict_endpoint():
     start = time.time()
 
-    encoding_input = face_encode(
-        to_numpy_array(
-            request.get_json()['image']))
+    encoding_input = face_encode_from_request(fl.request)
     if encoding_input is None:
-        return make_response({"isFace": False, "faceId": None})
+        return response({"isFace": False, "faceId": None})
 
     face_id = predict(
         encoding_input,
-        db_get_faces())
+        db_get_faces)
     if face_id is None:
-        return make_response({"isFace":True, "faceId":None})
+        return response({"isFace": True, "faceId": None})
 
     print(f"Predict took: '{round((time.time()-start) * 1000, 0)}' ms")
-    return make_response({"isFace":True, "faceId":str(face_id)})
+    return response({"isFace": True, "faceId": str(face_id)})
 
 
 def predict(encoding, faces):
@@ -88,10 +88,10 @@ def to_numpy_array(image_base64):
     return image
 
 
-def face_encode_from_request(req):
+def face_encode_from_request(request):
     return face_encode(
         to_numpy_array(
-            req.get_json()['image']))
+            request.get_json()['image']))
 
 
 def face_encode(image):
@@ -105,43 +105,52 @@ def face_encode(image):
 
 
 def compare(encoding, faces):
-    for face in faces:
-        yield face_comparison(
-            face_id=face["_id"],
-            euclidean_distance_mean=np.mean(
-                face_recognition.face_distance(
-                    np.array(face["encodings"]),
-                    encoding)))
+    with lock:
+        for face in faces():
+            yield face_comparison(
+                face_id=face["_id"],
+                euclidean_distance_mean=np.mean(
+                    face_recognition.face_distance(
+                        np.array(face["encodings"]),
+                        encoding)))
 
 
 def db_create_face(encoding):
-    start = time.time()
-    _id = faces_db() \
-        .insert_one({
-            "encodings": [encoding.tolist()]}) \
-        .inserted_id
-    print(
-        f"create_face for record '{_id}' took: '{round((time.time()-start) * 1000, 0)}' ms")
+    with lock:
+        start = time.time()
+        _id = faces_db() \
+            .insert_one({
+                "encodings": [encoding.tolist()]}) \
+            .inserted_id
+        global faces_collection
+        faces_collection = []
+        print(
+            f"create_face for record '{_id}' took: '{round((time.time()-start) * 1000, 0)}' ms")
     return _id
 
 
 def db_update_face(_id, encoding):
-    start = time.time()
-    faces_db() \
-        .update(
-            {'_id': ObjectId(_id)},
-            {'$push': {'encodings': encoding.tolist()}})
-    print(
-        f"update_face for record '{_id}' took: '{round((time.time()-start) * 1000, 0)}' ms")
+    with lock:
+        start = time.time()
+        faces_db() \
+            .update(
+                {'_id': ObjectId(_id)},
+                {'$push': {'encodings': encoding.tolist()}})
+        global faces_collection
+        faces_collection = []
+        print(
+            f"update_face for record '{_id}' took: '{round((time.time()-start) * 1000, 0)}' ms")
     return _id
 
 
 def db_get_faces():
     start = time.time()
-    faces = faces_db() \
-        .find({})
+    global faces_collection
+    if not faces_collection:
+        for face in faces_db().find({}):
+            faces_collection.append(face)
     print(f"get_faces took: '{round((time.time()-start) * 1000, 0)}' ms")
-    return faces
+    return faces_collection
 
 
 def faces_db():
@@ -149,5 +158,8 @@ def faces_db():
         .marley \
         .faces
 
-def make_response(response):
-    return Response(json.dumps(response), mimetype='application/json')
+
+def response(json_data):
+    return fl.Response(
+        json.dumps(json_data),
+        mimetype='application/json')
