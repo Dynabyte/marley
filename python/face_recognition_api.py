@@ -67,10 +67,12 @@ def inner_predict_endpoint():
 
 
 def predict(encoding, faces):
-    closest_comparison = closest(
-        compare(
-            encoding,
-            faces))
+    closest_comparison = \
+        time_lambda(
+            lambda: closest(compare(
+                encoding,
+                faces)),
+            "closest_comparison")
     if closest_comparison.euclidean_distance_mean > 0.5:
         return None
     return closest_comparison.face_id
