@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.client.HttpServerErrorException;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -22,25 +23,29 @@ public class ApiExceptionHandler {
      * @return ResponseEntity including an ApiException object that details the error as well as the http status.
      */
     @ExceptionHandler(value = {ImageEncodingException.class, MissingArgumentException.class})
-    public ResponseEntity<Object> handleBadRequestExceptions(Exception e){
+    public ResponseEntity<ApiExceptionReport> handleCustomExceptions(Exception e){
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-        String exceptionClass = e.getClass().toString().substring(63);
-        ApiExceptionReport apiExceptionReport = new ApiExceptionReport(
-                exceptionClass,
-                e.getMessage(),
-                httpStatus,
-                ZonedDateTime.now(ZoneId.of("+02:00"))
-        );
-        return new ResponseEntity<>(apiExceptionReport, httpStatus);
+        return getErrorResponse(e, httpStatus, e.getMessage());
+    }
+
+    @ExceptionHandler(value = {HttpServerErrorException.class})
+    public ResponseEntity<ApiExceptionReport> handleExternalAPIException(Exception e){
+        HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        return getErrorResponse(e, httpStatus, "Error in FaceRecognition API");
     }
 
     @ExceptionHandler(value = {MethodArgumentNotValidException.class})
-    public ResponseEntity<Object> handleValidationException(Exception e){
+    public ResponseEntity<ApiExceptionReport> handleValidationException(Exception e){
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-        String exceptionClass = e.getClass().toString().substring(35);
+        return getErrorResponse(e, httpStatus, e.getMessage());
+    }
+
+
+    private ResponseEntity<ApiExceptionReport> getErrorResponse(Exception e, HttpStatus httpStatus, String message) {
+        String exceptionClass = e.getClass().getSimpleName();
         ApiExceptionReport apiExceptionReport = new ApiExceptionReport(
                 exceptionClass,
-                e.getMessage(),
+                message,
                 httpStatus,
                 ZonedDateTime.now(ZoneId.of("+02:00"))
         );

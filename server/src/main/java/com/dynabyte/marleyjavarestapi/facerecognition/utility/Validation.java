@@ -1,12 +1,11 @@
 package com.dynabyte.marleyjavarestapi.facerecognition.utility;
 
-import com.dynabyte.marleyjavarestapi.facerecognition.to.request.ImageRequest;
 import com.dynabyte.marleyjavarestapi.facerecognition.exception.ImageEncodingException;
 import com.dynabyte.marleyjavarestapi.facerecognition.exception.MissingArgumentException;
+import com.dynabyte.marleyjavarestapi.facerecognition.to.request.ImageRequest;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.request.RegistrationRequest;
 
 import java.util.Base64;
-import java.util.stream.Collectors;
 
 /**
  * Utility class for validating various data using static void/boolean methods. Includes helper sub methods.
@@ -21,22 +20,18 @@ public class Validation {
        if(registrationRequest.getImages() == null){
            throw new MissingArgumentException("images missing! Must be included in base64format");
        }
-       registrationRequest.setImages(
-               registrationRequest.getImages()
-                       .stream()
-                       .map(image -> image.startsWith("data:image/jpeg;base64,") ? image.substring(23) : image)
-                       .filter(Validation::isBase64Encoded)
-                       .collect(Collectors.toList()));
-
+       registrationRequest.getImages().forEach(Validation::validateImage);
     }
 
     public static void validateImageRequest(ImageRequest imageRequest){
-        validateImageNotNull(imageRequest.getImage());
+        imageRequest.setImage(validateImage(imageRequest.getImage()));
+    }
 
-        if(imageRequest.getImage().startsWith("data:image/jpeg;base64,")){
-            imageRequest.setImage(imageRequest.getImage().substring(23));
-        }
-        validateBase64Image(imageRequest.getImage());
+    public static String validateImage(String base64Image){
+        validateImageNotNull(base64Image);
+        base64Image = base64Image.replace("data:image/jpeg;base64,", "");
+        validateIsBase64(base64Image);
+        return base64Image;
     }
 
     private static void validateImageNotNull(String base64Image){
@@ -45,7 +40,7 @@ public class Validation {
         }
     }
 
-    private static void validateBase64Image(String base64Image){
+    private static void validateIsBase64(String base64Image){
         if (!isBase64Encoded(base64Image)){
             throw new ImageEncodingException("Image is not in base64 format!");
         }

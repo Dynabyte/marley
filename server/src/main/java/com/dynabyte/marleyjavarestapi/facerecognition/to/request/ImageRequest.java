@@ -10,12 +10,11 @@ import javax.validation.constraints.NotNull;
  */
 @Data
 @NoArgsConstructor
-public abstract class ImageRequest {
+public class ImageRequest {
 
-    @NotNull(message = "image must be included as a base64 string")
     private String image;
 
-    public ImageRequest(@NotNull(message = "image must be included as a base64 string") String image) {
+    public ImageRequest(String image) {
         this.image = image;
     }
 }

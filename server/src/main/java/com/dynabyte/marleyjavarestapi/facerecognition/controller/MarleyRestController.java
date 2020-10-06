@@ -1,8 +1,8 @@
 package com.dynabyte.marleyjavarestapi.facerecognition.controller;
 
 import com.dynabyte.marleyjavarestapi.facerecognition.model.Person;
-import com.dynabyte.marleyjavarestapi.facerecognition.service.interfaces.IFaceRecognitionService;
-import com.dynabyte.marleyjavarestapi.facerecognition.service.interfaces.IPersonService;
+import com.dynabyte.marleyjavarestapi.facerecognition.service.FaceRecognitionService;
+import com.dynabyte.marleyjavarestapi.facerecognition.service.PersonService;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.request.*;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.response.ClientPredictionResponse;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.response.PythonResponse;
@@ -22,11 +22,11 @@ import java.util.List;
 @RestController
 public class MarleyRestController {
 
-    private final IFaceRecognitionService faceRecognitionService;
-    private final IPersonService personService;
+    private final FaceRecognitionService faceRecognitionService;
+    private final PersonService personService;
 
     @Autowired
-    public MarleyRestController(IFaceRecognitionService faceRecognitionService, IPersonService personService) {
+    public MarleyRestController(FaceRecognitionService faceRecognitionService, PersonService personService) {
         this.faceRecognitionService = faceRecognitionService;
         this.personService = personService;
     }
@@ -38,32 +38,32 @@ public class MarleyRestController {
      * image contains a face of any known person and if it contains a face at all. If the person is known then the response
      * will also include that persons UUID and other information stored in a database.
      *
-     * @param predictionRequest A request object that must contain an image in base64 format
+     * @param imageRequest A request object that must contain an image in base64 format
      * @return ResponseEntity object with the results of the image prediction
      */
     @PostMapping("/predict")
-    public ResponseEntity<ClientPredictionResponse> predict(@RequestBody PredictionRequest predictionRequest){
+    public ResponseEntity<ClientPredictionResponse> predict(@RequestBody ImageRequest imageRequest){
 
-        Validation.validateImageRequest(predictionRequest);
+        Validation.validateImageRequest(imageRequest);
 
-        PythonResponse pythonResponse = faceRecognitionService.predict(predictionRequest);
+        PythonResponse pythonResponse = faceRecognitionService.predict(imageRequest);
         System.out.println(pythonResponse);
 
-        ClientPredictionResponse predictionResponse =
+        ClientPredictionResponse clientPredictionResponse =
                 new ClientPredictionResponse("Unknown", pythonResponse.isFace(), false);
 
         if(pythonResponse.getFaceId() == null){
-            return ResponseEntity.ok(predictionResponse);
+            return ResponseEntity.ok(clientPredictionResponse);
         }
 
         personService.findById(pythonResponse.getFaceId()).ifPresent(person -> {
-            predictionResponse.setKnownFace(true);
-            predictionResponse.setName(person.getName());
+            clientPredictionResponse.setKnownFace(true);
+            clientPredictionResponse.setName(person.getName());
         });
 
         //TODO throw exception perhaps if a faceID is in the predictionResponse but not found in DB?
 
-        return ResponseEntity.ok(predictionResponse);
+        return ResponseEntity.ok(clientPredictionResponse);
     }
 
     @PostMapping("/register")
@@ -78,6 +78,7 @@ public class MarleyRestController {
     }
 
     private void registerPersonWithMultipleImages(RegistrationRequest registrationRequest) {
+        //TODO rewrite into one loop with boolean check
         String faceId = null;
         List<String> images = registrationRequest.getImages();
         int startIndex = 0;
@@ -86,7 +87,7 @@ public class MarleyRestController {
         for (String image : images){
             startIndex++;
             try {
-                PythonResponse pythonResponse = faceRecognitionService.postLabel(new LabelRequest(image));
+                PythonResponse pythonResponse = faceRecognitionService.postLabel(new LabelPutRequest(image));
                 if (pythonResponse.getFaceId() != null){
                     faceId = pythonResponse.getFaceId();
                     personService.save(new Person(faceId, registrationRequest.getName()));
@@ -103,7 +104,7 @@ public class MarleyRestController {
         //Add all remaining image encodings to the same faceId that was generated earlier
         for (int i = startIndex; i < images.size(); i++) {
             try {
-                faceRecognitionService.putLabel(new LabelRequest(images.get(i), faceId));
+                faceRecognitionService.putLabel(new LabelPutRequest(images.get(i), faceId));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -117,6 +118,7 @@ public class MarleyRestController {
         Validation.validateImageRequest(singleImageRegistrationRequest);
         PythonResponse pythonResponse = faceRecognitionService.postLabel(singleImageRegistrationRequest);
         personService.save(new Person(pythonResponse.getFaceId(), singleImageRegistrationRequest.getName()));
+       
         return HttpStatus.OK;
     }
 }
