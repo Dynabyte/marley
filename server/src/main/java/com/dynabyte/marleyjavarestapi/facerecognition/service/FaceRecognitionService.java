@@ -3,6 +3,8 @@ package com.dynabyte.marleyjavarestapi.facerecognition.service;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.request.ImageRequest;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.request.LabelPutRequest;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.response.PythonResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -13,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class FaceRecognitionService {
 
+    private final Logger LOGGER = LoggerFactory.getLogger(FaceRecognitionService.class);
     private final String faceRecognitionURL = "http://localhost:5000/";
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -22,6 +25,7 @@ public class FaceRecognitionService {
      * @return response object including whether a face is detected and includes a faceID if a known person is detected
      */
     public PythonResponse predict(ImageRequest imageRequest){
+        LOGGER.info("Sending prediction request");
         return restTemplate.postForObject(faceRecognitionURL + "predict", imageRequest, PythonResponse.class);
     }
 
@@ -31,10 +35,16 @@ public class FaceRecognitionService {
      * @return response object including whether a face is detected and includes a faceID if a known person is detected
      */
     public PythonResponse postLabel(ImageRequest imageRequest){
+        LOGGER.info("Sending label post request");
         return  restTemplate.postForObject(faceRecognitionURL + "label", imageRequest, PythonResponse.class);
     }
 
+    /**
+     * Sends a labeling request to add an encoding of an additional image for a existing face to the database
+     * @param labelPutRequest includes an image in base64 format
+     */
     public void putLabel(LabelPutRequest labelPutRequest) {
+        LOGGER.info("Sending label put request");
         restTemplate.put(faceRecognitionURL + "label", labelPutRequest);
     }
 }

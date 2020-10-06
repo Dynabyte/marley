@@ -1,5 +1,8 @@
 package com.dynabyte.marleyjavarestapi.facerecognition.controller;
 
+import com.dynabyte.marleyjavarestapi.facerecognition.exception.MissingPersonInDbException;
+import com.dynabyte.marleyjavarestapi.facerecognition.exception.PersonAlreadyInDbException;
+import com.dynabyte.marleyjavarestapi.facerecognition.exception.RegistrationException;
 import com.dynabyte.marleyjavarestapi.facerecognition.model.Person;
 import com.dynabyte.marleyjavarestapi.facerecognition.service.FaceRecognitionService;
 import com.dynabyte.marleyjavarestapi.facerecognition.service.PersonService;
@@ -7,14 +10,15 @@ import com.dynabyte.marleyjavarestapi.facerecognition.to.request.*;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.response.ClientPredictionResponse;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.response.PythonResponse;
 import com.dynabyte.marleyjavarestapi.facerecognition.utility.Validation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
+import org.springframework.web.client.HttpServerErrorException;
 
 /**
  * Controller for the Marley rest api that is the communication hub for all requests.
@@ -22,6 +26,7 @@ import java.util.List;
 @RestController
 public class MarleyRestController {
 
+    private final Logger LOGGER = LoggerFactory.getLogger(MarleyRestController.class);
     private final FaceRecognitionService faceRecognitionService;
     private final PersonService personService;
 
@@ -43,82 +48,107 @@ public class MarleyRestController {
      */
     @PostMapping("/predict")
     public ResponseEntity<ClientPredictionResponse> predict(@RequestBody ImageRequest imageRequest){
+        LOGGER.info("Predict request initiated");
 
         Validation.validateImageRequest(imageRequest);
 
         PythonResponse pythonResponse = faceRecognitionService.predict(imageRequest);
-        System.out.println(pythonResponse);
+        LOGGER.info("Received response: " + pythonResponse);
 
         ClientPredictionResponse clientPredictionResponse =
                 new ClientPredictionResponse("Unknown", pythonResponse.isFace(), false);
 
         if(pythonResponse.getFaceId() == null){
+            LOGGER.info("Successful prediction: " + clientPredictionResponse);
             return ResponseEntity.ok(clientPredictionResponse);
         }
 
-        personService.findById(pythonResponse.getFaceId()).ifPresent(person -> {
+        personService.findById(pythonResponse.getFaceId()).ifPresentOrElse(person -> {
             clientPredictionResponse.setKnownFace(true);
             clientPredictionResponse.setName(person.getName());
+        }, () -> {
+            String warningMessage = "Found faceId but no matching person in the database";
+            LOGGER.warn(warningMessage);
+            throw new MissingPersonInDbException(warningMessage);
         });
 
-        //TODO throw exception perhaps if a faceID is in the predictionResponse but not found in DB?
-
+        LOGGER.info("Successful prediction: " + clientPredictionResponse);
         return ResponseEntity.ok(clientPredictionResponse);
     }
 
     @PostMapping("/register")
     public HttpStatus register(@RequestBody RegistrationRequest registrationRequest){
+        LOGGER.info("Registration request initiated");
         Validation.validateRegistrationRequest(registrationRequest);
+        LOGGER.info("Registration request validated");
 
         //TODO verify that everything works
         registerPersonWithMultipleImages(registrationRequest);
         //TODO Log report of how many images succeeded
 
+        LOGGER.info("Registration request successful");
+        return HttpStatus.OK;
+    }
+
+    @PostMapping("/label")
+    public HttpStatus registerWithSingleImage(@RequestBody SingleImageRegistrationRequest singleImageRegistrationRequest){
+        LOGGER.info("Registration request for single image initiated");
+        Validation.validateSingleImageRegistrationRequest(singleImageRegistrationRequest);
+        verifyThatPersonIsNotInDbAlready(singleImageRegistrationRequest.getImage());
+        PythonResponse pythonResponse = faceRecognitionService.postLabel(singleImageRegistrationRequest);
+        personService.save(new Person(pythonResponse.getFaceId(), singleImageRegistrationRequest.getName()));
+        LOGGER.info("Registration complete. Person saved to database");
         return HttpStatus.OK;
     }
 
     private void registerPersonWithMultipleImages(RegistrationRequest registrationRequest) {
-        //TODO rewrite into one loop with boolean check
+        LOGGER.info("Registering images...");
         String faceId = null;
-        List<String> images = registrationRequest.getImages();
-        int startIndex = 0;
+        int registeredImagesCount = 0;
 
-        //Go through each base64 image until one can be encoded and added to the database correctly
-        for (String image : images){
-            startIndex++;
+        boolean isRegisteredPersonInDb = false;
+        //Go through each base64 image until one can be encoded and added to the database correctly, then add the rest to the same faceId
+        for (String image : registrationRequest.getImages()){
             try {
-                PythonResponse pythonResponse = faceRecognitionService.postLabel(new LabelPutRequest(image));
-                if (pythonResponse.getFaceId() != null){
-                    faceId = pythonResponse.getFaceId();
-                    personService.save(new Person(faceId, registrationRequest.getName()));
-                    break;
+                if(!isRegisteredPersonInDb){
+                    verifyThatPersonIsNotInDbAlready(image);
+                    PythonResponse labelResponse = faceRecognitionService.postLabel(new LabelPutRequest(image));
+                    if (labelResponse.getFaceId() != null){
+                        faceId = labelResponse.getFaceId();
+                        personService.save(new Person(faceId, registrationRequest.getName()));
+                        isRegisteredPersonInDb = true;
+                        registeredImagesCount++;
+                        LOGGER.info("Posted Image. Registered images: " + registeredImagesCount);
+                    }
                 }
-            } catch (Exception e){
+                else {
+                    //TODO exception handling or check return value faceId != null somehow
+                    faceRecognitionService.putLabel(new LabelPutRequest(image, faceId));
+                    registeredImagesCount++;
+                    LOGGER.info("Added Image. Registered images: " + registeredImagesCount);
+                }
+            } catch (HttpServerErrorException e){
+                LOGGER.warn("Something went wrong in Face Recognition API");
                 e.printStackTrace();
             }
         }
-        //TODO check if person already exists in the python database using predict?
-        //TODO throw exception if no image at all can be added to the database
-        System.out.println("Start index: " + startIndex);
-
-        //Add all remaining image encodings to the same faceId that was generated earlier
-        for (int i = startIndex; i < images.size(); i++) {
-            try {
-                faceRecognitionService.putLabel(new LabelPutRequest(images.get(i), faceId));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        if(registeredImagesCount == 0){
+            throw new RegistrationException("Could not register any images or save person to Db");
         }
-
+        LOGGER.info("Registration Complete. Total registered images: " + registeredImagesCount);
     }
 
-    //TODO remake label method to have more fitting names and only save to DB if valid faceId
-    @PostMapping("/label")
-    public HttpStatus registerWithSingleImage(@RequestBody SingleImageRegistrationRequest singleImageRegistrationRequest){
-        Validation.validateImageRequest(singleImageRegistrationRequest);
-        PythonResponse pythonResponse = faceRecognitionService.postLabel(singleImageRegistrationRequest);
-        personService.save(new Person(pythonResponse.getFaceId(), singleImageRegistrationRequest.getName()));
-       
-        return HttpStatus.OK;
+    private void verifyThatPersonIsNotInDbAlready(String image) {
+        LOGGER.info("Verifying that person is not already in database");
+
+        PythonResponse predictResponse = faceRecognitionService.predict(new ImageRequest(image));
+        final String faceId = predictResponse.getFaceId();
+        if(faceId != null){
+            personService.findById(faceId).ifPresent(person -> {
+                String warningMessage = "Cannot register a person who is already in the database";
+                LOGGER.warn(warningMessage);
+                throw new PersonAlreadyInDbException(warningMessage);
+            });
+        }
     }
 }

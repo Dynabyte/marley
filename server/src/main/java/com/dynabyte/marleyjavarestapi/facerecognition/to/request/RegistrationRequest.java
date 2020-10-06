@@ -6,6 +6,9 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.List;
 
+/**
+ * Request from client to register a person including name and a list of base64 images
+ */
 @Data
 public class RegistrationRequest {
 

@@ -5,7 +5,9 @@ import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotNull;
 
-
+/**
+ * Includes an image in base64 format and a faceId to add the encoded image to as a reference
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class LabelPutRequest extends ImageRequest{
