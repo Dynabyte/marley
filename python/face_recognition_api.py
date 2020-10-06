@@ -103,9 +103,8 @@ def face_encode(image):
     face_encodings = face_recognition \
         .face_encodings(image)
 
-    if len(face_encodings) == 0:
+    if not face_encodings:
         return None
-
     return face_encodings[0]
 
 
