@@ -134,6 +134,8 @@ def predict(encoding, faces):
 
 
 def closest(comparisons):
+    if not comparisons:
+        return face_comparison(None, 1)
     return min(
         comparisons,
         key=lambda comparison: comparison.euclidean_distance_mean)
@@ -157,13 +159,16 @@ def face_encode(image):
 
 def compare(encoding, faces):
     with lock:
+        face_comparisons = []
         for face in faces:
-            yield face_comparison(
-                face_id=face["_id"],
-                euclidean_distance_mean=np.mean(
-                    face_recognition.face_distance(
-                        np.array(face["encodings"]),
-                        encoding)))
+            face_comparisons.append(
+                face_comparison(
+                    face_id=face["_id"],
+                    euclidean_distance_mean=np.mean(
+                        face_recognition.face_distance(
+                            np.array(face["encodings"]),
+                            encoding))))
+        return face_comparisons
 
 
 def db_create_face(encoding):
