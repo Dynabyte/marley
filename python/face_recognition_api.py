@@ -198,7 +198,7 @@ def db_get_faces():
 
 def faces_db():
     return mongo_client \
-        .marley_daniel \
+        .marley \
         .faces
 
 
