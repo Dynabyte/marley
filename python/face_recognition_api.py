@@ -112,7 +112,7 @@ def predict_face(image_base64):
 
     face_id = predict(
         encoding_input,
-        db_get_faces)
+        time(db_get_faces))
 
     if face_id is None:
         return {"isFace": True, "faceId": None}
@@ -157,7 +157,7 @@ def face_encode(image):
 
 def compare(encoding, faces):
     with lock:
-        for face in time(faces):
+        for face in faces:
             yield face_comparison(
                 face_id=face["_id"],
                 euclidean_distance_mean=np.mean(
