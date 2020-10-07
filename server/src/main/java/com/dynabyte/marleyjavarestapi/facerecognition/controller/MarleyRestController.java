@@ -132,7 +132,7 @@ public class MarleyRestController {
                 e.printStackTrace();
             }
         }
-        if(registeredImagesCount == 0){
+        if(!isRegisteredPersonInDb){
             throw new RegistrationException("Could not register any images or save person to Db");
         }
         LOGGER.info("Registration Complete. Total registered images: " + registeredImagesCount);
