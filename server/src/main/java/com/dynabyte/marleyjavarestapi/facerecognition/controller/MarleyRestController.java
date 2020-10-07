@@ -144,6 +144,7 @@ public class MarleyRestController {
         PythonResponse predictResponse = faceRecognitionService.predict(new ImageRequest(image));
         final String faceId = predictResponse.getFaceId();
         if(faceId != null){
+            LOGGER.info("Found face in face recognition database: " + faceId);
             personService.findById(faceId).ifPresent(person -> {
                 String warningMessage = "Cannot register a person who is already in the database";
                 LOGGER.warn(warningMessage);

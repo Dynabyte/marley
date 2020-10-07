@@ -16,7 +16,7 @@ import org.springframework.web.client.RestTemplate;
 public class FaceRecognitionService {
 
     private final Logger LOGGER = LoggerFactory.getLogger(FaceRecognitionService.class);
-    private final String faceRecognitionURL = "http://localhost:5000/";
+    private final String faceRecognitionURL = "http://localhost:5000/face-recognition/";
     private final RestTemplate restTemplate = new RestTemplate();
 
     /**
@@ -45,6 +45,6 @@ public class FaceRecognitionService {
      */
     public void putLabel(LabelPutRequest labelPutRequest) {
         LOGGER.info("Sending label put request");
-        restTemplate.put(faceRecognitionURL + "label", labelPutRequest);
+        restTemplate.put(faceRecognitionURL + "label/" + labelPutRequest.getFaceId(), labelPutRequest);
     }
 }
