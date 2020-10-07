@@ -9,11 +9,14 @@ import springfox.documentation.service.Contact;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Configuration file for Swagger Documentation. Automatically generates api documentation for all endpoints as well as
+ * transfer objects, i.e. request or response objects
+ */
 @Configuration
 public class SwaggerDocumentationConfig {
 
