@@ -1,5 +1,5 @@
 :root {
-  --image-url: url("stockholm.jpg");
+  --image-url: url('stockholm.jpg');
 }
 
 html,
@@ -10,14 +10,15 @@ body {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family: "'Playfair Display', serif", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
   font-size: 16px;
+  color: white;
   margin: 0;
   padding: 0;
   width: 100vw;
+  background: linear-gradient(rgb(239, 87, 227, 0.9), rgba(239, 87, 227, 0.1)),
+    var(--image-url) center center;
 }

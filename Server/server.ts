@@ -32,9 +32,17 @@ app.post('/predict', (req: Request, res: Response) => {
 
   return res.send({
     name: persons[random].name,
-    isKnownFace: Math.random() >= 0.5,
-    isFace: Math.random() >= 0.2,
+    isKnownFace: Math.random() >= 0.9,
+    isFace: Math.random() >= 0.1,
   });
+});
+
+app.post('/register', (req: Request, res: Response) => {
+  console.log(req.body);
+  const body: string[] = req.body;
+  //const base64String: string = body.split('base64,')[1];
+
+  return res.sendStatus(200);
 });
 
 app.listen(PORT, () => {

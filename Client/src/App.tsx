@@ -1,92 +1,27 @@
-import axios from 'axios';
-import React, { useEffect } from 'react';
-import './App.css';
-import { DiffCamEngine } from './diff-cam-engine';
-import dynabyteLogo from './dynabyte_white.png';
-import { ICapturePayload, IDiffCamEngine } from './models/diffCamEngine.models';
-import Logo from './shared/Logo';
-import Title from './shared/Title';
+import React from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import Home from './Home';
+import Analyze from './register/Analyze';
+import Positioning from './register/PositionInformation';
+import RegisterForm from './register/RegisterForm';
 
-interface IResult {
-  isKnownFace?: boolean;
-  isFace?: boolean;
-  isConfident?: boolean;
-  name?: string;
-  personId?: string;
-}
-
-export const App = () => {
-  const [hasMotion, setHasMotion] = React.useState<boolean>(false);
-  const [result, setResult] = React.useState<IResult>({});
-
-  useEffect(() => {
-    const diffCamEngine: IDiffCamEngine = DiffCamEngine();
-
-    const initSuccess: () => void = () => {
-      diffCamEngine.start();
-    };
-
-    const initError: (error: any) => void = (error: any) => {
-      console.log(error);
-    };
-
-    const capture: (payload: ICapturePayload) => void = (
-      payload: ICapturePayload
-    ) => {
-      setHasMotion(payload.hasMotion);
-
-      if (payload.hasMotion) {
-        axios
-          .post(
-            'http://localhost:8000/predict',
-            { image: payload.getURL() },
-            {
-              headers: { 'Content-Type': 'application/json' },
-            }
-          )
-          .then(({ data }) => setResult(data));
-      }
-    };
-
-    diffCamEngine.init({
-      initSuccessCallback: initSuccess,
-      initErrorCallback: initError,
-      captureCallback: capture,
-      captureIntervalTime: 2000,
-    });
-
-    return () => diffCamEngine.stop();
-  }, []);
-
-  const { isKnownFace, isFace, name } = result;
-
-  return (
-    <div className='wrapper'>
-      {isKnownFace && (
-        <Title hasMotion={hasMotion}>{`Välkommen ${name} till`}</Title>
-      )}
-      {/* {!isKnownFace && isFace && <RegisterForm />} */}
-      <Logo
-        src={dynabyteLogo}
-        alt='logo'
-        width='200'
-        height='80'
-        hasMotion={hasMotion}
-      />
-      <footer>
-        <span>
-          Photo by{' '}
-          <a href='https://unsplash.com/@freetousesoundscom?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText'>
-            Free To Use Sounds
-          </a>{' '}
-          on{' '}
-          <a href='https://unsplash.com/s/photos/grass?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText'>
-            Unsplash
-          </a>
-        </span>
-      </footer>
-    </div>
-  );
-};
+const App = () => (
+  <Router>
+    <Switch>
+      <Route path='/' exact>
+        <Home />
+      </Route>
+      <Route path='/register' exact>
+        <RegisterForm />
+      </Route>
+      <Route path='/positioning' exact>
+        <Positioning />
+      </Route>
+      <Route path='/analys' exact>
+        <Analyze />
+      </Route>
+    </Switch>
+  </Router>
+);
 
 export default App;
