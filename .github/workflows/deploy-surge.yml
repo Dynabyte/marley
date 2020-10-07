@@ -1,0 +1,31 @@
+name: Deploy react app to Surge
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Client
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: 12
+
+      - name: Build React App
+        run: |
+          npm install # Install Dependencies
+          npm run build
+
+      - name: Install Surge
+        run: npm install -g surge
+
+      - name: Deploy to Surge
+        run:  surge ./build marley-poc.surge.sh/ --token ${{secrets.SURGE_TOKEN}}
