@@ -8,8 +8,10 @@ app.use(cors());
 
 app.use(express.static(path.join(__dirname, 'build')));
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: '100mb' }));
+app.use(
+  express.urlencoded({ limit: '100mb', extended: true, parameterLimit: 50000 })
+);
 
 const PORT = process.env.PORT || 8000;
 
@@ -32,15 +34,13 @@ app.post('/predict', (req: Request, res: Response) => {
 
   return res.send({
     name: persons[random].name,
-    isKnownFace: Math.random() >= 0.9,
-    isFace: Math.random() >= 0.1,
+    isKnownFace: false, //Math.random() >= 0.9,
+    isFace: true, //Math.random() >= 0.1,
   });
 });
 
 app.post('/register', (req: Request, res: Response) => {
   console.log(req.body);
-  const body: string[] = req.body;
-  //const base64String: string = body.split('base64,')[1];
 
   return res.sendStatus(200);
 });

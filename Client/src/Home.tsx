@@ -73,7 +73,7 @@ export const Home = () => {
       )}
       {!isKnownFace && isFace && (
         <>
-          <Title hasMotion={hasMotion}>{`Välkommen`}</Title>
+          <h1>{`Välkommen`}</h1>
           <div>Vi känner inte igen dig sen tidigare. </div>
           <p>Vill du registrera dig?</p>
           <button onClick={handleClick}>JA</button>

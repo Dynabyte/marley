@@ -1,5 +1,4 @@
-import axios from 'axios';
-import React, { createRef, RefObject, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -13,14 +12,13 @@ const Container = styled.div`
 
 const Analyze = () => {
   const history = useHistory();
-  const name = history.location.state;
 
   const [isDone, setIsDone] = useState(false);
 
-  const videoRef = createRef() as RefObject<any>;
-  const canvas = document.createElement('canvas') as HTMLCanvasElement;
-
   useEffect(() => {
+    const canvas = document.createElement('canvas') as HTMLCanvasElement;
+    const video = document.createElement('video') as HTMLVideoElement;
+    const name = history.location.state;
     if (navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices
         .getUserMedia({
@@ -31,44 +29,38 @@ const Analyze = () => {
           },
         })
         .then((stream) => {
-          videoRef.current.srcObject = stream;
+          video.srcObject = stream;
+          video.play();
 
-          const ctx = canvas.getContext('2d');
           let imageArray = [];
 
-          let numberOfCalls = 0;
-          const interval = setInterval(() => {
-            canvas.width = 720;
-            canvas.height = 560;
-            ctx.drawImage(videoRef.current, 0, 0, 720, 560);
-            // Add to array
-            const dataURL = canvas.toDataURL();
-            imageArray.push(dataURL);
-            //setImageArray((imageArray) => [...imageArray, dataURL]);
-            if (++numberOfCalls === 3) {
-              clearInterval(interval);
-              axios
-                .post(
-                  'http://localhost:8000/register',
-                  { name, images: imageArray },
-                  {
-                    headers: { 'Content-Type': 'application/json' },
-                  }
-                )
-                .then((res) =>
-                  res.status === 200 ? setIsDone(true) : setIsDone(false)
-                );
-            }
-          }, 100);
+          const ctx = canvas.getContext('2d');
+          for (let i = 0; i < 3; i++) {
+            setTimeout(() => {
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              const dataURL = canvas.toDataURL();
+              console.log('dataURL: ', dataURL);
+              imageArray.push(dataURL);
+            }, 100);
+          }
+          // axios
+          //   .post(
+          //     'http://localhost:8000/register',
+          //     { name, images: imageArray },
+          //     {
+          //       headers: { 'Content-Type': 'application/json' },
+          //     }
+          //   )
+          //   .then((res) => setIsDone(true));
         });
+      return () => clearTimeout();
     }
-  }, [canvas, videoRef, name]);
+  }, [history]);
 
   return (
-    <Container>
-      {isDone ? <h1>Klart!</h1> : <h1>Analyserar....</h1>}
-      <video autoPlay ref={videoRef} style={{ display: 'none' }}></video>
-    </Container>
+    <Container>{isDone ? <h1>Klart!</h1> : <h1>Analyserar....</h1>}</Container>
   );
 };
 
