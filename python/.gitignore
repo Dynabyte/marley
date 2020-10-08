@@ -42,4 +42,5 @@ pydevd*.log
 nodeLanguageServer/**
 nodeLanguageServer.*/**
 test_images
-_*.txt
+#Environment variables are stored in a file .env with no title
+.env
