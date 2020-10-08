@@ -10,6 +10,9 @@ from bson.objectid import ObjectId
 import json
 import time as tm
 import threading
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 app = fl.Flask(__name__)
 api = Api(
@@ -20,7 +23,13 @@ api = Api(
 lock = threading.Lock()
 faces_collection = []
 mongo_client = pymongo \
-    .MongoClient("mongodb+srv://marley-db-user:DUElFH0k35peHesM@marleycluster.42wu5.mongodb.net/marley?retryWrites=true&w=majority")
+    .MongoClient(os.getenv('MONGO_CLIENT'))
+database_name = os.getenv('DB_NAME')
+collection_name = os.getenv('COLLECTION_NAME')
+
+print(mongo_client\
+            [database_name]\
+                [collection_name])
 
 face_comparison = namedtuple(
     "face_comparison",
@@ -201,9 +210,9 @@ def db_get_faces():
 
 
 def faces_db():
-    return mongo_client \
-        .marley \
-        .faces
+    return mongo_client\
+            [database_name]\
+                [collection_name]
 
 
 def time(func):
