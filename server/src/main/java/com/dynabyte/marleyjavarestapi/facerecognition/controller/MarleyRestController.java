@@ -88,9 +88,7 @@ public class MarleyRestController {
         Validation.validateRegistrationRequest(registrationRequest);
         LOGGER.info("Registration request validated");
 
-        //TODO verify that everything works
         registerPersonWithMultipleImages(registrationRequest);
-        //TODO Log report of how many images succeeded
 
         LOGGER.info("Registration request successful");
         return HttpStatus.OK;
