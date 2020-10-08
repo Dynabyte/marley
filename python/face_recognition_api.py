@@ -110,9 +110,13 @@ def predict_face(image_base64):
     if encoding_input is None:
         return {"isFace": False, "faceId": None}
 
+    faces = time(db_get_faces)
+    if not faces:
+        return {"isFace": False, "faceId": None}
+
     face_id = predict(
         encoding_input,
-        time(db_get_faces))
+        faces)
 
     if face_id is None:
         return {"isFace": True, "faceId": None}
@@ -134,8 +138,6 @@ def predict(encoding, faces):
 
 
 def closest(comparisons):
-    if not comparisons:
-        return face_comparison(None, 1)
     return min(
         comparisons,
         key=lambda comparison: comparison.euclidean_distance_mean)
@@ -159,16 +161,13 @@ def face_encode(image):
 
 def compare(encoding, faces):
     with lock:
-        face_comparisons = []
         for face in faces:
-            face_comparisons.append(
-                face_comparison(
-                    face_id=face["_id"],
-                    euclidean_distance_mean=np.mean(
-                        face_recognition.face_distance(
-                            np.array(face["encodings"]),
-                            encoding))))
-        return face_comparisons
+            yield face_comparison(
+                face_id=face["_id"],
+                euclidean_distance_mean=np.mean(
+                    face_recognition.face_distance(
+                        np.array(face["encodings"]),
+                        encoding)))
 
 
 def db_create_face(encoding):
