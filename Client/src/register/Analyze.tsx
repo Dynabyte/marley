@@ -16,9 +16,9 @@ const Analyze = () => {
   const [isDone, setIsDone] = useState(false);
 
   useEffect(() => {
-    const canvas = document.createElement('canvas') as HTMLCanvasElement;
-    const video = document.createElement('video') as HTMLVideoElement;
     const name = history.location.state;
+    const canvas = document.createElement('canvas');
+    let myStream: MediaStream;
     if (navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices
         .getUserMedia({
@@ -28,23 +28,40 @@ const Analyze = () => {
             height: { ideal: 560 },
           },
         })
-        .then((stream) => {
-          video.srcObject = stream;
-          video.play();
-
+        .then((stream: MediaStream) => {
+          myStream = stream;
           let imageArray = [];
+          setInterval(() => {
+            const imageCapture = new ImageCapture(myStream.getVideoTracks()[0]);
+            if (
+              imageCapture.track.readyState === 'live' &&
+              imageCapture.track.enabled &&
+              !imageCapture.track.muted
+            ) {
+              imageCapture.grabFrame().then((imageBitmap) => {
+                canvas.getContext('2d').drawImage(imageBitmap, 0, 0);
+                const dataURL = canvas.toDataURL();
+                imageArray.push(dataURL);
+                console.log(dataURL);
+              });
+            } else {
+              myStream.getTracks().forEach(function (t) {
+                t.stop();
+              });
+              navigator.mediaDevices
+                .getUserMedia({
+                  video: {
+                    width: { ideal: 1920 },
+                    height: { ideal: 1024 },
+                  },
+                })
+                .then(function (stream) {
+                  myStream = stream;
+                  console.log('new stream created');
+                });
+            }
+          }, 2000);
 
-          const ctx = canvas.getContext('2d');
-          for (let i = 0; i < 3; i++) {
-            setTimeout(() => {
-              canvas.width = video.videoWidth;
-              canvas.height = video.videoHeight;
-              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-              const dataURL = canvas.toDataURL();
-              console.log('dataURL: ', dataURL);
-              imageArray.push(dataURL);
-            }, 100);
-          }
           // axios
           //   .post(
           //     'http://localhost:8000/register',
@@ -55,7 +72,7 @@ const Analyze = () => {
           //   )
           //   .then((res) => setIsDone(true));
         });
-      return () => clearTimeout();
+      return () => clearInterval();
     }
   }, [history]);
 
