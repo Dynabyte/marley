@@ -112,7 +112,7 @@ def predict_face(image_base64):
 
     faces = time(db_get_faces)
     if not faces:
-        return {"isFace": False, "faceId": None}
+        return {"isFace": True, "faceId": None}
 
     face_id = predict(
         encoding_input,
@@ -202,7 +202,7 @@ def db_get_faces():
 
 def faces_db():
     return mongo_client \
-        .marley \
+        .marley_daniel \
         .faces
 
 
