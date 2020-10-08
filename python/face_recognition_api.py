@@ -110,9 +110,13 @@ def predict_face(image_base64):
     if encoding_input is None:
         return {"isFace": False, "faceId": None}
 
+    faces = time(db_get_faces)
+    if not faces:
+        return {"isFace": True, "faceId": None}
+
     face_id = predict(
         encoding_input,
-        time(db_get_faces))
+        faces)
 
     if face_id is None:
         return {"isFace": True, "faceId": None}
