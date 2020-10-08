@@ -42,4 +42,4 @@ pydevd*.log
 nodeLanguageServer/**
 nodeLanguageServer.*/**
 test_images
-_*.txt
+*.env
