@@ -24,12 +24,7 @@ lock = threading.Lock()
 faces_collection = []
 mongo_client = pymongo \
     .MongoClient(os.getenv('MONGO_CLIENT'))
-database_name = os.getenv('DB_NAME')
-collection_name = os.getenv('COLLECTION_NAME')
-
-print(mongo_client\
-            [database_name]\
-                [collection_name])
+database_name = os.getenv('MONGO_DB_NAME')
 
 face_comparison = namedtuple(
     "face_comparison",
@@ -211,8 +206,8 @@ def db_get_faces():
 
 def faces_db():
     return mongo_client\
-            [database_name]\
-                [collection_name]
+           [database_name]\
+           .faces
 
 
 def time(func):
