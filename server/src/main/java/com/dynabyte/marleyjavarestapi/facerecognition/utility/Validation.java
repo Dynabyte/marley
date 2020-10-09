@@ -2,7 +2,6 @@ package com.dynabyte.marleyjavarestapi.facerecognition.utility;
 
 import com.dynabyte.marleyjavarestapi.facerecognition.exception.ImageEncodingException;
 import com.dynabyte.marleyjavarestapi.facerecognition.exception.InvalidArgumentException;
-import com.dynabyte.marleyjavarestapi.facerecognition.exception.MissingArgumentException;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.request.ImageRequest;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.request.RegistrationRequest;
 import org.slf4j.Logger;
@@ -27,6 +26,7 @@ public class Validation {
      */
     public static void validateImageRequest(ImageRequest imageRequest){
         LOGGER.info("Validating image request");
+        validateImageNotNull(imageRequest.getImage());
         imageRequest.setImage(validateImageAndRemoveDescriptorTag(imageRequest.getImage()));
         LOGGER.info("Image request validated");
     }
@@ -39,7 +39,7 @@ public class Validation {
         LOGGER.info("Validating registration request");
 
         validateName(registrationRequest.getName());
-        validateImagesNotNull(registrationRequest.getImages());
+        validateImagesNotNullOrEmpty(registrationRequest.getImages());
 
         List<String> validatedBase64Images = validateImagesAndRemoveDescriptorTags(registrationRequest.getImages());
         registrationRequest.setImages(validatedBase64Images);
@@ -69,7 +69,7 @@ public class Validation {
         if(name == null){
             String warningMessage = "name cannot be null!";
             LOGGER.warn(warningMessage);
-            throw new MissingArgumentException(warningMessage);
+            throw new InvalidArgumentException(warningMessage);
         }
         if(name.length() < 1 || name.length() > 50){
             String warningMessage = "name must be between 1 and 50 characters!";
@@ -83,14 +83,14 @@ public class Validation {
      * Validates that a list of strings is not null
      * @param images The list of strings to be validated
      */
-    private static void validateImagesNotNull(List<String> images) {
-        LOGGER.info("Validating images not null");
+    private static void validateImagesNotNullOrEmpty(List<String> images) {
+        LOGGER.info("Validating images not null or empty");
         if(images == null || images.isEmpty()){
-            String warningMessage = "images missing! Must be included in base64format";
+            String warningMessage = "images array missing or empty! Must be included in base64format";
             LOGGER.warn(warningMessage);
-            throw new MissingArgumentException(warningMessage);
+            throw new InvalidArgumentException(warningMessage);
         }
-        LOGGER.info("Images validated as not null");
+        LOGGER.info("Images validated as not null or empty");
     }
 
 
