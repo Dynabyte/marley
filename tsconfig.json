@@ -14,5 +14,5 @@
     "resolveJsonModule": true
   },
   "exclude": ["node_modules", "build"],
-  "include": ["Client", "Server"]
+  "include": ["client", "mockServer"]
 }

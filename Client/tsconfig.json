@@ -6,6 +6,6 @@
     "lib": ["dom", "dom.iterable", "esnext"]
   },
   "extends": "../tsconfig.json",
-  "exclude": ["../../Server", "node_modules"],
+  "exclude": ["../mockServer", "node_modules"],
   "include": ["."]
 }

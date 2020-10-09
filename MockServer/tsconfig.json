@@ -4,6 +4,6 @@
     "target": "ES5"
   },
   "extends": "../tsconfig.json",
-  "exclude": ["../Client"],
+  "exclude": ["../client"],
   "include": ["."]
 }
