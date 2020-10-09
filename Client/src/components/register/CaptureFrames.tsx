@@ -1,7 +1,7 @@
+import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import axios from 'axios'
 
 const Container = styled.div`
   display: flex;
@@ -11,7 +11,7 @@ const Container = styled.div`
   align-items: center;
 `;
 
-const Analyze = () => {
+const CaptureFrames = () => {
   const history = useHistory();
 
   const [isDone, setIsDone] = useState(false);
@@ -41,32 +41,12 @@ const Analyze = () => {
             ) {
               imageCapture.grabFrame().then((imageBitmap) => {
                 imageBitmaps.push(imageBitmap);
-                console.log("captured frame");
                 if (imageBitmaps.length === 60) {
                   console.log('Uploading images');
                   clearInterval(interval);
-
-                  //Upload images
-                  let images = [];
-                  imageBitmaps.forEach(img => {
-                    canvas
-                      .getContext('2d')
-                      .drawImage(img, 0, 0);
-                    const dataURL = canvas.toDataURL();
-                    images.push(dataURL);
-                  });
-                  axios
-                    .post(
-                      'http://localhost:8000/register',
-                      { name, images },
-                      {
-                        headers: { 'Content-Type': 'application/json' },
-                      }
-                    )
-                    .then((res) => {
-                      setIsDone(true);
-                      console.log('Uploaded images');
-                    });
+                  const base64images = getDataURL(imageBitmaps);
+                  uploadImages(base64images);
+                
                 }
               });
             } else {
@@ -86,9 +66,40 @@ const Analyze = () => {
                   console.log('new stream created');
                 });
             }
-          }, 34);//take 30 frames per second
-        });
+          }, 34); //take 30 frames per second
+
+          const getDataURL = (imageBitmaps: ImageBitmap[]) => {
+            let base64images = [];
+            imageBitmaps.forEach(img => {
+              canvas
+                .getContext('2d')
+                .drawImage(img, 0, 0);
+              const dataURL = canvas.toDataURL();
+              base64images.push(dataURL);
+            });
+            return base64images;
+
+          }
+
+      const uploadImages = (images: string[]) => {
+          axios
+            .post(
+              'http://localhost:8000/register',
+              { name, images },
+              {
+                headers: { 'Content-Type': 'application/json' },
+              }
+            )
+            .then((res) => {
+              setIsDone(true);
+              console.log('Uploaded images');
+            }).catch(error => console.error(error));
+      }
+      
+    });
+
       return () => clearInterval();
+
     }
   }, [history]);
 
@@ -97,4 +108,4 @@ const Analyze = () => {
   );
 };
 
-export default Analyze;
+export default CaptureFrames;

@@ -1,9 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Home from './Home';
-import Analyze from './register/Analyze';
-import Positioning from './register/PositionInformation';
-import RegisterForm from './register/RegisterForm';
+import Analyze from './components/register/CaptureFrames';
+import Positioning from './components/register/PositionInformation';
+import RegisterForm from './components/register/RegistrationForm';
 
 const App = () => (
   <Router>
@@ -11,13 +11,13 @@ const App = () => (
       <Route path='/' exact>
         <Home />
       </Route>
-      <Route path='/register' exact>
+      <Route path='/registration' exact>
         <RegisterForm />
       </Route>
       <Route path='/positioning' exact>
         <Positioning />
       </Route>
-      <Route path='/analys' exact>
+      <Route path='/capture-frames' exact>
         <Analyze />
       </Route>
     </Switch>

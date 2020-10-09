@@ -22,7 +22,7 @@ const Positioning = () => {
         <li>Placera dig mitt framför skärmen.</li>
       </ul>
       <button
-        onClick={() => history.push({ pathname: '/analys', state: name })}
+        onClick={() => history.push({ pathname: '/capture-frames', state: name })}
       >
         REDO
       </button>

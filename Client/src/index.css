@@ -1,5 +1,5 @@
 :root {
-  --image-url: url('stockholm.jpg');
+  --image-url: url('./static/images/stockholm.jpg');
 }
 
 html,

@@ -14,7 +14,7 @@ const Input = styled.input`
   margin-bottom: 1rem;
 `;
 
-const RegisterForm = () => {
+const RegistrationForm = () => {
   const [value, setValue] = useState('');
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
@@ -47,4 +47,4 @@ const RegisterForm = () => {
   );
 };
 
-export default RegisterForm;
+export default RegistrationForm;

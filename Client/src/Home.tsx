@@ -1,12 +1,12 @@
 import axios from 'axios';
-import React, { useCallback, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useEffect } from 'react';
 import './App.css';
+import FaceRegistrationText from './components/FaceRegistrationText';
 import { DiffCamEngine } from './diff-cam-engine';
-import dynabyteLogo from './dynabyte_white.png';
 import { ICapturePayload, IDiffCamEngine } from './models/diffCamEngine.models';
 import Logo from './shared/Logo';
 import Title from './shared/Title';
+import dynabyteLogo from './static/images/dynabyte_white.png';
 
 interface IResult {
   isKnownFace?: boolean;
@@ -19,7 +19,7 @@ interface IResult {
 export const Home = () => {
   const [hasMotion, setHasMotion] = React.useState<boolean>(false);
   const [result, setResult] = React.useState<IResult>({});
-  const history = useHistory();
+  const [isLoading, setIsLoading ] = React.useState<boolean>(true);
 
   useEffect(() => {
     const diffCamEngine: IDiffCamEngine = DiffCamEngine();
@@ -46,7 +46,9 @@ export const Home = () => {
               headers: { 'Content-Type': 'application/json' },
             }
           )
-          .then(({ data }) => setResult(data));
+          .then(({ data }) => {
+            setIsLoading(false);
+            setResult(data)});
       }
     };
 
@@ -60,11 +62,22 @@ export const Home = () => {
     return () => diffCamEngine.stop();
   }, [result]);
 
-  const handleClick = useCallback(() => {
-    history.push('/register');
-  }, [history]);
+  
 
   const { isKnownFace, isFace, name } = result;
+
+  if(isLoading) {
+    return (
+      <div className='wrapper'>
+      <Logo
+      src={dynabyteLogo}
+      alt='logo'
+      width='200'
+      height='80'
+    />
+    </div>
+    );
+  }
 
   return (
     <div className='wrapper'>
@@ -73,19 +86,9 @@ export const Home = () => {
       )}
       {!isKnownFace && isFace && (
         <>
-          <h1>{`Välkommen`}</h1>
-          <div>Vi känner inte igen dig sen tidigare. </div>
-          <p>Vill du registrera dig?</p>
-          <button onClick={handleClick}>JA</button>
-        </>
-      )}
-      <Logo
-        src={dynabyteLogo}
-        alt='logo'
-        width='200'
-        height='80'
-        hasMotion={hasMotion}
-      />
+       <FaceRegistrationText />
+       </>
+      )}      
       <footer>
         <span>
           Photo by{' '}

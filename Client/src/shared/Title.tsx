@@ -1,6 +1,8 @@
 import React from 'react';
 import styled, { css, keyframes } from 'styled-components';
 import '../App.css';
+import dynabyteLogo from '../static/images/dynabyte_white.png';
+import Logo from './Logo';
 
 const slideIn = keyframes`
   0% {
@@ -25,6 +27,7 @@ interface ITitle {
 
 export const Title: React.FC<ITitle> = ({ hasMotion, children }) => {
   return (
+    <>
     <StyledTitle
       hasMotion={hasMotion}
       style={{
@@ -34,12 +37,20 @@ export const Title: React.FC<ITitle> = ({ hasMotion, children }) => {
         fontSize: '4rem',
         color: 'white',
         animation: `2s ease-in-out 0s 1`,
-        order: hasMotion ? 1 : 2,
         opacity: hasMotion ? 1 : 0,
       }}
     >
       {children}
+      
+    
     </StyledTitle>
+    <Logo
+    src={dynabyteLogo}
+    alt='logo'
+    width='200'
+    height='80'
+  />
+  </>
   );
 };
 
