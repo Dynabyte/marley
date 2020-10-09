@@ -113,7 +113,7 @@ public class MarleyRestController {
             try {
                 if(!isRegisteredPersonInDb){
                     verifyImageHasFaceAndPersonIsNotInDbAlready(image);
-                    PythonResponse labelResponse = faceRecognitionService.postLabel(new LabelPutRequest(image));
+                    PythonResponse labelResponse = faceRecognitionService.postLabel(new ImageRequest(image));
                     if (labelResponse.getFaceId() != null){
                         faceId = labelResponse.getFaceId();
                         personService.save(new Person(faceId, registrationRequest.getName()));

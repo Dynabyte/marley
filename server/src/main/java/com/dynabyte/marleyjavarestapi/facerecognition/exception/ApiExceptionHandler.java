@@ -51,14 +51,6 @@ public class ApiExceptionHandler {
         return getErrorResponse(e, httpStatus, "Error in FaceRecognition API");
     }
 
-    //TODO remove or keep? Exceptions from javax.validation
-    @ExceptionHandler(value = {MethodArgumentNotValidException.class})
-    public ResponseEntity<ApiExceptionReport> handleValidationException(Exception e){
-        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-        return getErrorResponse(e, httpStatus, e.getMessage());
-    }
-
-
     /**
      * Generates a ResponseEntity with a build in ApiExceptionReport.
      * @param e The exception thrown

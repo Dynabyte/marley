@@ -3,8 +3,6 @@ package com.dynabyte.marleyjavarestapi.facerecognition.to.request;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
-
 /**
  * Superclass for requests from frontend involving an image in base64 format
  */
