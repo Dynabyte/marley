@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import axios from 'axios'
 
 const Container = styled.div`
   display: flex;
@@ -30,8 +31,8 @@ const Analyze = () => {
         })
         .then((stream: MediaStream) => {
           myStream = stream;
-          let imageArray = [];
-          setInterval(() => {
+          let imageBitmaps = [];
+          const interval = setInterval(() => {
             const imageCapture = new ImageCapture(myStream.getVideoTracks()[0]);
             if (
               imageCapture.track.readyState === 'live' &&
@@ -39,16 +40,41 @@ const Analyze = () => {
               !imageCapture.track.muted
             ) {
               imageCapture.grabFrame().then((imageBitmap) => {
-                canvas.getContext('2d').drawImage(imageBitmap, 0, 0);
-                const dataURL = canvas.toDataURL();
-                imageArray.push(dataURL);
-                console.log(dataURL);
+                imageBitmaps.push(imageBitmap);
+                console.log("captured frame");
+                if (imageBitmaps.length === 60) {
+                  console.log('Uploading images');
+                  clearInterval(interval);
+
+                  //Upload images
+                  let images = [];
+                  imageBitmaps.forEach(img => {
+                    canvas
+                      .getContext('2d')
+                      .drawImage(img, 0, 0);
+                    const dataURL = canvas.toDataURL();
+                    images.push(dataURL);
+                  });
+                  axios
+                    .post(
+                      'http://localhost:8000/register',
+                      { name, images },
+                      {
+                        headers: { 'Content-Type': 'application/json' },
+                      }
+                    )
+                    .then((res) => {
+                      setIsDone(true);
+                      console.log('Uploaded images');
+                    });
+                }
               });
             } else {
               myStream.getTracks().forEach(function (t) {
                 t.stop();
               });
-              navigator.mediaDevices
+              navigator
+                .mediaDevices
                 .getUserMedia({
                   video: {
                     width: { ideal: 1920 },
@@ -60,17 +86,7 @@ const Analyze = () => {
                   console.log('new stream created');
                 });
             }
-          }, 2000);
-
-          // axios
-          //   .post(
-          //     'http://localhost:8000/register',
-          //     { name, images: imageArray },
-          //     {
-          //       headers: { 'Content-Type': 'application/json' },
-          //     }
-          //   )
-          //   .then((res) => setIsDone(true));
+          }, 34);//take 30 frames per second
         });
       return () => clearInterval();
     }
