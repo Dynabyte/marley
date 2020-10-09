@@ -52,6 +52,7 @@ class FaceNotDetectedException(BaseException):
 
 
 @ns.route('/label')
+@ns.response(409, 'Face not detected')
 class CreateLabel(Resource):
     @ns.doc('create_label')
     @ns.expect(image)
