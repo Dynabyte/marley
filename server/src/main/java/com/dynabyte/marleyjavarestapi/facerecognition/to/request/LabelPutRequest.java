@@ -1,19 +1,19 @@
 package com.dynabyte.marleyjavarestapi.facerecognition.to.request;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
+ * Request to python face recognition api
  * Includes an image in base64 format and a faceId to add the encoded image to as a reference
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class LabelPutRequest extends ImageRequest{
+public class LabelPutRequest {
 
+    String image;
     String faceId;
 
     public LabelPutRequest(String image, String faceId) {
-        super(image);
+        this.image = image;
         this.faceId = faceId;
     }
 

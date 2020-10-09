@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Superclass for requests from frontend involving an image in base64 format
+ * Request including an image in base64 format
  */
 @Data
 @NoArgsConstructor
