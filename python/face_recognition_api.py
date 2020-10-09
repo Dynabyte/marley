@@ -66,7 +66,7 @@ class CreateLabel(Resource):
                             lambda: db_create_face(face_encoding),
                             db_create_face.__name__),
                     api.payload['image']),
-                label_face.__name__)
+                label_face.__name__), 201
         except FaceNotDetectedException:
             traceback.print_exc()
             fl.abort(409, 'Face not detected')
@@ -101,15 +101,20 @@ class UpdateLabel(Resource):
 
 
 @ns.route('/predict')
+@ns.response(409, 'Face not detected')
 class Predict(Resource):
     @ns.doc('do_prediction')
     @ns.expect(image)
     @ns.marshal_list_with(face_id)
     def post(self):
-        return time_lambda(
-            lambda: predict_face(
-                api.payload['image']),
-            predict_face.__name__)
+        try:
+            return time_lambda(
+                lambda: predict_face(
+                    api.payload['image']),
+                predict_face.__name__)
+        except FaceNotDetectedException:
+            traceback.print_exc()
+            fl.abort(409, 'Face not detected')
 
 
 def label_face(db_save_face, image_base64):
