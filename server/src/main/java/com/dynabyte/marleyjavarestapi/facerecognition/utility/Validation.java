@@ -1,12 +1,10 @@
 package com.dynabyte.marleyjavarestapi.facerecognition.utility;
 
-import ch.qos.logback.core.joran.action.AppenderRefAction;
 import com.dynabyte.marleyjavarestapi.facerecognition.exception.ImageEncodingException;
+import com.dynabyte.marleyjavarestapi.facerecognition.exception.InvalidArgumentException;
 import com.dynabyte.marleyjavarestapi.facerecognition.exception.MissingArgumentException;
-import com.dynabyte.marleyjavarestapi.facerecognition.exception.RegistrationException;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.request.ImageRequest;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.request.RegistrationRequest;
-import com.dynabyte.marleyjavarestapi.facerecognition.to.request.SingleImageRegistrationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,58 +13,138 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Utility class for validating various data using static void/boolean methods. Includes helper sub methods.
+ * Utility class for validating various requests and other relevant data. Includes submethods for clarity.
+ * Exceptions are thrown if a input is determined to be invalid.
  */
 public class Validation {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Validation.class);
 
+
+    /**
+     * Validates image request used for predicting an image
+     * @param imageRequest Request containing a single base64 image string
+     */
+    public static void validateImageRequest(ImageRequest imageRequest){
+        LOGGER.info("Validating image request");
+        imageRequest.setImage(validateImageAndRemoveDescriptorTag(imageRequest.getImage()));
+        LOGGER.info("Image request validated");
+    }
+
+    /**
+     * Validates a request to register a new person and trims potential descriptor tags in the images list
+     * @param registrationRequest The request to be validated
+     */
     public static void validateRegistrationRequest(RegistrationRequest registrationRequest){
-        //TODO validate name or is that handled with @Size?
         LOGGER.info("Validating registration request");
 
         validateName(registrationRequest.getName());
         validateImagesNotNull(registrationRequest.getImages());
 
-        List<String> validatedBase64Images = registrationRequest.getImages()
-                .stream()
-                .map(Validation::validateImage)
-                .collect(Collectors.toList());
+        List<String> validatedBase64Images = validateImagesAndRemoveDescriptorTags(registrationRequest.getImages());
         registrationRequest.setImages(validatedBase64Images);
 
         LOGGER.info("Registration request validated");
     }
 
-    public static void validateSingleImageRegistrationRequest(SingleImageRegistrationRequest request){
-        validateName(request.getName());
-        validateImageRequest(request);
+    /**
+     * Validates a list of base64 image strings and removes descriptor tag if present. Throws error if not valid
+     * @param images List of base 64 image strings
+     * @return Validated list of base64 image strings after removing descriptor tags
+     */
+    private static List<String> validateImagesAndRemoveDescriptorTags(List<String> images) {
+        return images
+                .stream()
+                .map(Validation::validateImageAndRemoveDescriptorTag)
+                .collect(Collectors.toList());
     }
 
-    public static void validateImageRequest(ImageRequest imageRequest){
-        LOGGER.info("Validating image request");
-        imageRequest.setImage(validateImage(imageRequest.getImage()));
-        LOGGER.info("Image request validated");
+
+    /**
+     * Validates name to not be null and to fit size requirements
+     * @param name String to be validated
+     */
+    private static void validateName(String name) {
+        LOGGER.info("Validating name");
+        if(name == null){
+            String warningMessage = "name cannot be null!";
+            LOGGER.warn(warningMessage);
+            throw new MissingArgumentException(warningMessage);
+        }
+        if(name.length() < 1 || name.length() > 50){
+            String warningMessage = "name must be between 1 and 50 characters!";
+            LOGGER.warn(warningMessage);
+            throw new InvalidArgumentException(warningMessage);
+        }
+        LOGGER.info("Name validated");
     }
 
-    public static String validateImage(String base64Image){
+    /**
+     * Validates that a list of strings is not null
+     * @param images The list of strings to be validated
+     */
+    private static void validateImagesNotNull(List<String> images) {
+        LOGGER.info("Validating images not null");
+        if(images == null || images.isEmpty()){
+            String warningMessage = "images missing! Must be included in base64format";
+            LOGGER.warn(warningMessage);
+            throw new MissingArgumentException(warningMessage);
+        }
+        LOGGER.info("Images validated as not null");
+    }
+
+
+    //TODO split in two methods or keep current method?
+    /**
+     * Validates a single base64 image string and removes descriptor tag if present
+     * @param base64Image Base64 image string to be validated
+     * @return Validated base64 image string without descriptor tag
+     */
+    public static String validateImageAndRemoveDescriptorTag(String base64Image){
         LOGGER.info("Validating image");
         validateImageNotNull(base64Image);
-        base64Image = base64Image.replace("data:image/jpeg;base64,", "");
+        base64Image = removeBase64DescriptorTag(base64Image);
         validateIsBase64(base64Image);
         LOGGER.info("Image validated. Starts with: " + base64Image.substring(0, 25));
         return base64Image;
     }
 
+    /**
+     * Validates that base64 image string is not null
+     * @param base64Image Base64 image string to checked for null
+     */
     private static void validateImageNotNull(String base64Image){
         if(base64Image == null){
-            throw new MissingArgumentException("image cannot be null. Must be an image in base64 format");
+            String warningMessage = "image cannot be null. Must be an image in base64 format";
+            LOGGER.warn(warningMessage);
+            throw new InvalidArgumentException(warningMessage);
         }
     }
 
+    /**
+     * Removes descriptor tag for png or jpeg if present
+     * @param base64Image Base64 image string to remove descriptor tag from
+     * @return Base64 image string without descriptor tag
+     */
+    private static String removeBase64DescriptorTag(String base64Image) {
+        LOGGER.info("Removing image descriptor tag if present");
+        base64Image = base64Image.replace("data:image/jpeg;base64,", "");
+        base64Image = base64Image.replace("data:image/png;base64,", "");
+        return base64Image;
+    }
+
+    /**
+     * Validates whether a string can be decoded from base64
+     * @param base64Image Base64 image string to be validated
+     */
     private static void validateIsBase64(String base64Image){
+        LOGGER.info("Checking if image is base64 encoded");
         if (!isBase64Encoded(base64Image)){
-            throw new ImageEncodingException("Image is not in base64 format!");
+            String warningMessage = "Image is not in base64 format!";
+            LOGGER.warn(warningMessage);
+            throw new ImageEncodingException(warningMessage);
         }
+        LOGGER.info("Image is in base64 format");
     }
 
     /**
@@ -77,7 +155,6 @@ public class Validation {
      * @return true if base64 encoded string, false otherwise
      */
     private static boolean isBase64Encoded(String input) {
-        LOGGER.info("Checking if image is base64 encoded");
 
         /*  Since the decoder test can sometimes return true even for regular strings, short strings are dismissed and
             encoded string length will always be divisible by 4, which further improves accuracy a bit
@@ -90,37 +167,9 @@ public class Validation {
 
         try {
             decoder.decode(input);
-            LOGGER.info("Image is in base64 format");
             return true;
         } catch (IllegalArgumentException e) {
-            LOGGER.warn("Image is not in base64 format");
             return false;
         }
-    }
-
-    //TODO switch to javax.validation instead?
-    private static void validateName(String name) {
-        LOGGER.info("Validating name");
-        if(name == null){
-            String warningMessage = "name cannot be null!";
-            LOGGER.warn(warningMessage);
-            throw new MissingArgumentException(warningMessage);
-        }
-        if(name.length() < 1 || name.length() > 50){
-            String warningMessage = "name must be between 1 and 50 characters!";
-            LOGGER.warn(warningMessage);
-            throw new RegistrationException(warningMessage);
-        }
-        LOGGER.info("Name validated");
-    }
-
-    private static void validateImagesNotNull(List<String> images) {
-        LOGGER.info("Validating images not null");
-        if(images == null || images.isEmpty()){
-            String warningMessage = "images missing! Must be included in base64format";
-            LOGGER.warn(warningMessage);
-            throw new MissingArgumentException(warningMessage);
-        }
-        LOGGER.info("Images validated as not null");
     }
 }

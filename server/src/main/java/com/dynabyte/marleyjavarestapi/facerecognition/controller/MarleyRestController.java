@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +24,7 @@ import org.springframework.web.client.HttpServerErrorException;
 /**
  * Controller for the Marley rest api that is the communication hub for all requests.
  */
+@CrossOrigin(origins = {"http://localhost:3000"})
 @RestController
 public class MarleyRestController {
 
@@ -95,25 +97,6 @@ public class MarleyRestController {
     }
 
     /**
-     * Registers a person in the SQL database and requests face recognition service to store the face encoding from a
-     * single image in the request. A person will only be registered if that person is not already registered and the
-     * image must include a face
-     *
-     * @param singleImageRegistrationRequest Request with name and a single image as a base64 string
-     * @return HttpStatus.OK
-     */
-    @PostMapping("/label")
-    public HttpStatus registerWithSingleImage(@RequestBody SingleImageRegistrationRequest singleImageRegistrationRequest){
-        LOGGER.info("Registration request for single image initiated");
-        Validation.validateSingleImageRegistrationRequest(singleImageRegistrationRequest);
-        verifyImageHasFaceAndPersonIsNotInDbAlready(singleImageRegistrationRequest.getImage());
-        PythonResponse pythonResponse = faceRecognitionService.postLabel(singleImageRegistrationRequest);
-        personService.save(new Person(pythonResponse.getFaceId(), singleImageRegistrationRequest.getName()));
-        LOGGER.info("Registration complete. Person saved to database");
-        return HttpStatus.OK;
-    }
-
-    /**
      * Loops through the images in the request until a face is found and a person can be added to the database. After
      * that the loop continues and more image encodings are added to the same faceId.
      *
@@ -153,7 +136,9 @@ public class MarleyRestController {
             }
         }
         if(!isRegisteredPersonInDb){
-            throw new RegistrationException("Could not register any images or save person to Db");
+            String warningMessage = "Could not register any images or save person to Db";
+            LOGGER.warn(warningMessage);
+            throw new RegistrationException(warningMessage);
         }
         LOGGER.info("Registration Complete. Total registered images: " + registeredImagesCount);
     }
@@ -163,13 +148,15 @@ public class MarleyRestController {
      *
      * @param image An image in base64 format
      */
-    private void verifyImageHasFaceAndPersonIsNotInDbAlready(String image) {
+    private void verifyImageHasFaceAndPersonIsNotInDbAlready(String image) { //TODO split into two methods?
         LOGGER.info("Verifying that person is not already in database");
 
         PythonResponse predictResponse = faceRecognitionService.predict(new ImageRequest(image));
         final String faceId = predictResponse.getFaceId();
         if(!predictResponse.isFace()){
-            throw new RegistrationException("No face found, cannot get face encoding from image");
+            String warningMessage = "No face found, cannot get face encoding from image";
+            LOGGER.warn(warningMessage);
+            throw new RegistrationException(warningMessage);
         }
         if(faceId != null){
             LOGGER.info("Found face in face recognition database: " + faceId);
