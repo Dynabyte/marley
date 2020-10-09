@@ -36,12 +36,10 @@ public class MarleyRestController {
         this.personService = personService;
     }
 
-    //TODO integrate into official marley project on github
-
     /**
      * Handles image prediction requests where the user can send an image and the python system will predict whether that
      * image contains a face of any known person and if it contains a face at all. If the person is known then the response
-     * will also include that persons UUID and other information stored in a database.
+     * will also include information about that person stored in a SQL database.
      *
      * @param imageRequest A request object that must contain an image in base64 format
      * @return ResponseEntity object with the results of the image prediction
@@ -76,31 +74,51 @@ public class MarleyRestController {
         return ResponseEntity.ok(clientPredictionResponse);
     }
 
+    /**
+     * Registers a person in the SQL database and requests face recognition service to store face encodings from the
+     * images in the request. A person will only be registered if that person is not already registered and has at least
+     * one image including a face
+     *
+     * @param registrationRequest Request including name and a list of base64 image strings
+     * @return HttpStatus.OK
+     */
     @PostMapping("/register")
     public HttpStatus register(@RequestBody RegistrationRequest registrationRequest){
         LOGGER.info("Registration request initiated");
         Validation.validateRegistrationRequest(registrationRequest);
         LOGGER.info("Registration request validated");
 
-        //TODO verify that everything works
         registerPersonWithMultipleImages(registrationRequest);
-        //TODO Log report of how many images succeeded
 
         LOGGER.info("Registration request successful");
         return HttpStatus.OK;
     }
 
+    /**
+     * Registers a person in the SQL database and requests face recognition service to store the face encoding from a
+     * single image in the request. A person will only be registered if that person is not already registered and the
+     * image must include a face
+     *
+     * @param singleImageRegistrationRequest Request with name and a single image as a base64 string
+     * @return HttpStatus.OK
+     */
     @PostMapping("/label")
     public HttpStatus registerWithSingleImage(@RequestBody SingleImageRegistrationRequest singleImageRegistrationRequest){
         LOGGER.info("Registration request for single image initiated");
         Validation.validateSingleImageRegistrationRequest(singleImageRegistrationRequest);
-        verifyThatPersonIsNotInDbAlready(singleImageRegistrationRequest.getImage());
+        verifyImageHasFaceAndPersonIsNotInDbAlready(singleImageRegistrationRequest.getImage());
         PythonResponse pythonResponse = faceRecognitionService.postLabel(singleImageRegistrationRequest);
         personService.save(new Person(pythonResponse.getFaceId(), singleImageRegistrationRequest.getName()));
         LOGGER.info("Registration complete. Person saved to database");
         return HttpStatus.OK;
     }
 
+    /**
+     * Loops through the images in the request until a face is found and a person can be added to the database. After
+     * that the loop continues and more image encodings are added to the same faceId.
+     *
+     * @param registrationRequest The request object accepted in the register endpoint
+     */
     private void registerPersonWithMultipleImages(RegistrationRequest registrationRequest) {
         LOGGER.info("Registering images...");
         String faceId = null;
@@ -111,7 +129,7 @@ public class MarleyRestController {
         for (String image : registrationRequest.getImages()){
             try {
                 if(!isRegisteredPersonInDb){
-                    verifyThatPersonIsNotInDbAlready(image);
+                    verifyImageHasFaceAndPersonIsNotInDbAlready(image);
                     PythonResponse labelResponse = faceRecognitionService.postLabel(new LabelPutRequest(image));
                     if (labelResponse.getFaceId() != null){
                         faceId = labelResponse.getFaceId();
@@ -122,14 +140,16 @@ public class MarleyRestController {
                     }
                 }
                 else {
-                    //TODO exception handling or check return value faceId != null somehow
+                    //TODO check return value faceId != null somehow? Could verify face and not in db depending on performance
                     faceRecognitionService.putLabel(new LabelPutRequest(image, faceId));
                     registeredImagesCount++;
                     LOGGER.info("Added Image. Registered images: " + registeredImagesCount);
                 }
             } catch (HttpServerErrorException e){
-                LOGGER.warn("Something went wrong in Face Recognition API");
+                LOGGER.warn("Image not registered. Something went wrong in Face Recognition API");
                 e.printStackTrace();
+            } catch (RegistrationException e){
+                LOGGER.warn("Image not registered. No face found in image");
             }
         }
         if(!isRegisteredPersonInDb){
@@ -138,11 +158,19 @@ public class MarleyRestController {
         LOGGER.info("Registration Complete. Total registered images: " + registeredImagesCount);
     }
 
-    private void verifyThatPersonIsNotInDbAlready(String image) {
+    /**
+     * Verifies that the image has a face and that the faceId is not already present in the SQL database
+     *
+     * @param image An image in base64 format
+     */
+    private void verifyImageHasFaceAndPersonIsNotInDbAlready(String image) {
         LOGGER.info("Verifying that person is not already in database");
 
         PythonResponse predictResponse = faceRecognitionService.predict(new ImageRequest(image));
         final String faceId = predictResponse.getFaceId();
+        if(!predictResponse.isFace()){
+            throw new RegistrationException("No face found, cannot get face encoding from image");
+        }
         if(faceId != null){
             LOGGER.info("Found face in face recognition database: " + faceId);
             personService.findById(faceId).ifPresent(person -> {

@@ -16,6 +16,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class Person implements Serializable {
 
+    //TODO currently javax.validation is not in use! Decide whether to use that or Validation.validateName method (current)
     @Id
     private String faceId;
     @Size(min = 1, max = 50, message = "name must be between 1-50 characters long")

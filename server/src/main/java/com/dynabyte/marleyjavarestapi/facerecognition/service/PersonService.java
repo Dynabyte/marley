@@ -23,11 +23,22 @@ public class PersonService {
         this.personRepository = personRepository;
     }
 
-    public Optional<Person> findById(String id) {
-        LOGGER.info("Searching database by id " + id);
-        return personRepository.findById(id);
+    /**
+     * Searches the SQL database for a person with a specific faceId
+     *
+     * @param faceId the faceId that the person's face encodings are stored with in the face recognition database
+     * @return An Optional Person
+     */
+    public Optional<Person> findById(String faceId) {
+        LOGGER.info("Searching database by faceId " + faceId);
+        return personRepository.findById(faceId);
     }
 
+    /**
+     * Saves a person object to the SQL database
+     *
+     * @param person An object matching the Person entity
+     */
     public void save(Person person) {
         LOGGER.info("Saving person to database: " + person);
         personRepository.save(person);

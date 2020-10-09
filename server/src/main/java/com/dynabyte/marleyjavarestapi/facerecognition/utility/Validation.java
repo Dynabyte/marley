@@ -3,6 +3,7 @@ package com.dynabyte.marleyjavarestapi.facerecognition.utility;
 import ch.qos.logback.core.joran.action.AppenderRefAction;
 import com.dynabyte.marleyjavarestapi.facerecognition.exception.ImageEncodingException;
 import com.dynabyte.marleyjavarestapi.facerecognition.exception.MissingArgumentException;
+import com.dynabyte.marleyjavarestapi.facerecognition.exception.RegistrationException;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.request.ImageRequest;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.request.RegistrationRequest;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.request.SingleImageRegistrationRequest;
@@ -97,12 +98,18 @@ public class Validation {
         }
     }
 
+    //TODO switch to javax.validation instead?
     private static void validateName(String name) {
         LOGGER.info("Validating name");
         if(name == null){
             String warningMessage = "name cannot be null!";
             LOGGER.warn(warningMessage);
             throw new MissingArgumentException(warningMessage);
+        }
+        if(name.length() < 1 || name.length() > 50){
+            String warningMessage = "name must be between 1 and 50 characters!";
+            LOGGER.warn(warningMessage);
+            throw new RegistrationException(warningMessage);
         }
         LOGGER.info("Name validated");
     }
