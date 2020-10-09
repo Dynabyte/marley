@@ -105,7 +105,7 @@ class UpdateLabel(Resource):
 class Predict(Resource):
     @ns.doc('do_prediction')
     @ns.expect(image)
-    @ns.marshal_list_with(face_id)
+    @ns.marshal_with(face_id)
     def post(self):
         try:
             return time_lambda(
