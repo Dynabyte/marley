@@ -112,7 +112,8 @@ public class MarleyRestController {
         for (String image : registrationRequest.getImages()){
             try {
                 if(!isRegisteredPersonInDb){
-                    verifyImageHasFaceAndPersonIsNotInDbAlready(image);
+                    verifyImageHasFaceAndPersonIsNotInDbAlready(image, registrationRequest.getName());
+
                     PythonResponse labelResponse = faceRecognitionService.postLabel(new ImageRequest(image));
                     if (labelResponse.getFaceId() != null){
                         faceId = labelResponse.getFaceId();
@@ -143,12 +144,13 @@ public class MarleyRestController {
         LOGGER.info("Registration Complete. Total registered images: " + registeredImagesCount);
     }
 
+    //TODO Split method into parts and fix method honesty. This method saves to DB if faceId is found in python DB but not in person DB
     /**
      * Verifies that the image has a face and that the faceId is not already present in the SQL database
      *
      * @param image An image in base64 format
      */
-    private void verifyImageHasFaceAndPersonIsNotInDbAlready(String image) { //TODO split into two methods?
+    private void verifyImageHasFaceAndPersonIsNotInDbAlready(String image, String name) { //TODO split into two methods?
         LOGGER.info("Verifying that person is not already in database");
 
         PythonResponse predictResponse = faceRecognitionService.predict(new ImageRequest(image));
@@ -160,10 +162,13 @@ public class MarleyRestController {
         }
         if(faceId != null){
             LOGGER.info("Found face in face recognition database: " + faceId);
-            personService.findById(faceId).ifPresent(person -> {
+            personService.findById(faceId).ifPresentOrElse(person -> {
                 String warningMessage = "Cannot register a person who is already in the database";
                 LOGGER.warn(warningMessage);
                 throw new PersonAlreadyInDbException(warningMessage);
+            }, () -> {
+                LOGGER.info("Found faceId in face recognition DB but not in Person DB");
+                personService.save(new Person(faceId, name));
             });
         }
     }
