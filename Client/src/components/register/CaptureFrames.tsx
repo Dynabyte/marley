@@ -71,6 +71,8 @@ const CaptureFrames = () => {
           const getDataURL = (imageBitmaps: ImageBitmap[]) => {
             let base64images = [];
             imageBitmaps.forEach(img => {
+              canvas.width = img.width;
+              canvas.height = img.height;
               canvas
                 .getContext('2d')
                 .drawImage(img, 0, 0);
@@ -84,7 +86,7 @@ const CaptureFrames = () => {
       const uploadImages = (images: string[]) => {
           axios
             .post(
-              'http://localhost:8000/register',
+              'http://localhost:8080/register',
               { name, images },
               {
                 headers: { 'Content-Type': 'application/json' },

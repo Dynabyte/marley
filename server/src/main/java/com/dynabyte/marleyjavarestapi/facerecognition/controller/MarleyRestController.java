@@ -24,7 +24,7 @@ import org.springframework.web.client.HttpServerErrorException;
 /**
  * Controller for the Marley rest api that is the communication hub for all requests.
  */
-@CrossOrigin(origins = {"http://localhost:3000"})
+@CrossOrigin
 @RestController
 public class MarleyRestController {
 
@@ -53,7 +53,7 @@ public class MarleyRestController {
         Validation.validateImageRequest(imageRequest);
 
         PythonResponse pythonResponse = faceRecognitionService.predict(imageRequest);
-        LOGGER.info("Received response: " + pythonResponse);
+        LOGGER.debug("Received response: " + pythonResponse);
 
         ClientPredictionResponse clientPredictionResponse =
                 new ClientPredictionResponse("Unknown", pythonResponse.isFace(), false);
@@ -154,6 +154,7 @@ public class MarleyRestController {
         LOGGER.info("Verifying that person is not already in database");
 
         PythonResponse predictResponse = faceRecognitionService.predict(new ImageRequest(image));
+        LOGGER.debug("Predict response: " + predictResponse);
         final String faceId = predictResponse.getFaceId();
         if(!predictResponse.isFace()){
             String warningMessage = "No face found, cannot get face encoding from image";

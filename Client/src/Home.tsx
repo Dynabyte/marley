@@ -40,7 +40,7 @@ export const Home = () => {
       if (payload.hasMotion) {
         axios
           .post(
-            'http://localhost:8000/predict',
+            'http://localhost:8080/predict',
             { image: payload.getURL() },
             {
               headers: { 'Content-Type': 'application/json' },
@@ -48,7 +48,8 @@ export const Home = () => {
           )
           .then(({ data }) => {
             setIsLoading(false);
-            setResult(data)});
+            setResult(data)})
+            .catch(error => console.log(error))
       }
     };
 
@@ -56,7 +57,7 @@ export const Home = () => {
       initSuccessCallback: initSuccess,
       initErrorCallback: initError,
       captureCallback: capture,
-      captureIntervalTime: 2000,
+      captureIntervalTime: 1000,
     });
 
     return () => diffCamEngine.stop();

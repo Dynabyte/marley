@@ -1,5 +1,8 @@
 package com.dynabyte.marleyjavarestapi.facerecognition.exception;
 
+import com.dynabyte.marleyjavarestapi.facerecognition.controller.MarleyRestController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -15,6 +18,8 @@ import java.time.ZonedDateTime;
  */
 @ControllerAdvice
 public class ApiExceptionHandler {
+
+    private final Logger LOGGER = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
     /**
      * Handles exceptions in the api, creating a ResponseEntity object which gives the api user better information than just an internal server error.
@@ -36,7 +41,7 @@ public class ApiExceptionHandler {
      */
     @ExceptionHandler(value = {MissingPersonInDbException.class, PersonAlreadyInDbException.class, RegistrationException.class})
     public ResponseEntity<ApiExceptionReport> handleCustomInternalExceptions(Exception e){
-        HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        HttpStatus httpStatus = HttpStatus.NOT_ACCEPTABLE;
         return getErrorResponse(e, httpStatus, e.getMessage());
     }
 
@@ -66,6 +71,7 @@ public class ApiExceptionHandler {
                 httpStatus,
                 ZonedDateTime.now(ZoneId.of("+02:00"))
         );
+        LOGGER.error(String.valueOf(apiExceptionReport));
         return new ResponseEntity<>(apiExceptionReport, httpStatus);
     }
 }

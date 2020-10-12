@@ -22,4 +22,13 @@ public class ApiExceptionReport {
         this.timestamp = timestamp;
     }
 
+    @Override
+    public String toString() {
+        return "ApiExceptionReport{" +
+                "exceptionClass='" + exceptionClass + '\'' +
+                ", message='" + message + '\'' +
+                ", httpStatus=" + httpStatus +
+                ", timestamp=" + timestamp +
+                '}';
+    }
 }
