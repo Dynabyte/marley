@@ -3,12 +3,12 @@ package com.dynabyte.marleyjavarestapi.facerecognition.controller;
 import com.dynabyte.marleyjavarestapi.facerecognition.exception.MissingPersonInDbException;
 import com.dynabyte.marleyjavarestapi.facerecognition.exception.PersonAlreadyInDbException;
 import com.dynabyte.marleyjavarestapi.facerecognition.exception.RegistrationException;
+import com.dynabyte.marleyjavarestapi.facerecognition.model.FaceRecognitionResult;
 import com.dynabyte.marleyjavarestapi.facerecognition.model.Person;
 import com.dynabyte.marleyjavarestapi.facerecognition.service.FaceRecognitionService;
 import com.dynabyte.marleyjavarestapi.facerecognition.service.PersonService;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.request.*;
 import com.dynabyte.marleyjavarestapi.facerecognition.to.response.ClientPredictionResponse;
-import com.dynabyte.marleyjavarestapi.facerecognition.to.response.PythonResponse;
 import com.dynabyte.marleyjavarestapi.facerecognition.utility.Validation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 
 /**
@@ -27,6 +28,11 @@ import org.springframework.web.client.HttpServerErrorException;
 @CrossOrigin
 @RestController
 public class MarleyRestController {
+
+    //TODO Change python response object to not include isFace
+    //TODO Change restTemplate to get ResponseEntity from python
+    //TODO Check status code, for 200, 409 (face not detected), 404 (face not found in database for put), else throw exception
+    //TODO Create use case classes, separate logic from controller: PredictUseCase & RegisterUseCase with execute(..) and sub-methods
 
     private final Logger LOGGER = LoggerFactory.getLogger(MarleyRestController.class);
     private final FaceRecognitionService faceRecognitionService;
@@ -52,18 +58,18 @@ public class MarleyRestController {
 
         Validation.validateImageRequest(imageRequest);
 
-        PythonResponse pythonResponse = faceRecognitionService.predict(imageRequest);
-        LOGGER.debug("Received response: " + pythonResponse);
+        FaceRecognitionResult faceRecognitionResult = faceRecognitionService.predict(imageRequest);
+        LOGGER.info("Received response: " + faceRecognitionResult);
 
         ClientPredictionResponse clientPredictionResponse =
-                new ClientPredictionResponse("Unknown", pythonResponse.isFace(), false);
+                new ClientPredictionResponse("Unknown", faceRecognitionResult.isFace(), false);
 
-        if(pythonResponse.getFaceId() == null){
+        if(faceRecognitionResult.getFaceId() == null){
             LOGGER.info("Successful prediction: " + clientPredictionResponse);
             return ResponseEntity.ok(clientPredictionResponse);
         }
 
-        personService.findById(pythonResponse.getFaceId()).ifPresentOrElse(person -> {
+        personService.findById(faceRecognitionResult.getFaceId()).ifPresentOrElse(person -> {
             clientPredictionResponse.setKnownFace(true);
             clientPredictionResponse.setName(person.getName());
         }, () -> {
@@ -114,9 +120,9 @@ public class MarleyRestController {
                 if(!isRegisteredPersonInDb){
                     verifyImageHasFaceAndPersonIsNotInDbAlready(image, registrationRequest.getName());
 
-                    PythonResponse labelResponse = faceRecognitionService.postLabel(new ImageRequest(image));
-                    if (labelResponse.getFaceId() != null){
-                        faceId = labelResponse.getFaceId();
+                    FaceRecognitionResult faceRecognitionResult = faceRecognitionService.postLabel(new ImageRequest(image));
+                    if (faceRecognitionResult.getFaceId() != null){
+                        faceId = faceRecognitionResult.getFaceId();
                         personService.save(new Person(faceId, registrationRequest.getName()));
                         isRegisteredPersonInDb = true;
                         registeredImagesCount++;
@@ -132,7 +138,10 @@ public class MarleyRestController {
             } catch (HttpServerErrorException e){
                 LOGGER.warn("Image not registered. Something went wrong in Face Recognition API");
                 e.printStackTrace();
-            } catch (RegistrationException e){
+            } catch (HttpClientErrorException e){
+                LOGGER.warn("Face not found");
+            }
+            catch (RegistrationException e){
                 LOGGER.warn("Image not registered. No face found in image");
             }
         }
@@ -153,10 +162,10 @@ public class MarleyRestController {
     private void verifyImageHasFaceAndPersonIsNotInDbAlready(String image, String name) { //TODO split into two methods?
         LOGGER.info("Verifying that person is not already in database");
 
-        PythonResponse predictResponse = faceRecognitionService.predict(new ImageRequest(image));
-        LOGGER.debug("Predict response: " + predictResponse);
-        final String faceId = predictResponse.getFaceId();
-        if(!predictResponse.isFace()){
+        FaceRecognitionResult faceRecognitionResult = faceRecognitionService.predict(new ImageRequest(image));
+        LOGGER.debug("Predict response: " + faceRecognitionResult);
+        final String faceId = faceRecognitionResult.getFaceId();
+        if(!faceRecognitionResult.isFace()){
             String warningMessage = "No face found, cannot get face encoding from image";
             LOGGER.warn(warningMessage);
             throw new RegistrationException(warningMessage);
@@ -170,6 +179,7 @@ public class MarleyRestController {
             }, () -> {
                 LOGGER.info("Found faceId in face recognition DB but not in Person DB");
                 personService.save(new Person(faceId, name));
+                //TODO currently sends request to postLabel anyway, make it stop or skip saving entirely?
             });
         }
     }

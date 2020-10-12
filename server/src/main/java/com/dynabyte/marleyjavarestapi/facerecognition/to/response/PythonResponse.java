@@ -10,8 +10,6 @@ import lombok.Data;
 @Data
 public class PythonResponse {
 
-    @JsonProperty
-    private boolean isFace;
     private String faceId;
 
 }
