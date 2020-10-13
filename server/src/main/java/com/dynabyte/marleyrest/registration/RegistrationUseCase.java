@@ -29,13 +29,11 @@ public class RegistrationUseCase {
     private final Logger LOGGER = LoggerFactory.getLogger(RegistrationUseCase.class);
     private final PersonService personService;
     private final FaceRecognitionService faceRecognitionService;
-    private final PredictionUseCase predictionUseCase;
 
     @Autowired
-    public RegistrationUseCase(PersonService personService, FaceRecognitionService faceRecognitionService, PredictionUseCase predictionUseCase) {
+    public RegistrationUseCase(PersonService personService, FaceRecognitionService faceRecognitionService) {
         this.personService = personService;
         this.faceRecognitionService = faceRecognitionService;
-        this.predictionUseCase = predictionUseCase;
     }
 
     /**
@@ -75,8 +73,7 @@ public class RegistrationUseCase {
                 if(!isRegisteredPersonInDb){
                     verifyPersonIsNotRegisteredAlready(image);
 
-                    FaceRecognitionResponse faceRecognitionResponse = faceRecognitionService.postLabel(new ImageRequest(image));
-                    registeredFaceId = faceRecognitionResponse.getFaceId();
+                    registeredFaceId = faceRecognitionService.postLabel(new ImageRequest(image));
                     personService.save(new Person(registeredFaceId, name));
                     isRegisteredPersonInDb = true;
                     registeredImagesCount++;
@@ -109,7 +106,7 @@ public class RegistrationUseCase {
      * @param image the image to be face predicted for verification
      */
     private void verifyPersonIsNotRegisteredAlready(String image) {
-        String predictionFaceId = predictionUseCase.predictFaceId(image);
+        String predictionFaceId = faceRecognitionService.predict(new ImageRequest(image));
 
         if(predictionFaceId != null){
             personService.findById(predictionFaceId).ifPresentOrElse(person -> {

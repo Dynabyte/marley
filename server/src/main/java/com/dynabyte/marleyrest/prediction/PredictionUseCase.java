@@ -42,7 +42,7 @@ public class PredictionUseCase {
 
         String faceId;
         try {
-            faceId = predictFaceId(imageRequest.getImage());
+            faceId = faceRecognitionService.predict(imageRequest);
         } catch (RestClientResponseException e) {
             if(e.getRawStatusCode() == 409){
                 return new ClientPredictionResponse("Unknown", false, false);
@@ -63,18 +63,5 @@ public class PredictionUseCase {
             throw new MissingPersonInDbException("Found faceId in face recognition API but no matching person in the database");
         });
         return clientPredictionResponse;
-    }
-
-    /**
-     * Predicts a face id from a base64 image string
-     * @param base64Image base64 image string to be predicted
-     * @return returns a faceId if found, else throws exception
-     */
-    public String predictFaceId(String base64Image) {
-        String faceId;
-        FaceRecognitionResponse faceRecognitionResponse = faceRecognitionService.predict(new ImageRequest(base64Image));
-        LOGGER.debug("Received response: " + faceRecognitionResponse);
-        faceId = faceRecognitionResponse.getFaceId();
-        return faceId;
     }
 }

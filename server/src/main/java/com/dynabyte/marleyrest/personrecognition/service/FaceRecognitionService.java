@@ -23,11 +23,13 @@ public class FaceRecognitionService {
     /**
      * Sends a prediction request to find out whether an image includes a face and if it is recognized as a known person
      * @param imageRequest includes an image to test
-     * @return response object including whether a face is detected and includes a faceID if a known person is detected
+     * @return faceID from face recognition API as a string
      */
-    public FaceRecognitionResponse predict(ImageRequest imageRequest){
+    public String predict(ImageRequest imageRequest){
         LOGGER.debug("Sending prediction request to face recognition API");
-        return restTemplate.postForObject(faceRecognitionURL + "predict", imageRequest, FaceRecognitionResponse.class);
+        return restTemplate
+                .postForObject(faceRecognitionURL + "predict", imageRequest, FaceRecognitionResponse.class)
+                .getFaceId();
     }
 
 
@@ -35,11 +37,13 @@ public class FaceRecognitionService {
     /**
      * Sends a labeling request to save a the encoding of an image for a new person to the database
      * @param imageRequest includes an image in base64 format
-     * @return response object including whether a face is detected and includes a faceID if a known person is detected
+     * @return faceID from face recognition API as a string
      */
-    public FaceRecognitionResponse postLabel(ImageRequest imageRequest){
+    public String postLabel(ImageRequest imageRequest){
         LOGGER.debug("Sending label post request to face recognition API");
-        return restTemplate.postForObject(faceRecognitionURL + "label", imageRequest, FaceRecognitionResponse.class);
+        return restTemplate
+                .postForObject(faceRecognitionURL + "label", imageRequest, FaceRecognitionResponse.class)
+                .getFaceId();
     }
 
     /**
