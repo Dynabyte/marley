@@ -1,4 +1,4 @@
-package com.dynabyte.marleyrest.registration.model;
+package com.dynabyte.marleyrest.personrecognition.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

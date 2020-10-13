@@ -4,7 +4,7 @@ import com.dynabyte.marleyrest.api.exception.ResponseBodyNotFoundException;
 import com.dynabyte.marleyrest.prediction.PredictionUseCase;
 import com.dynabyte.marleyrest.registration.RegistrationUseCase;
 import com.dynabyte.marleyrest.registration.request.RegistrationRequest;
-import com.dynabyte.marleyrest.prediction.request.ImageRequest;
+import com.dynabyte.marleyrest.personrecognition.request.ImageRequest;
 import com.dynabyte.marleyrest.prediction.response.ClientPredictionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

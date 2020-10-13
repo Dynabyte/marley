@@ -1,7 +1,7 @@
-package com.dynabyte.marleyrest.registration.service;
+package com.dynabyte.marleyrest.personrecognition.service;
 
-import com.dynabyte.marleyrest.registration.model.Person;
-import com.dynabyte.marleyrest.registration.repository.PersonRepository;
+import com.dynabyte.marleyrest.personrecognition.model.Person;
+import com.dynabyte.marleyrest.personrecognition.repository.PersonRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

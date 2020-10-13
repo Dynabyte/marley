@@ -1,4 +1,4 @@
-package com.dynabyte.marleyrest.prediction.request;
+package com.dynabyte.marleyrest.personrecognition.request;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

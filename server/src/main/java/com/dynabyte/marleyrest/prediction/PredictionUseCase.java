@@ -2,12 +2,12 @@ package com.dynabyte.marleyrest.prediction;
 
 import com.dynabyte.marleyrest.api.util.RequestUtil;
 import com.dynabyte.marleyrest.prediction.exception.FaceRecognitionException;
-import com.dynabyte.marleyrest.prediction.request.ImageRequest;
+import com.dynabyte.marleyrest.personrecognition.request.ImageRequest;
 import com.dynabyte.marleyrest.prediction.response.ClientPredictionResponse;
-import com.dynabyte.marleyrest.prediction.response.FaceRecognitionResponse;
-import com.dynabyte.marleyrest.prediction.service.FaceRecognitionService;
+import com.dynabyte.marleyrest.personrecognition.response.FaceRecognitionResponse;
+import com.dynabyte.marleyrest.personrecognition.service.FaceRecognitionService;
 import com.dynabyte.marleyrest.registration.exception.MissingPersonInDbException;
-import com.dynabyte.marleyrest.registration.service.PersonService;
+import com.dynabyte.marleyrest.personrecognition.service.PersonService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

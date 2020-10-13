@@ -1,7 +1,7 @@
 package com.dynabyte.marleyrest;
 
 import com.dynabyte.marleyrest.api.exception.InvalidArgumentException;
-import com.dynabyte.marleyrest.prediction.request.ImageRequest;
+import com.dynabyte.marleyrest.personrecognition.request.ImageRequest;
 import com.dynabyte.marleyrest.registration.request.RegistrationRequest;
 import com.dynabyte.marleyrest.api.util.RequestUtil;
 import org.junit.jupiter.api.Test;

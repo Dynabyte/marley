@@ -1,6 +1,6 @@
-package com.dynabyte.marleyrest.registration.repository;
+package com.dynabyte.marleyrest.personrecognition.repository;
 
-import com.dynabyte.marleyrest.registration.model.Person;
+import com.dynabyte.marleyrest.personrecognition.model.Person;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

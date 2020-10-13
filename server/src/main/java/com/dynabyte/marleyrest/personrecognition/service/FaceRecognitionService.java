@@ -1,8 +1,8 @@
-package com.dynabyte.marleyrest.prediction.service;
+package com.dynabyte.marleyrest.personrecognition.service;
 
-import com.dynabyte.marleyrest.prediction.request.ImageRequest;
+import com.dynabyte.marleyrest.personrecognition.request.ImageRequest;
 import com.dynabyte.marleyrest.registration.request.LabelPutRequest;
-import com.dynabyte.marleyrest.prediction.response.FaceRecognitionResponse;
+import com.dynabyte.marleyrest.personrecognition.response.FaceRecognitionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

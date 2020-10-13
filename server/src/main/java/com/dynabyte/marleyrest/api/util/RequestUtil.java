@@ -1,13 +1,9 @@
 package com.dynabyte.marleyrest.api.util;
 
-import com.dynabyte.marleyrest.api.exception.ImageEncodingException;
 import com.dynabyte.marleyrest.api.exception.InvalidArgumentException;
-import com.dynabyte.marleyrest.prediction.request.ImageRequest;
+import com.dynabyte.marleyrest.personrecognition.request.ImageRequest;
 import com.dynabyte.marleyrest.registration.request.RegistrationRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 

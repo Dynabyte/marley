@@ -1,4 +1,4 @@
-package com.dynabyte.marleyrest.prediction.response;
+package com.dynabyte.marleyrest.personrecognition.response;
 
 import lombok.Data;
 
