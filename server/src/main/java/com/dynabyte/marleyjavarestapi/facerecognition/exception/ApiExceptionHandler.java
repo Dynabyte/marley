@@ -49,9 +49,9 @@ public class ApiExceptionHandler {
      * @param e The thrown exception
      * @return ResponseEntity including an ApiExceptionReport object that details the error as well as the http status.
      */
-    @ExceptionHandler(value = {HttpServerErrorException.class})
-    public ResponseEntity<ApiExceptionReport> handleExternalAPIException(HttpServerErrorException e){
-        HttpStatus httpStatus = e.getStatusCode();
+    @ExceptionHandler(value = {FaceRecognitionException.class})
+    public ResponseEntity<ApiExceptionReport> handleExternalAPIException(FaceRecognitionException e){
+        HttpStatus httpStatus = e.getHttpStatus();
         return getErrorResponse(e, httpStatus);
     }
 

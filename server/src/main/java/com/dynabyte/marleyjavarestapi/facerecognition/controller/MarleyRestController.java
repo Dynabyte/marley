@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 
+import java.util.Objects;
+
 /**
  * Controller for the Marley rest api that is the communication hub for all requests.
  */
@@ -55,6 +57,11 @@ public class MarleyRestController {
     @PostMapping("/predict")
     public ResponseEntity<ClientPredictionResponse> predict(@RequestBody ImageRequest imageRequest){
         LOGGER.info("Predict request initiated");
+        if(Objects.isNull(imageRequest)){
+            //TODO returnera 4xx fel
+        }
+        //TODO RequestUtil is called inside service
+        //TODO Immutability and method honesty
 
         Validation.validateImageRequest(imageRequest);
 

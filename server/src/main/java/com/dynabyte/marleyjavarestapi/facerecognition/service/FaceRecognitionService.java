@@ -15,6 +15,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+//TODO Improve error handling!
 
 /**
  * Face Recognition Service sends requests to the python rest api for face recognition and delivers a response.
@@ -25,6 +26,8 @@ public class FaceRecognitionService {
     private final Logger LOGGER = LoggerFactory.getLogger(FaceRecognitionService.class);
     private final String faceRecognitionURL = "http://localhost:5000/face-recognition/";
     private final RestTemplate restTemplate = new RestTemplate();
+
+
 
     /**
      * Sends a prediction request to find out whether an image includes a face and if it is recognized as a known person

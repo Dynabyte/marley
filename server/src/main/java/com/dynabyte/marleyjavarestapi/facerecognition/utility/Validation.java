@@ -100,7 +100,7 @@ public class Validation {
      * @param base64Image Base64 image string to be validated
      * @return Validated base64 image string without descriptor tag
      */
-    public static String validateImageAndRemoveDescriptorTag(String base64Image){
+    private static String validateImageAndRemoveDescriptorTag(String base64Image){
         LOGGER.info("Validating image");
         validateImageNotNull(base64Image);
         base64Image = removeBase64DescriptorTag(base64Image);
@@ -128,9 +128,9 @@ public class Validation {
      */
     private static String removeBase64DescriptorTag(String base64Image) {
         LOGGER.info("Removing image descriptor tag if present");
-        base64Image = base64Image.replace("data:image/jpeg;base64,", "");
-        base64Image = base64Image.replace("data:image/png;base64,", "");
-        return base64Image;
+        return base64Image
+                .replace("data:image/jpeg;base64,", "")
+                .replace("data:image/png;base64,", "");
     }
 
     /**
