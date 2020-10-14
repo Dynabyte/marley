@@ -25,6 +25,7 @@ public class FaceRecognitionService {
      * @param imageRequest includes an image to test
      * @return faceID from face recognition API as a string
      */
+    @SuppressWarnings("ConstantConditions") //null is checked later
     public String predict(ImageRequest imageRequest){
         LOGGER.debug("Sending prediction request to face recognition API");
         return restTemplate
@@ -39,6 +40,7 @@ public class FaceRecognitionService {
      * @param imageRequest includes an image in base64 format
      * @return faceID from face recognition API as a string
      */
+    @SuppressWarnings("ConstantConditions") //null is checked later
     public String postLabel(ImageRequest imageRequest){
         LOGGER.debug("Sending label post request to face recognition API");
         return restTemplate
