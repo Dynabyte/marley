@@ -2,40 +2,25 @@ import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import CenterContent from '../../ui/CenterContent';
+import WhiteButton from '../../ui/WhiteButton';
 
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 100vh;
-  align-items: center;
+const StyledCenterContent = styled(CenterContent)`
   font-size: 3rem;
   font-weight: bold;
 `;
 
-const Button = styled.button`
-    padding: 15px;
-    margin: 0 10px;
-    letter-spacing: 1px;
-    border-radius: 5px;
-    border: 1px solid #737b8d;
-    font-size: 1rem;
-    font-weight: 500;
-    opacity: 0.8;
-
-  `;
-
-  const Text = styled.div`
-    text-align: center;
-    max-width: 70%;
-  `;
+const Center = styled.div`
+  text-align: center;
+  max-width: 70%;
+`;
 
 const CaptureFrames = () => {
   const history = useHistory();
-  
+
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const intervalRef = useRef(null);
-  
+
   useEffect(() => {
     const name = history.location.state;
     const canvas = document.createElement('canvas');
@@ -52,7 +37,7 @@ const CaptureFrames = () => {
         .then((stream: MediaStream) => {
           myStream = stream;
           let imageBitmaps = [];
-         intervalRef.current = setInterval(() => {
+          intervalRef.current = setInterval(() => {
             const imageCapture = new ImageCapture(myStream.getVideoTracks()[0]);
             if (
               imageCapture.track.readyState === 'live' &&
@@ -65,8 +50,9 @@ const CaptureFrames = () => {
                   setIsVisible(true);
                   console.log('Uploading images');
                   myStream.getTracks().forEach(function (t) {
-                    t.stop(); }); 
-                  clearInterval(intervalRef.current); 
+                    t.stop();
+                  });
+                  clearInterval(intervalRef.current);
                   const base64images = getDataURL(imageBitmaps);
                   uploadImages(base64images);
                 }
@@ -75,8 +61,7 @@ const CaptureFrames = () => {
               myStream.getTracks().forEach(function (t) {
                 t.stop();
               });
-              navigator
-                .mediaDevices
+              navigator.mediaDevices
                 .getUserMedia({
                   video: {
                     width: { ideal: 1920 },
@@ -92,39 +77,36 @@ const CaptureFrames = () => {
 
           const getDataURL = (imageBitmaps: ImageBitmap[]) => {
             let base64images = [];
-            imageBitmaps.forEach(img => {
+            imageBitmaps.forEach((img) => {
               canvas.width = img.width;
               canvas.height = img.height;
-              canvas
-                .getContext('2d')
-                .drawImage(img, 0, 0);
+              canvas.getContext('2d').drawImage(img, 0, 0);
               const dataURL = canvas.toDataURL();
               base64images.push(dataURL);
             });
             return base64images;
+          };
 
-          }
-
-      const uploadImages = (images: string[]) => {
-          axios
-            .post(
-              'http://localhost:8000/register',
-              { name, images },
-              {
-                headers: { 'Content-Type': 'application/json' },
-              }
-            )
-            .then(() => {
-              console.log('Uploaded images');
-            }).catch(error => console.error(error));
-      }
-      
-    });
-  }
-  return () => clearInterval(intervalRef.current);
+          const uploadImages = (images: string[]) => {
+            axios
+              .post(
+                'http://localhost:8000/register',
+                { name, images },
+                {
+                  headers: { 'Content-Type': 'application/json' },
+                }
+              )
+              .then(() => {
+                console.log('Uploaded images');
+              })
+              .catch((error) => console.error(error));
+          };
+        });
+    }
+    return () => clearInterval(intervalRef.current);
   }, [history]);
 
-  if(isVisible) {
+  if (isVisible) {
     const timeoutId = setTimeout(() => {
       setIsVisible(false);
       clearTimeout(timeoutId);
@@ -136,19 +118,22 @@ const CaptureFrames = () => {
     setIsVisible(false);
     clearTimeout();
     history.push('/');
-  }
+  };
 
   return (
-    <Container>
+    <StyledCenterContent>
       {!isVisible && <div>Laddar...</div>}
- {isVisible && (
- <Text>
-   <p>Tack! Bilderna har tagits emot för registrering. </p> 
-   <p>Det kan ta någon minut innan registreringen har gått igenom och du kan bli igenkänd i systemet.</p>
-   <Button onClick={handleClick}>KLAR</Button>
- </Text>)}
-    </Container>
-   
+      {isVisible && (
+        <Center>
+          <p>Tack! Bilderna har tagits emot för registrering. </p>
+          <p>
+            Det kan ta någon minut innan registreringen har gått igenom och du
+            kan bli igenkänd i systemet.
+          </p>
+          <WhiteButton onClick={handleClick}>KLAR</WhiteButton>
+        </Center>
+      )}
+    </StyledCenterContent>
   );
 };
 
