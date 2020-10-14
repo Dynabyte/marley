@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import Title from '../shared/Title';
-import WhiteButton from '../ui/WhiteButton';
+import Title from '../../shared/Title';
+import WhiteButton from '../../ui/WhiteButton';
 
 const Register = styled.div`
   font-size: 3rem;

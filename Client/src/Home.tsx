@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useRef } from 'react';
 import './App.css';
-import FaceRegistrationText from './components/FaceRegistrationText';
+import FaceRegistrationText from './components/register/FaceRegistrationText';
 import Logo from './shared/Logo';
 import Title from './shared/Title';
 import dynabyteLogo from './static/images/dynabyte_white.png';

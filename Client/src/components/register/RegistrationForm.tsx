@@ -71,11 +71,12 @@ const RegistrationForm = () => {
 
   const validate = (value: string) => {
     let errors = [];
-    if (value.length === 0) {
-      errors.push('Name is required');
+    if (value.trim().length === 0) {
+      errors.push('Du måste fylla i ett namn');
     }
-    if (value.trim().length > 50) {
-      errors.push('Must be less than 50 characters');
+
+    if (value.length > 50) {
+      errors.push('Det får inte vara fler än 50 tecken');
     }
     return errors;
   };

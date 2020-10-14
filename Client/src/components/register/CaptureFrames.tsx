@@ -122,7 +122,7 @@ const CaptureFrames = () => {
 
   return (
     <StyledCenterContent>
-      {!isVisible && <div>Laddar...</div>}
+      {!isVisible && <div>Samlar data...</div>}
       {isVisible && (
         <Center>
           <p>Tack! Bilderna har tagits emot för registrering. </p>
