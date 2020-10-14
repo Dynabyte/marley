@@ -1,7 +1,32 @@
 import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import Logo from '../shared/Logo';
-import dynabyteLogo from '../static/images/dynabyte_white.png';
+import styled from 'styled-components';
+import Title from '../shared/Title';
+
+const Button = styled.button`
+    padding: 15px;
+    margin: 0 10px;
+    letter-spacing: 1px;
+    border-radius: 5px;
+    border: 1px solid #737b8d;
+    font-size: 1rem;
+    font-weight: 500;
+    opacity: 0.8;
+
+  `;
+
+ const Register = styled.div`
+ font-size: 3rem;
+ font-weight: bold;
+
+ p {
+   margin: 10px;
+ }
+ `;
+
+ const Text = styled.div`
+  display: flex;
+  `
 
 
 
@@ -14,16 +39,14 @@ const FaceRegistrationText = () => {
 
   return (
   <>
-    <h1>Välkommen till</h1>
-    <Logo
-        src={dynabyteLogo}
-        alt='logo'
-        width='200'
-        height='80'
-    />
+    <Title>Välkommen till</Title>
+    <Register>
   <p>Vi känner inte igen dig sen tidigare.</p>
+  <Text>
   <p>Vill du registrera dig?</p>
-  <button onClick={handleClick}>JA</button>
+  <Button onClick={handleClick}>REGISTRERA DIG NU</Button>
+  </Text>
+  </Register>
 </>
 );
 }

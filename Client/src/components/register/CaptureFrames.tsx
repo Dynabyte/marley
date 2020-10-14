@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -9,13 +9,33 @@ const Container = styled.div`
   justify-content: center;
   height: 100vh;
   align-items: center;
+  font-size: 3rem;
+  font-weight: bold;
 `;
+
+const Button = styled.button`
+    padding: 15px;
+    margin: 0 10px;
+    letter-spacing: 1px;
+    border-radius: 5px;
+    border: 1px solid #737b8d;
+    font-size: 1rem;
+    font-weight: 500;
+    opacity: 0.8;
+
+  `;
+
+  const Text = styled.div`
+    text-align: center;
+    max-width: 70%;
+  `;
 
 const CaptureFrames = () => {
   const history = useHistory();
-
-  const [isDone, setIsDone] = useState(false);
-
+  
+  const [isVisible, setIsVisible] = useState<boolean>(false);
+  const intervalRef = useRef(null);
+  
   useEffect(() => {
     const name = history.location.state;
     const canvas = document.createElement('canvas');
@@ -32,7 +52,7 @@ const CaptureFrames = () => {
         .then((stream: MediaStream) => {
           myStream = stream;
           let imageBitmaps = [];
-          const interval = setInterval(() => {
+         intervalRef.current = setInterval(() => {
             const imageCapture = new ImageCapture(myStream.getVideoTracks()[0]);
             if (
               imageCapture.track.readyState === 'live' &&
@@ -42,11 +62,13 @@ const CaptureFrames = () => {
               imageCapture.grabFrame().then((imageBitmap) => {
                 imageBitmaps.push(imageBitmap);
                 if (imageBitmaps.length === 60) {
+                  setIsVisible(true);
                   console.log('Uploading images');
-                  clearInterval(interval);
+                  myStream.getTracks().forEach(function (t) {
+                    t.stop(); }); 
+                  clearInterval(intervalRef.current); 
                   const base64images = getDataURL(imageBitmaps);
                   uploadImages(base64images);
-                
                 }
               });
             } else {
@@ -63,7 +85,7 @@ const CaptureFrames = () => {
                 })
                 .then(function (stream) {
                   myStream = stream;
-                  console.log('new stream created');
+                  console.log('new stream created capture');
                 });
             }
           }, 34); //take 30 frames per second
@@ -86,27 +108,47 @@ const CaptureFrames = () => {
       const uploadImages = (images: string[]) => {
           axios
             .post(
-              'http://localhost:8080/register',
+              'http://localhost:8000/register',
               { name, images },
               {
                 headers: { 'Content-Type': 'application/json' },
               }
             )
-            .then((res) => {
-              setIsDone(true);
+            .then(() => {
               console.log('Uploaded images');
             }).catch(error => console.error(error));
       }
       
     });
-
-      return () => clearInterval();
-
-    }
+  }
+  return () => clearInterval(intervalRef.current);
   }, [history]);
 
+  if(isVisible) {
+    const timeoutId = setTimeout(() => {
+      setIsVisible(false);
+      clearTimeout(timeoutId);
+      history.push('/');
+    }, 60000);
+  }
+
+  const handleClick = () => {
+    setIsVisible(false);
+    clearTimeout();
+    history.push('/');
+  }
+
   return (
-    <Container>{isDone ? <h1>Klart!</h1> : <h1>Analyserar....</h1>}</Container>
+    <Container>
+      {!isVisible && <div>Laddar...</div>}
+ {isVisible && (
+ <Text>
+   <p>Tack! Bilderna har tagits emot för registrering. </p> 
+   <p>Det kan ta någon minut innan registreringen har gått igenom och du kan bli igenkänd i systemet.</p>
+   <Button onClick={handleClick}>KLAR</Button>
+ </Text>)}
+    </Container>
+   
   );
 };
 
