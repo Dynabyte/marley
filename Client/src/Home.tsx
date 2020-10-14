@@ -1,69 +1,103 @@
 import axios from 'axios';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import './App.css';
 import FaceRegistrationText from './components/FaceRegistrationText';
-import { DiffCamEngine } from './diff-cam-engine';
-import { ICapturePayload, IDiffCamEngine } from './models/diffCamEngine.models';
 import Logo from './shared/Logo';
 import Title from './shared/Title';
 import dynabyteLogo from './static/images/dynabyte_white.png';
 
+
+
 interface IResult {
   isKnownFace?: boolean;
   isFace?: boolean;
-  isConfident?: boolean;
   name?: string;
-  personId?: string;
 }
 
 export const Home = () => {
-  const [hasMotion, setHasMotion] = React.useState<boolean>(false);
   const [result, setResult] = React.useState<IResult>({});
   const [isLoading, setIsLoading ] = React.useState<boolean>(true);
-
+  const intervalRef = useRef(null);
+  
   useEffect(() => {
-    const diffCamEngine: IDiffCamEngine = DiffCamEngine();
-
-    const initSuccess: () => void = () => {
-      diffCamEngine.start();
-    };
-
-    const initError: (error: any) => void = (error: any) => {
-      console.log(error);
-    };
-
-    const capture: (payload: ICapturePayload) => void = (
-      payload: ICapturePayload
-    ) => {
-      setHasMotion(payload.hasMotion);
-
-      if (payload.hasMotion) {
-        axios
-          .post(
-            'http://localhost:8080/predict',
-            { image: payload.getURL() },
-            {
-              headers: { 'Content-Type': 'application/json' },
+    const canvas = document.createElement('canvas');
+    let myStream: MediaStream;
+    if (navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices
+        .getUserMedia({
+          audio: false,
+          video: {
+            width: { ideal: 720 },
+            height: { ideal: 560 },
+          },
+        })
+        .then((stream: MediaStream) => {
+          myStream = stream;
+          intervalRef.current = setInterval(() => {
+            const imageCapture = new ImageCapture(myStream.getVideoTracks()[0]);
+            if (
+              imageCapture.track.readyState === 'live' &&
+              imageCapture.track.enabled &&
+              !imageCapture.track.muted
+            ) {
+              imageCapture.grabFrame().then((imageBitmap) => {
+                const dataURL = getDataURL(imageBitmap);
+                uploadImage(dataURL);
+              });
+            } else {
+              myStream.getTracks().forEach(function (t) {
+                t.stop();
+              });
+              navigator
+                .mediaDevices
+                .getUserMedia({
+                  video: {
+                    width: { ideal: 1920 },
+                    height: { ideal: 1024 },
+                  },
+                })
+                .then(function (stream) {
+                  myStream = stream;
+                  console.log('new stream created');
+                });
             }
-          )
-          .then(({ data }) => {
-            setIsLoading(false);
-            setResult(data)})
-            .catch(error => console.log(error))
-      }
-    };
-
-    diffCamEngine.init({
-      initSuccessCallback: initSuccess,
-      initErrorCallback: initError,
-      captureCallback: capture,
-      captureIntervalTime: 1000,
+          }, 2000);
+        
     });
 
-    return () => diffCamEngine.stop();
-  }, [result]);
 
-  
+    const uploadImage = (image: string) => {
+      axios
+        .post(
+          'http://localhost:8000/predict',
+          { image },
+          {
+            headers: { 'Content-Type': 'application/json' },
+          }
+        )
+        .then(({ data }) => {
+          setIsLoading(false);
+          setResult(data);
+        }).catch(error => console.error(error));
+  };
+
+    const getDataURL = (img: ImageBitmap) => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      canvas
+        .getContext('2d')
+        .drawImage(img, 0, 0);
+      return canvas.toDataURL();
+
+  };
+}
+  return () => {
+    myStream.getTracks().forEach(function (t) {
+      t.stop();
+    });
+    clearInterval(intervalRef.current)
+  };
+},[]);  
 
   const { isKnownFace, isFace, name } = result;
 
@@ -83,13 +117,12 @@ export const Home = () => {
   return (
     <div className='wrapper'>
       {isKnownFace && (
-        <Title hasMotion={hasMotion}>{`Välkommen ${name} till`}</Title>
+        <Title>{`Välkommen ${name} till`}</Title>
       )}
-      {!isKnownFace && isFace && (
-        <>
+       {!isKnownFace && isFace && (
        <FaceRegistrationText />
-       </>
-      )}      
+     )}   
+    
       <footer>
         <span>
           Photo by{' '}
