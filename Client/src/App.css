@@ -1,6 +1,4 @@
 .wrapper {
-  /* background: linear-gradient(rgb(239, 87, 227, 0.9), rgba(239, 87, 227, 0.1)),
-    var(--image-url) center center; */
   height: 100vh;
   overflow-y: hidden;
   display: flex;

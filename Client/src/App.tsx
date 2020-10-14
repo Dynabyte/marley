@@ -8,23 +8,23 @@ import GlobalStyle from './styling/GlobalStyle';
 
 const App = () => (
   <>
-  <GlobalStyle />
-  <Router>
-    <Switch>
-      <Route path='/' exact>
-        <Home />
-      </Route>
-      <Route path='/registration' exact>
-        <RegisterForm />
-      </Route>
-      <Route path='/positioning' exact>
-        <Positioning />
-      </Route>
-      <Route path='/capture-frames' exact>
-        <CaptureFrames />
-      </Route>
-    </Switch>
-  </Router>
+    <GlobalStyle />
+    <Router>
+      <Switch>
+        <Route path='/' exact>
+          <Home />
+        </Route>
+        <Route path='/registration' exact>
+          <RegisterForm />
+        </Route>
+        <Route path='/positioning' exact>
+          <Positioning />
+        </Route>
+        <Route path='/capture-frames' exact>
+          <CaptureFrames />
+        </Route>
+      </Switch>
+    </Router>
   </>
 );
 

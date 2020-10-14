@@ -6,8 +6,7 @@ const GlobalStyle = createGlobalStyle`
   --image-url: url(${stockholm});
 }
 
-
-  * {
+* {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -32,6 +31,6 @@ body {
   background: linear-gradient(rgb(239, 87, 227, 0.9), rgba(239, 87, 227, 0.1)),
     var(--image-url) center center;
 }
-`
+`;
 
 export default GlobalStyle;

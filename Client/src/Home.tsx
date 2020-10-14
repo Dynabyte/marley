@@ -6,8 +6,6 @@ import Logo from './shared/Logo';
 import Title from './shared/Title';
 import dynabyteLogo from './static/images/dynabyte_white.png';
 
-
-
 interface IResult {
   isKnownFace?: boolean;
   isFace?: boolean;
@@ -16,9 +14,9 @@ interface IResult {
 
 export const Home = () => {
   const [result, setResult] = React.useState<IResult>({});
-  const [isLoading, setIsLoading ] = React.useState<boolean>(true);
+  const [isLoading, setIsLoading] = React.useState<boolean>(true);
   const intervalRef = useRef(null);
-  
+
   useEffect(() => {
     const canvas = document.createElement('canvas');
     let myStream: MediaStream;
@@ -48,8 +46,7 @@ export const Home = () => {
               myStream.getTracks().forEach(function (t) {
                 t.stop();
               });
-              navigator
-                .mediaDevices
+              navigator.mediaDevices
                 .getUserMedia({
                   video: {
                     width: { ideal: 1920 },
@@ -62,67 +59,54 @@ export const Home = () => {
                 });
             }
           }, 2000);
-        
-    });
+        });
 
+      const uploadImage = (image: string) => {
+        axios
+          .post(
+            'http://localhost:8000/predict',
+            { image },
+            {
+              headers: { 'Content-Type': 'application/json' },
+            }
+          )
+          .then(({ data }) => {
+            setIsLoading(false);
+            setResult(data);
+          })
+          .catch((error) => console.error(error));
+      };
 
-    const uploadImage = (image: string) => {
-      axios
-        .post(
-          'http://localhost:8000/predict',
-          { image },
-          {
-            headers: { 'Content-Type': 'application/json' },
-          }
-        )
-        .then(({ data }) => {
-          setIsLoading(false);
-          setResult(data);
-        }).catch(error => console.error(error));
-  };
-
-    const getDataURL = (img: ImageBitmap) => {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      canvas
-        .getContext('2d')
-        .drawImage(img, 0, 0);
-      return canvas.toDataURL();
-
-  };
-}
-  return () => {
-    myStream.getTracks().forEach(function (t) {
-      t.stop();
-    });
-    clearInterval(intervalRef.current)
-  };
-},[]);  
+      const getDataURL = (img: ImageBitmap) => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        return canvas.toDataURL();
+      };
+    }
+    return () => {
+      myStream.getTracks().forEach(function (t) {
+        t.stop();
+      });
+      clearInterval(intervalRef.current);
+    };
+  }, []);
 
   const { isKnownFace, isFace, name } = result;
 
-  if(isLoading) {
+  if (isLoading) {
     return (
       <div className='wrapper'>
-      <Logo
-      src={dynabyteLogo}
-      alt='logo'
-      width='200'
-      height='80'
-    />
-    </div>
+        <Logo src={dynabyteLogo} alt='logo' width='200' height='80' />
+      </div>
     );
   }
 
   return (
     <div className='wrapper'>
-      {isKnownFace && (
-        <Title>{`Välkommen ${name} till`}</Title>
-      )}
-       {!isKnownFace && isFace && (
-       <FaceRegistrationText />
-     )}   
-    
+      {isKnownFace && <Title>{`Välkommen ${name} till`}</Title>}
+      {!isKnownFace && isFace && <FaceRegistrationText />}
+
       <footer>
         <span>
           Photo by{' '}

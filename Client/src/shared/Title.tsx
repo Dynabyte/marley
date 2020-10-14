@@ -21,32 +21,23 @@ const StyledTitle = styled.h1`
   ${() => animation};
 `;
 
-
-
 export const Title: React.FC = ({ children }) => {
   return (
     <>
-    <StyledTitle
-      style={{
-        marginTop: 0,
-        textAlign: 'center',
-        fontSize: '4rem',
-        color: 'white',
-        animation: `2s ease-in-out 0s 1`,
-        opacity:  1,
-      }}
-    >
-      {children}
-      
-    
-    </StyledTitle>
-    <Logo
-    src={dynabyteLogo}
-    alt='logo'
-    width='200'
-    height='80'
-  />
-  </>
+      <StyledTitle
+        style={{
+          marginTop: 0,
+          textAlign: 'center',
+          fontSize: '4rem',
+          color: 'white',
+          animation: `2s ease-in-out 0s 1`,
+          opacity: 1,
+        }}
+      >
+        {children}
+      </StyledTitle>
+      <Logo src={dynabyteLogo} alt='logo' width='200' height='80' />
+    </>
   );
 };
 
