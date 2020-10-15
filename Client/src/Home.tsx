@@ -39,9 +39,11 @@ export const Home = () => {
               !imageCapture.track.muted
             ) {
               imageCapture.grabFrame().then((imageBitmap) => {
+
                 const dataURL = getDataURL(imageBitmap);
                 uploadImage(dataURL);
-              });
+              })
+              .catch(error => console.trace());
             } else {
               myStream.getTracks().forEach(function (t) {
                 t.stop();
@@ -58,13 +60,13 @@ export const Home = () => {
                   console.log('new stream created');
                 });
             }
-          }, 2000);
+          }, 800);
         });
 
       const uploadImage = (image: string) => {
         axios
           .post(
-            'http://localhost:8000/predict',
+            'http://localhost:8080/predict',
             { image },
             {
               headers: { 'Content-Type': 'application/json' },

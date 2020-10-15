@@ -90,7 +90,7 @@ const CaptureFrames = () => {
           const uploadImages = (images: string[]) => {
             axios
               .post(
-                'http://localhost:8000/register',
+                'http://localhost:8080/register',
                 { name, images },
                 {
                   headers: { 'Content-Type': 'application/json' },
