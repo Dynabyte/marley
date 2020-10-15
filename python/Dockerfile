@@ -40,6 +40,7 @@ RUN python -m pip install pymongo
 RUN pip install pymongo[srv]
 RUN pip install -U python-dotenv
 RUN pip install face_recognition
+RUN pip install waitress
 
 EXPOSE 5000
 
