@@ -68,7 +68,7 @@ export const Home = () => {
       const uploadImage = (image: string) => {
         axios
           .post(
-            'http://localhost:8080/predict',
+            'http://localhost:8000/predict',
             { image },
             {
               headers: { 'Content-Type': 'application/json' },
@@ -91,8 +91,6 @@ export const Home = () => {
       };
     }
     return () => {
-      console.log(intervalRef.current);
-
       myStream.getTracks().forEach(function (t) {
         t.stop();
       });

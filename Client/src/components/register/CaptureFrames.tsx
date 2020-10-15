@@ -20,6 +20,7 @@ const CaptureFrames = () => {
 
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const intervalRef = useRef<number>(null);
+  const timerRef = useRef<number>(null);
 
   useEffect(() => {
     const name = history.location.state;
@@ -44,19 +45,23 @@ const CaptureFrames = () => {
               imageCapture.track.enabled &&
               !imageCapture.track.muted
             ) {
-              imageCapture.grabFrame().then((imageBitmap) => {
-                imageBitmaps.push(imageBitmap);
-                if (imageBitmaps.length === 60) {
-                  setIsVisible(true);
-                  console.log('Uploading images');
-                  myStream.getTracks().forEach(function (t) {
-                    t.stop();
-                  });
-                  clearInterval(intervalRef.current);
-                  const base64images = getDataURL(imageBitmaps);
-                  uploadImages(base64images);
-                }
-              });
+              imageCapture
+                .grabFrame()
+                .then((imageBitmap) => {
+                  imageBitmaps.push(imageBitmap);
+                  if (imageBitmaps.length === 60) {
+                    setIsVisible(true);
+                    console.log('Uploading images');
+                    myStream.getTracks().forEach(function (t) {
+                      t.stop();
+                    });
+                    clearInterval(intervalRef.current);
+
+                    const base64images = getDataURL(imageBitmaps);
+                    uploadImages(base64images);
+                  }
+                })
+                .catch(() => console.trace());
             } else {
               myStream.getTracks().forEach(function (t) {
                 t.stop();
@@ -70,7 +75,7 @@ const CaptureFrames = () => {
                 })
                 .then(function (stream) {
                   myStream = stream;
-                  console.log('new stream created capture');
+                  console.log('new stream created');
                 });
             }
           }, 34); //take 30 frames per second
@@ -90,7 +95,7 @@ const CaptureFrames = () => {
           const uploadImages = (images: string[]) => {
             axios
               .post(
-                'http://localhost:8080/register',
+                'http://localhost:8000/register',
                 { name, images },
                 {
                   headers: { 'Content-Type': 'application/json' },
@@ -103,20 +108,21 @@ const CaptureFrames = () => {
           };
         });
     }
-    return () => clearInterval(intervalRef.current);
+
+    return () => {
+      clearInterval(intervalRef.current);
+      clearTimeout(timerRef.current);
+    };
   }, [history]);
 
   if (isVisible) {
-    const timeoutId = setTimeout(() => {
+    timerRef.current = setTimeout(() => {
       setIsVisible(false);
-      clearTimeout(timeoutId);
       history.push('/');
     }, 60000);
   }
 
   const handleClick = () => {
-    setIsVisible(false);
-    clearTimeout();
     history.push('/');
   };
 
