@@ -38,11 +38,12 @@ const Errors = styled.div`
   margin: -15px 0 25px 0;
   font-weight: bold;
   font-size: 1.25rem;
+  color: black;
 `;
 
 const RegistrationForm = () => {
-  const [value, setValue] = useState('');
-  const [errors, setErrors] = useState([]);
+  const [value, setValue] = useState<string>('');
+  const [errors, setErrors] = useState<string[]>([]);
   const history = useHistory();
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -96,7 +97,7 @@ const RegistrationForm = () => {
             onChange={handleChange}
             placeholder='För- och efternamn'
           />
-          <Errors style={{ color: 'black' }}>
+          <Errors>
             {errors.map((error, index) => (
               <p key={index}>{error}</p>
             ))}

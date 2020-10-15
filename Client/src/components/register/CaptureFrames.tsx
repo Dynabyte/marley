@@ -19,11 +19,11 @@ const CaptureFrames = () => {
   const history = useHistory();
 
   const [isVisible, setIsVisible] = useState<boolean>(false);
-  const intervalRef = useRef(null);
+  const intervalRef = useRef<number>(null);
 
   useEffect(() => {
     const name = history.location.state;
-    const canvas = document.createElement('canvas');
+    const canvas: HTMLCanvasElement = document.createElement('canvas');
     let myStream: MediaStream;
     if (navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices
@@ -36,7 +36,7 @@ const CaptureFrames = () => {
         })
         .then((stream: MediaStream) => {
           myStream = stream;
-          let imageBitmaps = [];
+          let imageBitmaps: ImageBitmap[] = [];
           intervalRef.current = setInterval(() => {
             const imageCapture = new ImageCapture(myStream.getVideoTracks()[0]);
             if (
@@ -76,12 +76,12 @@ const CaptureFrames = () => {
           }, 34); //take 30 frames per second
 
           const getDataURL = (imageBitmaps: ImageBitmap[]) => {
-            let base64images = [];
+            let base64images: string[] = [];
             imageBitmaps.forEach((img) => {
               canvas.width = img.width;
               canvas.height = img.height;
               canvas.getContext('2d').drawImage(img, 0, 0);
-              const dataURL = canvas.toDataURL();
+              const dataURL: string = canvas.toDataURL();
               base64images.push(dataURL);
             });
             return base64images;
