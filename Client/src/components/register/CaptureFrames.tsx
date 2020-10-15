@@ -47,7 +47,6 @@ const CaptureFrames = () => {
               imageCapture.grabFrame().then((imageBitmap) => {
                 imageBitmaps.push(imageBitmap);
                 if (imageBitmaps.length === 60) {
-                  setIsVisible(true);
                   console.log('Uploading images');
                   myStream.getTracks().forEach(function (t) {
                     t.stop();
@@ -56,7 +55,8 @@ const CaptureFrames = () => {
                   const base64images = getDataURL(imageBitmaps);
                   uploadImages(base64images);
                 }
-              });
+              })
+              .catch(error => console.trace());
             } else {
               myStream.getTracks().forEach(function (t) {
                 t.stop();
@@ -103,7 +103,9 @@ const CaptureFrames = () => {
           };
         });
     }
-    return () => clearInterval(intervalRef.current);
+    return () => {
+      clearInterval(intervalRef.current);
+    }
   }, [history]);
 
   if (isVisible) {
