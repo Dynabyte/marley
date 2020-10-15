@@ -18,6 +18,7 @@ export const Home = () => {
   const intervalRef = useRef(null);
 
   useEffect(() => {
+    let isMounted = true;
     const canvas = document.createElement('canvas');
     let myStream: MediaStream;
     if (navigator.mediaDevices.getUserMedia) {
@@ -38,12 +39,13 @@ export const Home = () => {
               imageCapture.track.enabled &&
               !imageCapture.track.muted
             ) {
-              imageCapture.grabFrame().then((imageBitmap) => {
-
-                const dataURL = getDataURL(imageBitmap);
-                uploadImage(dataURL);
-              })
-              .catch(error => console.trace());
+              imageCapture
+                .grabFrame()
+                .then((imageBitmap) => {
+                  const dataURL = getDataURL(imageBitmap);
+                  uploadImage(dataURL);
+                })
+                .catch(() => console.trace());
             } else {
               myStream.getTracks().forEach(function (t) {
                 t.stop();
@@ -73,8 +75,10 @@ export const Home = () => {
             }
           )
           .then(({ data }) => {
-            setIsLoading(false);
-            setResult(data);
+            if (isMounted) {
+              setIsLoading(false);
+              setResult(data);
+            }
           })
           .catch((error) => console.error(error));
       };
@@ -87,10 +91,13 @@ export const Home = () => {
       };
     }
     return () => {
+      console.log(intervalRef.current);
+
       myStream.getTracks().forEach(function (t) {
         t.stop();
       });
       clearInterval(intervalRef.current);
+      isMounted = false;
     };
   }, []);
 
