@@ -79,6 +79,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
+        <finalName>marley-person-recognition</finalName>
     </build>
 
 </project>

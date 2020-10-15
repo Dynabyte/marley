@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+
+    marley-postgres:
+        image: "postgres:9.6-alpine"
+        container_name: marley-postgres
+        #Volume mounted for database for the storage
+        volumes:
+          - marley-data:/var/lib/postgresql/data
+        ports:
+          - 5432:5432 # Forward the exposed port 5432 on the container to port 5432 on the host machine
+    
+        #Environment variable for DB name, user and password
+        environment:
+          - POSTGRES_DB=marleyDB
+          - POSTGRES_USER=marley
+          - POSTGRES_PASSWORD=marley
+
+    person-recognition:
+        build: ./server
+        container_name: person-recognition
+
+        environment:
+            DB_USER: marley
+            DB_PASS: marley
+            DB_URL: jdbc:postgresql://marley-postgres/marleyDB
+        ports:
+            - 8080:8080
+        links:
+            - marley-postgres
+        
+#Volumes for DB data
+volumes:
+    marley-data:
