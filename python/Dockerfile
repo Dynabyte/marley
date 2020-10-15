@@ -24,14 +24,15 @@ RUN apt-get install -y --fix-missing \
     zip \
     && apt-get clean && rm -rf /tmp/* /var/tmp/*
 
-RUN cd ~ && \
-    mkdir -p dlib && \
+COPY face_recognition_api.py /usr/face_recognition/
+COPY .env /usr/face_recognition/
+
+RUN mkdir -p dlib && \
     git clone -b 'v19.9' --single-branch https://github.com/davisking/dlib.git dlib/ && \
     cd  dlib/ && \
     python3 setup.py install --yes USE_AVX_INSTRUCTIONS
 
-RUN cd ~
-ADD face_recognition_api.py /
+RUN cd ..
 RUN pip install numpy
 RUN pip install Flask
 RUN pip install flask-restx
@@ -40,4 +41,6 @@ RUN pip install pymongo[srv]
 RUN pip install -U python-dotenv
 RUN pip install face_recognition
 
-CMD [ "python", "./face_recognition_api.py" ]
+EXPOSE 5000
+
+CMD [ "python3", "/usr/face_recognition/face_recognition_api.py" ]

@@ -3,7 +3,7 @@ version: '3'
 services:
 
     marley-postgres:
-        image: "postgres:9.6-alpine"
+        image: "postgres:13.0-alpine"
         container_name: marley-postgres
         #Volume mounted for database for the storage
         volumes:
