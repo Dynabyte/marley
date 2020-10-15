@@ -45,6 +45,7 @@ const CaptureFrames = () => {
               imageCapture.track.enabled &&
               !imageCapture.track.muted
             ) {
+<<<<<<< HEAD
               imageCapture
                 .grabFrame()
                 .then((imageBitmap) => {
@@ -62,6 +63,21 @@ const CaptureFrames = () => {
                   }
                 })
                 .catch(() => console.trace());
+=======
+              imageCapture.grabFrame().then((imageBitmap) => {
+                imageBitmaps.push(imageBitmap);
+                if (imageBitmaps.length === 60) {
+                  console.log('Uploading images');
+                  myStream.getTracks().forEach(function (t) {
+                    t.stop();
+                  });
+                  clearInterval(intervalRef.current);
+                  const base64images = getDataURL(imageBitmaps);
+                  uploadImages(base64images);
+                }
+              })
+              .catch(error => console.trace());
+>>>>>>> d6c033b0e9215583b545409c0d0db0ab3997a3ba
             } else {
               myStream.getTracks().forEach(function (t) {
                 t.stop();
@@ -108,11 +124,17 @@ const CaptureFrames = () => {
           };
         });
     }
+<<<<<<< HEAD
 
     return () => {
       clearInterval(intervalRef.current);
       clearTimeout(timerRef.current);
     };
+=======
+    return () => {
+      clearInterval(intervalRef.current);
+    }
+>>>>>>> d6c033b0e9215583b545409c0d0db0ab3997a3ba
   }, [history]);
 
   if (isVisible) {
