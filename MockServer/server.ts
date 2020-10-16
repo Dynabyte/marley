@@ -34,7 +34,7 @@ app.post('/predict', (req: Request, res: Response) => {
 
   return res.send({
     name: persons[random].name,
-    isKnownFace: false, //Math.random() >= 0.9,
+    isKnownFace: Math.random() >= 0.5,
     isFace: true, //Math.random() >= 0.1,
   });
 });
