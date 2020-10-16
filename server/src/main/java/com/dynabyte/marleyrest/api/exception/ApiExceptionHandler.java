@@ -25,11 +25,12 @@ public class ApiExceptionHandler {
     /**
      * Handles exceptions in the api, creating a ResponseEntity object which gives the api user better information than just an internal server error.
      * All the exception types that are handled are for bad requests and listed in "value" for the @ExceptionHandler annotation
+     *
      * @param e The thrown exception
      * @return ResponseEntity including an ApiExceptionReport object that details the error as well as the http status.
      */
     @ExceptionHandler(value = {ImageEncodingException.class, InvalidArgumentException.class, ResponseBodyNotFoundException.class})
-    public ResponseEntity<ApiExceptionReport> handleBadRequestExceptions(Exception e){
+    public ResponseEntity<ApiExceptionReport> handleBadRequestExceptions(Exception e) {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         return getErrorResponse(e, httpStatus);
     }
@@ -37,22 +38,24 @@ public class ApiExceptionHandler {
     /**
      * Handles exceptions in the api, creating a ResponseEntity object which gives the api user better information than just an internal server error.
      * All the exception types that are handled are for not acceptable requests and listed in "value" for the @ExceptionHandler annotation
+     *
      * @param e The thrown exception
      * @return ResponseEntity including an ApiExceptionReport object that details the error as well as the http status.
      */
     @ExceptionHandler(value = {MissingPersonInDbException.class, PersonAlreadyInDbException.class, RegistrationException.class})
-    public ResponseEntity<ApiExceptionReport> handleCustomInternalExceptions(Exception e){
+    public ResponseEntity<ApiExceptionReport> handleCustomInternalExceptions(Exception e) {
         HttpStatus httpStatus = HttpStatus.NOT_ACCEPTABLE;
         return getErrorResponse(e, httpStatus);
     }
 
     /**
      * Handles exception thrown from external face recognition API
+     *
      * @param e The thrown exception
      * @return ResponseEntity including an ApiExceptionReport object that details the error as well as the http status.
      */
     @ExceptionHandler(value = {FaceRecognitionException.class})
-    public ResponseEntity<ApiExceptionReport> handleExternalAPIException(FaceRecognitionException e){
+    public ResponseEntity<ApiExceptionReport> handleExternalAPIException(FaceRecognitionException e) {
         HttpStatus httpStatus = e.getHttpStatus();
         return getErrorResponse(e, httpStatus);
     }
@@ -71,7 +74,8 @@ public class ApiExceptionHandler {
 
     /**
      * Generates a ResponseEntity with a build in ApiExceptionReport.
-     * @param e The exception thrown
+     *
+     * @param e          The exception thrown
      * @param httpStatus Suitable http status for the exception
      * @return ResponseEntity which includes an ApiExceptionReport
      */

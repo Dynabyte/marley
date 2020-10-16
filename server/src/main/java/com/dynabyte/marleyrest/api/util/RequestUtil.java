@@ -7,6 +7,8 @@ import com.dynabyte.marleyrest.registration.request.RegistrationRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
+
 /**
  * Utility class for validating requests received in the rest api. Includes private submethods.
  * Exceptions are thrown if a request is determined to be invalid.
@@ -15,9 +17,10 @@ public class RequestUtil {
 
     /**
      * Validates image request used for predicting an image
+     *
      * @param imageRequest Request containing a single base64 image string
      */
-    public static ImageRequest validateAndPreparePredictionRequest(ImageRequest imageRequest){
+    public static ImageRequest validateAndPreparePredictionRequest(ImageRequest imageRequest) {
         ImageUtil.validateImageNotNull(imageRequest.getImage());
         return new ImageRequest(ImageUtil.validateImageAndRemoveDescriptorTag(imageRequest.getImage()));
 
@@ -25,9 +28,10 @@ public class RequestUtil {
 
     /**
      * Validates a request to register a new person and removes potential descriptor tags in the images list
+     *
      * @param registrationRequest The request to be validated
      */
-    public static RegistrationRequest validateAndPrepareRegistrationRequest(RegistrationRequest registrationRequest){
+    public static RegistrationRequest validateAndPrepareRegistrationRequest(RegistrationRequest registrationRequest) {
         validateName(registrationRequest.getName());
         validateImagesNotNullOrEmpty(registrationRequest.getImages());
         List<String> base64Images = validateImagesAndRemoveDescriptorTags(registrationRequest.getImages());
@@ -36,16 +40,18 @@ public class RequestUtil {
 
     /**
      * Validates that a list of strings is not null
+     *
      * @param images The list of strings to be validated
      */
     private static void validateImagesNotNullOrEmpty(List<String> images) {
-        if(images == null || images.isEmpty()){
+        if (isNull(images) || images.isEmpty()) {
             throw new InvalidArgumentException("images array missing or empty! Must be included in base64format");
         }
     }
 
     /**
      * Validates a list of base64 image strings and removes descriptor tag if present. Throws error if not valid
+     *
      * @param images List of base 64 image strings
      * @return Validated list of base64 image strings after removing descriptor tags
      */
@@ -59,13 +65,14 @@ public class RequestUtil {
 
     /**
      * Validates name to not be null and to fit size requirements
+     *
      * @param name String to be validated
      */
     private static void validateName(String name) {
-        if(name == null){
+        if (isNull(name)) {
             throw new InvalidArgumentException("name cannot be null!");
         }
-        if(name.length() < 1 || name.length() > 50){
+        if (name.length() < 1 || name.length() > 50) {
             throw new InvalidArgumentException("name must be between 1 and 50 characters!");
         }
     }

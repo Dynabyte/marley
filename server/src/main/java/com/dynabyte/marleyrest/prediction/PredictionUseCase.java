@@ -33,10 +33,11 @@ public class PredictionUseCase {
 
     /**
      * Predicts whether an image has a face and whether that face is recognized in the database
+     *
      * @param imageRequest a request with an image as a base64 image string
      * @return ClientPredictionResponse object
      */
-    public ClientPredictionResponse execute(ImageRequest imageRequest){
+    public ClientPredictionResponse execute(ImageRequest imageRequest) {
         LOGGER.info("Predict request initiated");
         imageRequest = RequestUtil.validateAndPreparePredictionRequest(imageRequest);
 
@@ -44,7 +45,7 @@ public class PredictionUseCase {
         try {
             faceId = faceRecognitionService.predict(imageRequest);
         } catch (RestClientResponseException e) {
-            if(e.getRawStatusCode() == 409){
+            if (e.getRawStatusCode() == 409) {
                 return new ClientPredictionResponse("Unknown", false, false);
             }
             throw new FaceRecognitionException("Something went wrong with the face recognition API", HttpStatus.valueOf(e.getRawStatusCode()));
@@ -52,7 +53,7 @@ public class PredictionUseCase {
 
         ClientPredictionResponse clientPredictionResponse = new ClientPredictionResponse("Unknown", true, false);
 
-        if(faceId == null){
+        if (faceId == null) {
             return clientPredictionResponse;
         }
 
