@@ -4,6 +4,7 @@ import CaptureFrames from './components/register/CaptureFrames';
 import Positioning from './components/register/PositionInformation';
 import RegisterForm from './components/register/RegistrationForm';
 import Home from './Home';
+import ErrorMessage from './components/ErrorMessage';
 import GlobalStyle from './styling/GlobalStyle';
 
 const App = () => (
@@ -22,6 +23,9 @@ const App = () => (
         </Route>
         <Route path='/capture-frames' exact>
           <CaptureFrames />
+        </Route>
+        <Route path='/error' exact>
+          <ErrorMessage/>
         </Route>
       </Switch>
     </Router>

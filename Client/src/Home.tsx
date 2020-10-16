@@ -68,7 +68,7 @@ export const Home = () => {
       const uploadImage = (image: string) => {
         axios
           .post(
-            'http://localhost:8000/predict',
+            'http://localhost:8080/predict',
             { image },
             {
               headers: { 'Content-Type': 'application/json' },
@@ -80,7 +80,12 @@ export const Home = () => {
               setResult(data);
             }
           })
-          .catch((error) => console.error(error));
+          .catch((error) => {
+            if( error.response ){
+              const errorData = error.response.data;
+              console.log(errorData);      
+          }
+          })
       };
 
       const getDataURL = (img: ImageBitmap) => {

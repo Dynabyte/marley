@@ -95,7 +95,7 @@ const CaptureFrames = () => {
           const uploadImages = (images: string[]) => {
             axios
               .post(
-                'http://localhost:8000/register',
+                'http://localhost:8080/register',
                 { name, images },
                 {
                   headers: { 'Content-Type': 'application/json' },
@@ -104,7 +104,16 @@ const CaptureFrames = () => {
               .then(() => {
                 console.log('Uploaded images');
               })
-              .catch((error) => console.error(error));
+              .catch((error) => {
+                if( error.response ){
+                  const errorData = error.response.data;
+                  console.log(errorData);
+                  const exceptionClass = errorData.exceptionClass;
+                  if(exceptionClass === 'PersonAlreadyInDbException'){
+                    history.push({pathname:'/error', state:'Du är redan registrerad'});
+                  }      
+              }
+              })
           };
         });
     }
