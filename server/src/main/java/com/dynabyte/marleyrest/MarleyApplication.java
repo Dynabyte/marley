@@ -7,10 +7,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * Runs the rest api spring boot application
  */
 @SpringBootApplication
-public class MarleyJavaRestApiApplication {
+public class MarleyApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(MarleyJavaRestApiApplication.class, args);
+        SpringApplication.run(MarleyApplication.class, args);
     }
 
 }

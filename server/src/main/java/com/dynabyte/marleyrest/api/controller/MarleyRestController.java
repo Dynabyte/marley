@@ -46,11 +46,7 @@ public class MarleyRestController {
     @PostMapping("/predict")
     public ResponseEntity<ClientPredictionResponse> predict(@RequestBody ImageRequest imageRequest) {
 
-        if (Objects.isNull(imageRequest)) {
-            throw new ResponseBodyNotFoundException("Image request missing!");
-        }
-        //TODO RequestUtil is called inside service
-        //TODO Immutability and method honesty
+        validateNotNull(imageRequest);
 
         ClientPredictionResponse clientPredictionResponse = predictionUseCase.execute(imageRequest);
 
@@ -69,13 +65,35 @@ public class MarleyRestController {
     @PostMapping("/register")
     public HttpStatus register(@RequestBody RegistrationRequest registrationRequest) {
 
-        if (Objects.isNull(registrationRequest)) {
-            throw new ResponseBodyNotFoundException("Registration request missing!");
-        }
+        validateNotNull(registrationRequest);
 
         registrationUseCase.execute(registrationRequest);
 
         LOGGER.info("Registration request successful");
         return HttpStatus.OK;
     }
+
+
+    /**
+     * Validates that image request is not null
+     * @param imageRequest request to be validated
+     */
+    private void validateNotNull(ImageRequest imageRequest) {
+        if (Objects.isNull(imageRequest)) {
+            throw new ResponseBodyNotFoundException("Image request missing!");
+        }
+    }
+
+    /**
+     * Validates that registration request is not null
+     * @param registrationRequest request to be validated
+     */
+    private void validateNotNull(RegistrationRequest registrationRequest) {
+        if (Objects.isNull(registrationRequest)) {
+            throw new ResponseBodyNotFoundException("Registration request missing!");
+        }
+    }
+
+
+
 }

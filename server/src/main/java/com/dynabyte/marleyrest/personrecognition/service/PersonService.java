@@ -40,7 +40,6 @@ public class PersonService {
      * @param person An object matching the Person entity
      */
     public void save(Person person) {
-        LOGGER.debug("Saving person to database: " + person);
         personRepository.save(person);
         LOGGER.info("Person saved to database: " + person);
     }
