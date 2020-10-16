@@ -5,6 +5,7 @@ import com.dynabyte.marleyrest.registration.request.LabelPutRequest;
 import com.dynabyte.marleyrest.personrecognition.response.FaceRecognitionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -15,7 +16,8 @@ import org.springframework.web.client.RestTemplate;
 public class FaceRecognitionService {
 
     private final Logger LOGGER = LoggerFactory.getLogger(FaceRecognitionService.class);
-    private final String faceRecognitionURL = "http://localhost:5000/face-recognition/";
+    @Value("${FACE_REC_URL:http://localhost:5000/face-recognition/}")
+    private String faceRecognitionURL;
     private final RestTemplate restTemplate = new RestTemplate();
 
 
@@ -27,7 +29,7 @@ public class FaceRecognitionService {
      */
     @SuppressWarnings("ConstantConditions") //null is checked later
     public String predict(ImageRequest imageRequest){
-        LOGGER.debug("Sending prediction request to face recognition API");
+        LOGGER.info("Sending prediction request to face recognition API");
         return restTemplate
                 .postForObject(faceRecognitionURL + "predict", imageRequest, FaceRecognitionResponse.class)
                 .getFaceId();

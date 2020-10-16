@@ -13,22 +13,36 @@ services:
     
         #Environment variable for DB name, user and password
         environment:
-          - POSTGRES_DB=marleyDB
-          - POSTGRES_USER=marley
-          - POSTGRES_PASSWORD=marley
+          - POSTGRES_DB=${POSTGRES_DB}
+          - POSTGRES_USER=${POSTGRES_USER}
+          - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
+    face-recognition:
+      build: ./python
+      container_name: face-recognition
+
+      environment:
+        - MONGO_CLIENT=${MONGO_CLIENT}
+        - MONGO_DB_NAME=${MONGO_DB_NAME}
+        - PYTHONUNBUFFERED=1
+      ports:
+        - 5000:5000
+
+    
     person-recognition:
         build: ./server
         container_name: person-recognition
 
         environment:
-            DB_USER: marley
-            DB_PASS: marley
-            DB_URL: jdbc:postgresql://marley-postgres/marleyDB
+          - DB_USER=${DB_USER}
+          - DB_PASS=${DB_PASS}
+          - DB_URL=${DB_URL}
+          - FACE_REC_URL=${FACE_REC_URL}
         ports:
             - 8080:8080
-        links:
+        depends_on:
             - marley-postgres
+            - face-recognition
         
 #Volumes for DB data
 volumes:

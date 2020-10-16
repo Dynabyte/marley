@@ -1,4 +1,5 @@
 FROM maven:3.6.3-openjdk-14-slim AS build
+VOLUME /java-code
 RUN mkdir -p /workspace
 WORKDIR /workspace
 COPY pom.xml /workspace
