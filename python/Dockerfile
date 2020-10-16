@@ -24,15 +24,14 @@ RUN apt-get install -y --fix-missing \
     zip \
     && apt-get clean && rm -rf /tmp/* /var/tmp/*
 
-COPY face_recognition_api.py /usr/face_recognition/
-COPY .env /usr/face_recognition/
-
 RUN mkdir -p dlib && \
     git clone -b 'v19.9' --single-branch https://github.com/davisking/dlib.git dlib/ && \
     cd  dlib/ && \
     python3 setup.py install --yes USE_AVX_INSTRUCTIONS
 
 RUN cd ..
+COPY face_recognition_api.py /usr/face_recognition/
+
 RUN pip install numpy
 RUN pip install Flask
 RUN pip install flask-restx
