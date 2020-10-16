@@ -44,9 +44,9 @@ public class MarleyRestController {
      * @return ResponseEntity object with the results of the image prediction
      */
     @PostMapping("/predict")
-    public ResponseEntity<ClientPredictionResponse> predict(@RequestBody ImageRequest imageRequest){
+    public ResponseEntity<ClientPredictionResponse> predict(@RequestBody ImageRequest imageRequest) {
 
-        if(Objects.isNull(imageRequest)){
+        if (Objects.isNull(imageRequest)) {
             throw new ResponseBodyNotFoundException("Image request missing!");
         }
         //TODO RequestUtil is called inside service
@@ -67,9 +67,9 @@ public class MarleyRestController {
      * @return HttpStatus.OK
      */
     @PostMapping("/register")
-    public HttpStatus register(@RequestBody RegistrationRequest registrationRequest){
+    public HttpStatus register(@RequestBody RegistrationRequest registrationRequest) {
 
-        if (Objects.isNull(registrationRequest)){
+        if (Objects.isNull(registrationRequest)) {
             throw new ResponseBodyNotFoundException("Registration request missing!");
         }
 

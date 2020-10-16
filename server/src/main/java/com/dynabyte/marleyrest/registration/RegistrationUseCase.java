@@ -39,9 +39,10 @@ public class RegistrationUseCase {
     /**
      * Executes the use case of registering a person in the person database and saving face encodings from a list of
      * images to the face recognition API. The face encodings and the person will have a matching faceId.
+     *
      * @param registrationRequest a request with a name and a list of base64 image strings
      */
-    public void execute(RegistrationRequest registrationRequest){
+    public void execute(RegistrationRequest registrationRequest) {
         LOGGER.info("Registration request initiated");
         registrationRequest = RequestUtil.validateAndPrepareRegistrationRequest(registrationRequest);
         LOGGER.debug("Registration request validated");
@@ -68,9 +69,9 @@ public class RegistrationUseCase {
 
         boolean isRegisteredPersonInDb = false;
         //Go through each base64 image until one can be encoded and added to the database correctly, then add the rest to the same faceId
-        for (String image : images){
+        for (String image : images) {
             try {
-                if(!isRegisteredPersonInDb){
+                if (!isRegisteredPersonInDb) {
                     verifyPersonIsNotRegisteredAlready(image);
 
                     registeredFaceId = faceRecognitionService.postLabel(new ImageRequest(image));
@@ -78,23 +79,21 @@ public class RegistrationUseCase {
                     isRegisteredPersonInDb = true;
                     registeredImagesCount++;
                     LOGGER.debug("Posted Image. Registered images: " + registeredImagesCount);
-                }
-                else {
+                } else {
                     //TODO predict again to verify it's still the same person? Would perhaps be more secure but would decrease performance
                     faceRecognitionService.putLabel(new LabelPutRequest(image, registeredFaceId));
                     registeredImagesCount++;
                     LOGGER.debug("Added Image. Registered images: " + registeredImagesCount);
                 }
-            } catch (RestClientResponseException e){
-                if (e.getRawStatusCode() == 409){
+            } catch (RestClientResponseException e) {
+                if (e.getRawStatusCode() == 409) {
                     LOGGER.info("No face found, cannot get face encoding from image. Skipping an image");
-                }
-                else {
+                } else {
                     LOGGER.info("Cannot register image. Something went wrong with Face Recognition API.");
                 }
             }
         }
-        if(!isRegisteredPersonInDb){
+        if (!isRegisteredPersonInDb) {
             throw new RegistrationException("Could not register any images or save person to Db");
         }
         LOGGER.info("Registration Complete. Total registered images: " + registeredImagesCount + " out of " + images.size());
@@ -103,12 +102,13 @@ public class RegistrationUseCase {
     /**
      * Verifies that a person is not already in a database by making a prediction. If faceId != null then a face is
      * recognized in the face recognition API and an exception will be thrown.
+     *
      * @param image the image to be face predicted for verification
      */
     private void verifyPersonIsNotRegisteredAlready(String image) {
         String predictionFaceId = faceRecognitionService.predict(new ImageRequest(image));
 
-        if(predictionFaceId != null){
+        if (predictionFaceId != null) {
             personService.findById(predictionFaceId).ifPresentOrElse(person -> {
                 LOGGER.info("Found face in face recognition database: " + predictionFaceId);
                 throw new PersonAlreadyInDbException("Cannot register a person who is already in the database");
