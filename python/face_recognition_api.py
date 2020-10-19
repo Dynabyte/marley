@@ -100,6 +100,27 @@ class UpdateLabel(Resource):
             traceback.print_exc()
             fl.abort(404, 'Face not found')
 
+@ns.route('/delete/<string:id>')
+@ns.response(404, 'Face not found')
+@ns.param('id', 'The face identifier (MongoDB ObjectID)')
+class Delete(Resource):
+    @ns.doc('delete_face')
+    @ns.marshal_with(face_id)
+    def delete(self, id):
+        try:
+            face_id = time_lambda(
+                lambda: db_delete_face(id),
+                db_delete_face.__name__)
+            if face_id is None:
+                raise FaceNotFoundException
+            return {"faceId": str(face_id)}
+        except FaceNotFoundException:
+            traceback.print_exc()
+            fl.abort(404, 'FaceId not found')
+            
+        
+        
+        
 
 @ns.route('/predict')
 @ns.response(409, 'Face not detected')
@@ -218,6 +239,17 @@ def db_update_face(_id, encoding):
         faces_collection = []
     if matched_count == 0:
         return None
+    return _id
+
+def db_delete_face(_id):
+    with lock:
+        deleted_count = faces_db() \
+            .delete_one({'_id': ObjectId(_id)}) \
+            .deleted_count
+        if deleted_count == 0:
+            return None
+        global faces_collection
+        faces_collection = []
     return _id
 
 

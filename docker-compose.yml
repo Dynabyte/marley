@@ -27,6 +27,8 @@ services:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASS}
     restart: unless-stopped
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
 
   face-recognition:
     build: ./python
@@ -59,3 +61,4 @@ services:
 #Volumes for DB data
 volumes:
   marley-data:
+  pgadmin-data:

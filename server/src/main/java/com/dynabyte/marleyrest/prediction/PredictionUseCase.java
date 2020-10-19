@@ -46,18 +46,19 @@ public class PredictionUseCase {
             faceId = faceRecognitionService.predict(imageRequest);
         } catch (RestClientResponseException e) {
             if (e.getRawStatusCode() == 409) {
-                return new ClientPredictionResponse("Unknown", false, false);
+                return new ClientPredictionResponse(null, "Unknown", false, false);
             }
             throw new FaceRecognitionException("Something went wrong with the face recognition API", HttpStatus.valueOf(e.getRawStatusCode()));
         }
 
-        ClientPredictionResponse clientPredictionResponse = new ClientPredictionResponse("Unknown", true, false);
+        ClientPredictionResponse clientPredictionResponse = new ClientPredictionResponse(null,"Unknown", true, false);
 
         if (faceId == null) {
             return clientPredictionResponse;
         }
 
         personService.findById(faceId).ifPresentOrElse(person -> {
+            clientPredictionResponse.setId(person.getFaceId());
             clientPredictionResponse.setName(person.getName());
             clientPredictionResponse.setKnownFace(true);
         }, () -> {

@@ -30,8 +30,6 @@ RUN mkdir -p dlib && \
     python3 setup.py install --yes USE_AVX_INSTRUCTIONS
 
 RUN cd ..
-COPY . /usr/face_recognition/
-
 RUN pip install numpy
 RUN pip install Flask
 RUN pip install flask-restx
@@ -40,6 +38,8 @@ RUN pip install pymongo[srv]
 RUN pip install -U python-dotenv
 RUN pip install face_recognition
 RUN pip install waitress
+
+COPY . /usr/face_recognition/
 
 EXPOSE 5000
 
