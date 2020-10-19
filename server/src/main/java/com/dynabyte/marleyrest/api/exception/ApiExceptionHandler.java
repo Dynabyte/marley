@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -32,8 +33,7 @@ public class ApiExceptionHandler {
      */
     @ExceptionHandler(value = {ImageEncodingException.class, InvalidArgumentException.class, ResponseBodyNotFoundException.class})
     public ResponseEntity<ApiExceptionReport> handleBadRequestExceptions(Exception e) {
-        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-        return getErrorResponse(e, httpStatus);
+        return getErrorResponse(e, HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -45,8 +45,7 @@ public class ApiExceptionHandler {
      */
     @ExceptionHandler(value = {MissingPersonInDbException.class, PersonAlreadyInDbException.class, RegistrationException.class, IdNotFoundException.class})
     public ResponseEntity<ApiExceptionReport> handleCustomInternalExceptions(Exception e) {
-        HttpStatus httpStatus = HttpStatus.NOT_ACCEPTABLE;
-        return getErrorResponse(e, httpStatus);
+        return getErrorResponse(e, HttpStatus.NOT_ACCEPTABLE);
     }
 
     /**
@@ -57,24 +56,22 @@ public class ApiExceptionHandler {
      */
     @ExceptionHandler(value = {FaceRecognitionException.class})
     public ResponseEntity<ApiExceptionReport> handleExternalAPIException(FaceRecognitionException e) {
-        HttpStatus httpStatus = e.getHttpStatus();
-        return getErrorResponse(e, httpStatus);
+         return getErrorResponse(e, e.getHttpStatus());
     }
 
 
-//    /**
-//     * Handles exception thrown from external API
-//     * @param e The thrown exception
-//     * @return ResponseEntity including an ApiExceptionReport object that details the error as well as the http status.
-//     */
-//    @ExceptionHandler(value = {HttpClientErrorException.class})
-//    public ResponseEntity<ApiExceptionReport> handleExternalAPIException(HttpClientErrorException e){
-//        HttpStatus httpStatus = e.getStatusCode();
-//        return getErrorResponse(e, httpStatus);
-//    }
+    /**
+     * Handles exception when external API is unavailable
+     * @param e The thrown exception
+     * @return ResponseEntity including an ApiExceptionReport object that details the error as well as the http status.
+     */
+    @ExceptionHandler(value = {ResourceAccessException.class})
+    public ResponseEntity<ApiExceptionReport> handleExternalAPIException(ResourceAccessException e){
+        return getErrorResponse(e, HttpStatus.SERVICE_UNAVAILABLE, "Face recognition service unavailable");
+    }
 
     /**
-     * Generates a ResponseEntity with a build in ApiExceptionReport.
+     * Generates a ResponseEntity with a built in ApiExceptionReport.
      *
      * @param e          The exception thrown
      * @param httpStatus Suitable http status for the exception
@@ -85,6 +82,25 @@ public class ApiExceptionHandler {
         ApiExceptionReport apiExceptionReport = new ApiExceptionReport(
                 exceptionClass,
                 e.getMessage(),
+                httpStatus,
+                ZonedDateTime.now(ZoneId.of("+02:00"))
+        );
+        LOGGER.warn(String.valueOf(apiExceptionReport));
+        return new ResponseEntity<>(apiExceptionReport, httpStatus);
+    }
+
+    /**
+     * Generates a ResponseEntity with a built in ApiExceptionReport with a custom message.
+     *
+     * @param e          The exception thrown
+     * @param httpStatus Suitable http status for the exception
+     * @return ResponseEntity which includes an ApiExceptionReport
+     */
+    private ResponseEntity<ApiExceptionReport> getErrorResponse(Exception e, HttpStatus httpStatus, String message) {
+        String exceptionClass = e.getClass().getSimpleName();
+        ApiExceptionReport apiExceptionReport = new ApiExceptionReport(
+                exceptionClass,
+                message,
                 httpStatus,
                 ZonedDateTime.now(ZoneId.of("+02:00"))
         );
