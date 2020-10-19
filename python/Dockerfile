@@ -30,7 +30,7 @@ RUN mkdir -p dlib && \
     python3 setup.py install --yes USE_AVX_INSTRUCTIONS
 
 RUN cd ..
-COPY face_recognition_api.py /usr/face_recognition/
+COPY . /usr/face_recognition/
 
 RUN pip install numpy
 RUN pip install Flask
