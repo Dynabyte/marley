@@ -1,21 +1,26 @@
 import axios from 'axios';
 import React, { useEffect, useRef } from 'react';
 import './App.css';
+import Modal from './components/Modal';
 import FaceRegistrationText from './components/register/FaceRegistrationText';
+import useModal from './hooks/useModal';
 import Logo from './shared/Logo';
 import Title from './shared/Title';
 import dynabyteLogo from './static/images/dynabyte_white.png';
+import WhiteButton from './ui/WhiteButton';
 
 interface IResult {
   isKnownFace?: boolean;
   isFace?: boolean;
   name?: string;
+  id?: number;
 }
 
 export const Home = () => {
   const [result, setResult] = React.useState<IResult>({});
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
   const intervalRef = useRef(null);
+  const { isShowing, toggle } = useModal();
 
   useEffect(() => {
     let isMounted = true;
@@ -81,11 +86,11 @@ export const Home = () => {
             }
           })
           .catch((error) => {
-            if( error.response ){
+            if (error.response) {
               const errorData = error.response.data;
-              console.log(errorData);      
-          }
-          })
+              console.log(errorData);
+            }
+          });
       };
 
       const getDataURL = (img: ImageBitmap) => {
@@ -104,9 +109,25 @@ export const Home = () => {
     };
   }, []);
 
-  const { isKnownFace, isFace, name } = result;
+  const { isKnownFace, isFace, name, id } = result;
 
-  if (isLoading) {
+  const handleClick = () => {
+    axios
+      .delete(`http://localhost:8080/delete/${id}`, {
+        headers: { 'Content-Type': 'application/json' },
+      })
+      .then(() => {
+        console.log('Deleted from system!');
+      })
+      .catch((error) => {
+        if (error.response) {
+          const errorData = error.response.data;
+          console.log(errorData);
+        }
+      });
+  };
+
+  if (isLoading || (!isKnownFace && !isFace)) {
     return (
       <div className='wrapper'>
         <Logo src={dynabyteLogo} alt='logo' width='200' height='80' />
@@ -116,7 +137,19 @@ export const Home = () => {
 
   return (
     <div className='wrapper'>
-      {isKnownFace && <Title>{`Välkommen ${name} till`}</Title>}
+      {isKnownFace && (
+        <>
+          <Title>{`Välkommen ${name} till`}</Title>
+          <WhiteButton className='button-default' onClick={toggle}>
+            Ta bort mig från systemet
+          </WhiteButton>
+          <Modal
+            isShowing={isShowing}
+            hide={toggle}
+            handleClick={handleClick}
+          />
+        </>
+      )}
       {!isKnownFace && isFace && <FaceRegistrationText />}
 
       <footer>
