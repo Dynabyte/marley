@@ -1,5 +1,6 @@
 package com.dynabyte.marleyrest.api.exception;
 
+import com.dynabyte.marleyrest.deletion.exception.IdNotFoundException;
 import com.dynabyte.marleyrest.prediction.exception.*;
 import com.dynabyte.marleyrest.registration.exception.MissingPersonInDbException;
 import com.dynabyte.marleyrest.registration.exception.PersonAlreadyInDbException;
@@ -42,7 +43,7 @@ public class ApiExceptionHandler {
      * @param e The thrown exception
      * @return ResponseEntity including an ApiExceptionReport object that details the error as well as the http status.
      */
-    @ExceptionHandler(value = {MissingPersonInDbException.class, PersonAlreadyInDbException.class, RegistrationException.class})
+    @ExceptionHandler(value = {MissingPersonInDbException.class, PersonAlreadyInDbException.class, RegistrationException.class, IdNotFoundException.class})
     public ResponseEntity<ApiExceptionReport> handleCustomInternalExceptions(Exception e) {
         HttpStatus httpStatus = HttpStatus.NOT_ACCEPTABLE;
         return getErrorResponse(e, httpStatus);

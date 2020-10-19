@@ -29,7 +29,7 @@ public class FaceRecognitionService {
      */
     @SuppressWarnings("ConstantConditions") //null is checked later
     public String predict(ImageRequest imageRequest) {
-        LOGGER.info("Sending prediction request to face recognition API");
+        LOGGER.debug("Sending prediction request to face recognition API");
         return restTemplate
                 .postForObject(faceRecognitionURL + "predict", imageRequest, FaceRecognitionResponse.class)
                 .getFaceId();
@@ -58,5 +58,15 @@ public class FaceRecognitionService {
     public void putLabel(LabelPutRequest labelPutRequest) {
         LOGGER.debug("Sending label put request to face recognition API");
         restTemplate.put(faceRecognitionURL + "label/" + labelPutRequest.getFaceId(), labelPutRequest);
+    }
+
+    /**
+     * Sends a request to delete a face with a specific faceId from database
+     *
+     * @param faceId the faceId of the face to be deleted
+     */
+    public void delete(String faceId) {
+        LOGGER.debug("Sending delete request to face recognition API");
+        restTemplate.delete(faceRecognitionURL + "delete/" + faceId);
     }
 }

@@ -1,6 +1,7 @@
 package com.dynabyte.marleyrest.api.controller;
 
 import com.dynabyte.marleyrest.api.exception.ResponseBodyNotFoundException;
+import com.dynabyte.marleyrest.deletion.DeleteUseCase;
 import com.dynabyte.marleyrest.prediction.PredictionUseCase;
 import com.dynabyte.marleyrest.registration.RegistrationUseCase;
 import com.dynabyte.marleyrest.registration.request.RegistrationRequest;
@@ -11,10 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
 
@@ -28,11 +26,13 @@ public class MarleyRestController {
     private final Logger LOGGER = LoggerFactory.getLogger(MarleyRestController.class);
     private final PredictionUseCase predictionUseCase;
     private final RegistrationUseCase registrationUseCase;
+    private final DeleteUseCase deleteUseCase;
 
     @Autowired
-    public MarleyRestController(PredictionUseCase predictionUseCase, RegistrationUseCase registrationUseCase) {
+    public MarleyRestController(PredictionUseCase predictionUseCase, RegistrationUseCase registrationUseCase, DeleteUseCase deleteUseCase) {
         this.predictionUseCase = predictionUseCase;
         this.registrationUseCase = registrationUseCase;
+        this.deleteUseCase = deleteUseCase;
     }
 
     /**
@@ -70,6 +70,15 @@ public class MarleyRestController {
         registrationUseCase.execute(registrationRequest);
 
         LOGGER.info("Registration request successful");
+        return HttpStatus.OK;
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public HttpStatus delete(@PathVariable String id){
+
+        deleteUseCase.execute(id);
+
+        LOGGER.info("Person with faceId " + id + " deleted");
         return HttpStatus.OK;
     }
 

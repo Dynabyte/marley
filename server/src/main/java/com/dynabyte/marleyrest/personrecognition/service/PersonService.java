@@ -34,6 +34,11 @@ public class PersonService {
         return personRepository.findById(faceId);
     }
 
+    public void deleteById(String faceId){
+        LOGGER.debug("Deleting person with faceId " + faceId);
+        personRepository.deleteById(faceId);
+    }
+
     /**
      * Saves a person object to the SQL database
      *
