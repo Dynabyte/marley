@@ -4,9 +4,7 @@ import './App.css';
 import Modal from './components/Modal';
 import FaceRegistrationText from './components/register/FaceRegistrationText';
 import useModal from './hooks/useModal';
-import Logo from './shared/Logo';
 import Title from './shared/Title';
-import dynabyteLogo from './static/images/dynabyte_white.png';
 import WhiteButton from './ui/WhiteButton';
 
 interface IResult {
@@ -18,7 +16,9 @@ interface IResult {
 
 export const Home = () => {
   const [result, setResult] = React.useState<IResult>({});
-  const [isLoading, setIsLoading] = React.useState<boolean>(true);
+  const [paused, setPaused] = React.useState<boolean>(false);
+  const [deleting, setDeleting] = React.useState<boolean>(false);
+
   const intervalRef = useRef(null);
   const { isShowing, toggle } = useModal();
 
@@ -37,37 +37,41 @@ export const Home = () => {
         })
         .then((stream: MediaStream) => {
           myStream = stream;
-          intervalRef.current = setInterval(() => {
-            const imageCapture = new ImageCapture(myStream.getVideoTracks()[0]);
-            if (
-              imageCapture.track.readyState === 'live' &&
-              imageCapture.track.enabled &&
-              !imageCapture.track.muted
-            ) {
-              imageCapture
-                .grabFrame()
-                .then((imageBitmap) => {
-                  const dataURL = getDataURL(imageBitmap);
-                  uploadImage(dataURL);
-                })
-                .catch(() => console.trace());
-            } else {
-              myStream.getTracks().forEach(function (t) {
-                t.stop();
-              });
-              navigator.mediaDevices
-                .getUserMedia({
-                  video: {
-                    width: { ideal: 1920 },
-                    height: { ideal: 1024 },
-                  },
-                })
-                .then(function (stream) {
-                  myStream = stream;
-                  console.log('new stream created');
+          if (!paused) {
+            intervalRef.current = setInterval(() => {
+              const imageCapture = new ImageCapture(
+                myStream.getVideoTracks()[0]
+              );
+              if (
+                imageCapture.track.readyState === 'live' &&
+                imageCapture.track.enabled &&
+                !imageCapture.track.muted
+              ) {
+                imageCapture
+                  .grabFrame()
+                  .then((imageBitmap) => {
+                    const dataURL = getDataURL(imageBitmap);
+                    uploadImage(dataURL);
+                  })
+                  .catch(() => console.trace());
+              } else {
+                myStream.getTracks().forEach(function (t) {
+                  t.stop();
                 });
-            }
-          }, 800);
+                navigator.mediaDevices
+                  .getUserMedia({
+                    video: {
+                      width: { ideal: 1920 },
+                      height: { ideal: 1024 },
+                    },
+                  })
+                  .then(function (stream) {
+                    myStream = stream;
+                    console.log('new stream created');
+                  });
+              }
+            }, 800);
+          }
         });
 
       const uploadImage = (image: string) => {
@@ -81,7 +85,6 @@ export const Home = () => {
           )
           .then(({ data }) => {
             if (isMounted) {
-              setIsLoading(false);
               setResult(data);
             }
           })
@@ -107,19 +110,29 @@ export const Home = () => {
       clearInterval(intervalRef.current);
       isMounted = false;
     };
-  }, []);
+  }, [paused]);
 
   const { isKnownFace, isFace, name, id } = result;
 
   const handleClick = () => {
+    setDeleting(true);
+
     axios
       .delete(`http://localhost:8080/delete/${id}`, {
         headers: { 'Content-Type': 'application/json' },
       })
       .then(() => {
         console.log('Deleted from system!');
+        setTimeout(() => {
+          setDeleting(false);
+          setResult({});
+          setPaused(false);
+        }, 2000);
       })
       .catch((error) => {
+        setDeleting(false);
+        setResult({});
+        setPaused(false);
         if (error.response) {
           const errorData = error.response.data;
           console.log(errorData);
@@ -127,10 +140,10 @@ export const Home = () => {
       });
   };
 
-  if (isLoading || (!isKnownFace && !isFace)) {
+  if (deleting) {
     return (
-      <div className='wrapper'>
-        <Logo src={dynabyteLogo} alt='logo' width='200' height='80' />
+      <div className='wrapper' style={{ fontSize: '3rem', fontWeight: 'bold' }}>
+        Raderar från systemet....
       </div>
     );
   }
@@ -140,13 +153,20 @@ export const Home = () => {
       {isKnownFace && (
         <>
           <Title>{`Välkommen ${name} till`}</Title>
-          <WhiteButton className='button-default' onClick={toggle}>
+          <WhiteButton
+            className='button-default'
+            onClick={() => {
+              toggle();
+              setPaused(true);
+            }}
+          >
             Ta bort mig från systemet
           </WhiteButton>
           <Modal
             isShowing={isShowing}
             hide={toggle}
             handleClick={handleClick}
+            setPaused={setPaused}
           />
         </>
       )}

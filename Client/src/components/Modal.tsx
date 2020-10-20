@@ -36,7 +36,7 @@ const Text = styled.p`
   font-weight: 300;
 `;
 
-const Modal = ({ isShowing, hide, handleClick }) => {
+const Modal = ({ isShowing, hide, handleClick, setPaused }) => {
   const onClick = () => {
     handleClick();
     hide();
@@ -62,7 +62,10 @@ const Modal = ({ isShowing, hide, handleClick }) => {
                 type='button'
                 data-dismiss='modal'
                 aria-label='Close'
-                onClick={hide}
+                onClick={() => {
+                  setPaused(false);
+                  hide();
+                }}
               >
                 <span aria-hidden='true'>NEJ</span>
               </PinkButton>
