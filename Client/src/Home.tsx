@@ -20,6 +20,7 @@ export const Home = () => {
   const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
 
   const intervalRef = useRef(null);
+  const timerRef = useRef(null);
   const { isShowing, toggle } = useModal();
 
   useEffect(() => {
@@ -108,6 +109,7 @@ export const Home = () => {
         t.stop();
       });
       clearInterval(intervalRef.current);
+      clearTimeout(timerRef.current);
       isMounted = false;
     };
   }, [paused]);
@@ -123,7 +125,7 @@ export const Home = () => {
       })
       .then(() => {
         console.log('Deleted from system!');
-        setTimeout(() => {
+        timerRef.current = setTimeout(() => {
           setIsDeleting(false);
           setResult({});
           setPaused(false);
