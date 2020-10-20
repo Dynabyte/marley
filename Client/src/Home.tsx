@@ -17,7 +17,7 @@ interface IResult {
 export const Home = () => {
   const [result, setResult] = React.useState<IResult>({});
   const [paused, setPaused] = React.useState<boolean>(false);
-  const [deleting, setDeleting] = React.useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
 
   const intervalRef = useRef(null);
   const { isShowing, toggle } = useModal();
@@ -115,7 +115,7 @@ export const Home = () => {
   const { isKnownFace, isFace, name, id } = result;
 
   const handleClick = () => {
-    setDeleting(true);
+    setIsDeleting(true);
 
     axios
       .delete(`http://localhost:8080/delete/${id}`, {
@@ -124,13 +124,13 @@ export const Home = () => {
       .then(() => {
         console.log('Deleted from system!');
         setTimeout(() => {
-          setDeleting(false);
+          setIsDeleting(false);
           setResult({});
           setPaused(false);
         }, 2000);
       })
       .catch((error) => {
-        setDeleting(false);
+        setIsDeleting(false);
         setResult({});
         setPaused(false);
         if (error.response) {
@@ -140,7 +140,7 @@ export const Home = () => {
       });
   };
 
-  if (deleting) {
+  if (isDeleting) {
     return (
       <div className='wrapper' style={{ fontSize: '3rem', fontWeight: 'bold' }}>
         Raderar från systemet....
