@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import CenterContent from '../../ui/CenterContent';
+import Spinner from '../../ui/Spinner';
 import WhiteButton from '../../ui/WhiteButton';
 
 const StyledCenterContent = styled(CenterContent)`
@@ -105,15 +106,18 @@ const CaptureFrames = () => {
                 console.log('Uploaded images');
               })
               .catch((error) => {
-                if( error.response ){
+                if (error.response) {
                   const errorData = error.response.data;
                   console.log(errorData);
                   const exceptionClass = errorData.exceptionClass;
-                  if(exceptionClass === 'PersonAlreadyInDbException'){
-                    history.push({pathname:'/error', state:'Du är redan registrerad'});
-                  }      
-              }
-              })
+                  if (exceptionClass === 'PersonAlreadyInDbException') {
+                    history.push({
+                      pathname: '/error',
+                      state: 'Du är redan registrerad',
+                    });
+                  }
+                }
+              });
           };
         });
     }
@@ -137,7 +141,12 @@ const CaptureFrames = () => {
 
   return (
     <StyledCenterContent>
-      {!isVisible && <div>Samlar data...</div>}
+      {!isVisible && (
+        <>
+          <p>Samlar data...</p>
+          <Spinner />
+        </>
+      )}
       {isVisible && (
         <Center>
           <p>Tack! Bilderna har tagits emot för registrering. </p>
