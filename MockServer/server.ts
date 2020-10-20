@@ -34,13 +34,21 @@ app.post('/predict', (req: Request, res: Response) => {
 
   return res.send({
     name: persons[random].name,
-    isKnownFace: false, //Math.random() >= 0.9,
+    isKnownFace: true, //Math.random() >= 0.9,
     isFace: true, //Math.random() >= 0.1,
+    id: persons[random].personId,
   });
 });
 
 app.post('/register', (req: Request, res: Response) => {
   console.log(req.body);
+
+  return res.sendStatus(200);
+});
+
+app.delete('/delete/:id', (req: Request, res: Response) => {
+  const id = req.params.id;
+  console.log('id: ', id);
 
   return res.sendStatus(200);
 });
