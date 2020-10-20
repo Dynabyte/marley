@@ -5,6 +5,7 @@ import Modal from './components/Modal';
 import FaceRegistrationText from './components/register/FaceRegistrationText';
 import useModal from './hooks/useModal';
 import Title from './shared/Title';
+import Spinner from './ui/Spinner';
 import WhiteButton from './ui/WhiteButton';
 
 interface IResult {
@@ -145,7 +146,8 @@ export const Home = () => {
   if (isDeleting) {
     return (
       <div className='wrapper' style={{ fontSize: '3rem', fontWeight: 'bold' }}>
-        Raderar från systemet....
+        <p>Raderar från systemet....</p>
+        <Spinner />
       </div>
     );
   }
