@@ -44,15 +44,14 @@ const Modal = ({ isShowing, hide, handleClick, setPaused }) => {
 
   if (isShowing) {
     return ReactDOM.createPortal(
-      <React.Fragment>
+      <>
         <ModalWrapper aria-modal aria-hidden tabIndex={-1} role='dialog'>
           <StyledModal>
             <Text>Vill du verkligen ta bort dig från systemet?</Text>
             <div style={{ display: 'flex' }}>
               <PinkButton
                 type='button'
-                data-dismiss='modal'
-                aria-label='Close'
+                aria-label='Yes'
                 onClick={onClick}
                 style={{ marginRight: '1rem' }}
               >
@@ -60,8 +59,7 @@ const Modal = ({ isShowing, hide, handleClick, setPaused }) => {
               </PinkButton>
               <PinkButton
                 type='button'
-                data-dismiss='modal'
-                aria-label='Close'
+                aria-label='No'
                 onClick={() => {
                   setPaused(false);
                   hide();
@@ -72,7 +70,7 @@ const Modal = ({ isShowing, hide, handleClick, setPaused }) => {
             </div>
           </StyledModal>
         </ModalWrapper>
-      </React.Fragment>,
+      </>,
       document.body
     );
   } else return null;

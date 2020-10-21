@@ -22,7 +22,7 @@ export const Home = () => {
 
   const intervalRef = useRef(null);
   const timerRef = useRef(null);
-  const { isShowing, toggle } = useModal();
+  const [isShowing, setIsShowing, toggle] = useModal();
 
   useEffect(() => {
     let isMounted = true;
@@ -152,23 +152,22 @@ export const Home = () => {
     );
   }
 
+  const handleModal = () => {
+    toggle();
+    setPaused(true);
+  };
+
   return (
     <div className='wrapper'>
       {isKnownFace && (
         <>
           <Title>{`Välkommen ${name} till`}</Title>
-          <WhiteButton
-            className='button-default'
-            onClick={() => {
-              toggle();
-              setPaused(true);
-            }}
-          >
+          <WhiteButton className='button-default' onClick={handleModal}>
             Ta bort mig från systemet
           </WhiteButton>
           <Modal
             isShowing={isShowing}
-            hide={toggle}
+            hide={() => setIsShowing(false)}
             handleClick={handleClick}
             setPaused={setPaused}
           />

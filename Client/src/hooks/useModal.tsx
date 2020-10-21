@@ -1,16 +1,15 @@
-import { useState } from 'react';
+import React, { Dispatch, useState } from 'react';
 
-const useModal = () => {
+const useModal = (): [
+  boolean,
+  Dispatch<React.SetStateAction<boolean>>,
+  () => void
+] => {
   const [isShowing, setIsShowing] = useState(false);
 
-  const toggle = () => {
-    setIsShowing(!isShowing);
-  };
+  const toggle = () => setIsShowing(!isShowing);
 
-  return {
-    isShowing,
-    toggle,
-  };
+  return [isShowing, setIsShowing, toggle];
 };
 
 export default useModal;
