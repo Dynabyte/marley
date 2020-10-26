@@ -1,0 +1,64 @@
+version: '3'
+
+services:
+
+  marley-postgres:
+    image: "postgres:13.0-alpine"
+    container_name: marley-postgres
+    #Volume mounted for database storage
+    volumes:
+      - marley-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432 # Forward the exposed port 5432 on the container to port 5432 on the host machine
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    depends_on:
+      - marley-postgres
+    ports:
+      - "5555:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASS}
+    restart: unless-stopped
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+  face-recognition:
+    build: ./python
+    container_name: face-recognition
+    environment:
+      - MONGO_CLIENT=${MONGO_CLIENT}
+      - MONGO_DB_NAME=${MONGO_DB_NAME}
+      - PYTHONUNBUFFERED=1
+    ports:
+      - 5000:5000
+    volumes: 
+      - ./python:/usr/src/face-recognition
+  
+  person-recognition:
+    build: ./server
+    container_name: person-recognition
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_URL=${DB_URL}
+      - FACE_REC_URL=${FACE_REC_URL}
+    ports:
+      - 8080:8080
+    depends_on:
+      - marley-postgres
+      - face-recognition
+    volumes: 
+      - ./server:/usr/src/person-recognition
+        
+#Volumes for DB data
+volumes:
+  marley-data:
+  pgadmin-data:

@@ -1,6 +1,8 @@
 import React from 'react';
 import styled, { css, keyframes } from 'styled-components';
 import '../App.css';
+import dynabyteLogo from '../static/images/dynabyte_white.png';
+import Logo from './Logo';
 
 const slideIn = keyframes`
   0% {
@@ -16,30 +18,26 @@ const animation = css`
 `;
 
 const StyledTitle = styled.h1`
-  ${(props: ITitle) => props.isKnownFace && animation};
+  ${() => animation};
 `;
 
-interface ITitle {
-  isKnownFace: boolean;
-}
-
-export const Title: React.FC<ITitle> = ({ isKnownFace, children }) => {
+export const Title: React.FC = ({ children }) => {
   return (
-    <StyledTitle
-      isKnownFace={isKnownFace}
-      style={{
-        fontFamily: "'Playfair Display', serif",
-        marginTop: 0,
-        textAlign: 'center',
-        fontSize: '4rem',
-        color: 'white',
-        animation: `2s ease-in-out 0s 1`,
-        order: isKnownFace ? 1 : 2,
-        opacity: isKnownFace ? 1 : 0,
-      }}
-    >
-      {children}
-    </StyledTitle>
+    <>
+      <StyledTitle
+        style={{
+          marginTop: 0,
+          textAlign: 'center',
+          fontSize: '4rem',
+          color: 'white',
+          animation: `2s ease-in-out 0s 1`,
+          opacity: 1,
+        }}
+      >
+        {children}
+      </StyledTitle>
+      <Logo src={dynabyteLogo} alt='logo' width='200' height='80' />
+    </>
   );
 };
 

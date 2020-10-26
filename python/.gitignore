@@ -43,4 +43,4 @@ nodeLanguageServer/**
 nodeLanguageServer.*/**
 test_images
 #Environment variables are stored in a file .env with no title
-.env
+/.env
