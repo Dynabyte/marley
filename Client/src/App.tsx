@@ -1,10 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import ErrorMessage from './components/ErrorMessage';
+import Motion from './components/Motion';
 import CaptureFrames from './components/register/CaptureFrames';
 import Positioning from './components/register/PositionInformation';
 import RegisterForm from './components/register/RegistrationForm';
 import Home from './Home';
-import ErrorMessage from './components/ErrorMessage';
 import GlobalStyle from './styling/GlobalStyle';
 
 const App = () => (
@@ -24,8 +25,11 @@ const App = () => (
         <Route path='/capture-frames' exact>
           <CaptureFrames />
         </Route>
+        <Route path='/motion' exact>
+          <Motion />
+        </Route>
         <Route path='/error' exact>
-          <ErrorMessage/>
+          <ErrorMessage />
         </Route>
       </Switch>
     </Router>

@@ -1,10 +1,13 @@
 import axios from 'axios';
 import React, { useEffect, useRef } from 'react';
+import { useHistory } from 'react-router-dom';
 import './App.css';
 import Modal from './components/Modal';
 import FaceRegistrationText from './components/register/FaceRegistrationText';
 import useModal from './hooks/useModal';
+import Logo from './shared/Logo';
 import Title from './shared/Title';
+import dynabyteLogo from './static/images/dynabyte_white.png';
 import Spinner from './ui/Spinner';
 import WhiteButton from './ui/WhiteButton';
 
@@ -22,9 +25,19 @@ export const Home = () => {
 
   const intervalRef = useRef(null);
   const timerRef = useRef(null);
+  const activeTimerRef = useRef(null);
   const [isShowing, setIsShowing, toggle] = useModal();
+  const history = useHistory();
 
   useEffect(() => {
+    const startTimer = () => {
+      activeTimerRef.current = setTimeout(() => {
+        history.push('/motion');
+      }, process.env.REACT_APP_ACTIVE_TIMER_TIMEOUT || 60000);
+    };
+
+    startTimer();
+
     let isMounted = true;
     const canvas = document.createElement('canvas');
     let myStream: MediaStream;
@@ -72,7 +85,7 @@ export const Home = () => {
                     console.log('new stream created');
                   });
               }
-            }, 800);
+            }, process.env.REACT_APP_PREDICT_INTERVAL || 800);
           }
         });
 
@@ -88,6 +101,9 @@ export const Home = () => {
           .then(({ data }) => {
             if (isMounted) {
               setResult(data);
+              if (data.isFace) {
+                updateTimer();
+              }
             }
           })
           .catch((error) => {
@@ -96,6 +112,11 @@ export const Home = () => {
               console.log(errorData);
             }
           });
+      };
+
+      const updateTimer = () => {
+        clearTimeout(activeTimerRef.current);
+        startTimer();
       };
 
       const getDataURL = (img: ImageBitmap) => {
@@ -111,9 +132,10 @@ export const Home = () => {
       });
       clearInterval(intervalRef.current);
       clearTimeout(timerRef.current);
+      clearTimeout(activeTimerRef.current);
       isMounted = false;
     };
-  }, [paused]);
+  }, [paused, history]);
 
   const { isKnownFace, isFace, name, id } = result;
 
@@ -174,6 +196,9 @@ export const Home = () => {
         </>
       )}
       {!isKnownFace && isFace && <FaceRegistrationText />}
+      {!isKnownFace && !isFace && (
+        <Logo src={dynabyteLogo} width='200' height='80' alt='logo' />
+      )}
 
       <footer>
         <span>
