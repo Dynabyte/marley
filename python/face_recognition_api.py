@@ -30,7 +30,7 @@ database_name = os.getenv('MONGO_DB_NAME')
 
 face_comparison = namedtuple(
     "face_comparison",
-    ["face_id", "euclidean_distance_mean"])
+    ["face_id", "euclidean_distance_minimum"])
 
 ns = api.namespace('face-recognition',
                    description='Labeling and prediction')
@@ -179,7 +179,7 @@ def predict(encoding, faces):
                     faces)),
             "closest_comparison")
 
-    if closest_comparison.euclidean_distance_mean > 0.5:
+    if closest_comparison.euclidean_distance_minimum > 0.5:
         return None
     return closest_comparison.face_id
 
@@ -187,7 +187,7 @@ def predict(encoding, faces):
 def closest(comparisons):
     return min(
         comparisons,
-        key=lambda comparison: comparison.euclidean_distance_mean)
+        key=lambda comparison: comparison.euclidean_distance_minimum)
 
 
 def to_numpy_array(image_base64):
@@ -211,7 +211,7 @@ def compare(encoding, faces):
         for face in faces:
             yield face_comparison(
                 face_id=face["_id"],
-                euclidean_distance_mean=np.mean(
+                euclidean_distance_minimum=np.amin(
                     face_recognition.face_distance(
                         np.array(face["encodings"]),
                         encoding)))
