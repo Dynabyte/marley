@@ -26,7 +26,7 @@ export const Home = () => {
   const intervalRef = useRef(null);
   const timerRef = useRef(null);
   const activeTimerRef = useRef(null);
-  const [isShowing, setIsShowing, toggle] = useModal();
+  const { isShowing, setIsShowing, toggle } = useModal();
   const history = useHistory();
 
   useEffect(() => {
