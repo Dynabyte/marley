@@ -13,14 +13,12 @@ import PinkButton from '../../ui/PinkButton';
 
 const Header = styled.div`
   margin: 20px 0;
-
   h1 {
     color: #333;
     font-size: 2.5rem;
     font-weight: bold;
     margin-bottom: 5px;
   }
-
   p {
     color: #6e6d6d;
     font-size: 1.5rem;
