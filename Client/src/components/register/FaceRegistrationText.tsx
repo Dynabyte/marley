@@ -7,7 +7,6 @@ import WhiteButton from '../../ui/WhiteButton';
 const Register = styled.div`
   font-size: 3rem;
   font-weight: bold;
-
   p {
     margin: 10px;
   }
