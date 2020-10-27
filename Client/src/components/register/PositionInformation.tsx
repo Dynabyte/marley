@@ -28,9 +28,8 @@ const Positioning = () => {
       <StyledCard>
         <h1>Positionering</h1>
         <ul>
-          <li>Placera dig 1 meter ifrån skärmen.</li>
+          <li>Placera dig ensam mitt framför skärmen.</li>
           <li>Titta mot kameran och var still i ca. 2 sekunder.</li>
-          <li>Placera dig mitt framför skärmen.</li>
         </ul>
         <div style={{ display: 'flex', marginTop: '2rem' }}>
           <PinkButton
