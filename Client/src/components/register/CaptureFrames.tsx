@@ -4,24 +4,23 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import CenterContent from '../../ui/CenterContent';
 import Spinner from '../../ui/Spinner';
-import WhiteButton from '../../ui/WhiteButton';
 
-const StyledCenterContent = styled(CenterContent)`
+const BigText = styled.p`
   font-size: 3rem;
   font-weight: bold;
 `;
 
-const Center = styled.div`
-  text-align: center;
-  max-width: 70%;
+const SmallText = styled.p`
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-top: 10px;
 `;
 
 const CaptureFrames = () => {
   const history = useHistory();
 
-  const [isVisible, setIsVisible] = useState<boolean>(false);
+  const [hasCollectedImages, setHasCollectedImages] = useState<boolean>(false);
   const intervalRef = useRef<number>(null);
-  const timerRef = useRef<number>(null);
 
   useEffect(() => {
     const name = history.location.state;
@@ -51,7 +50,7 @@ const CaptureFrames = () => {
                 .then((imageBitmap) => {
                   imageBitmaps.push(imageBitmap);
                   if (imageBitmaps.length === 60) {
-                    setIsVisible(true);
+                    setHasCollectedImages(true);
                     console.log('Uploading images');
                     myStream.getTracks().forEach(function (t) {
                       t.stop();
@@ -104,6 +103,7 @@ const CaptureFrames = () => {
               )
               .then(() => {
                 console.log('Uploaded images');
+                history.push('/');
               })
               .catch((error) => {
                 if (error.response) {
@@ -124,40 +124,25 @@ const CaptureFrames = () => {
 
     return () => {
       clearInterval(intervalRef.current);
-      clearTimeout(timerRef.current);
     };
   }, [history]);
 
-  if (isVisible) {
-    timerRef.current = setTimeout(() => {
-      setIsVisible(false);
-      history.push('/');
-    }, 60000);
-  }
-
-  const handleClick = () => {
-    history.push('/');
-  };
-
   return (
-    <StyledCenterContent>
-      {!isVisible && (
+    <CenterContent>
+      {!hasCollectedImages && (
         <>
-          <p>Samlar data...</p>
+          <BigText>Samlar data...</BigText>
           <Spinner />
         </>
       )}
-      {isVisible && (
-        <Center>
-          <p>Tack! Bilderna har tagits emot för registrering. </p>
-          <p>
-            Det kan ta någon minut innan registreringen har gått igenom och du
-            kan bli igenkänd i systemet.
-          </p>
-          <WhiteButton onClick={handleClick}>KLAR</WhiteButton>
-        </Center>
+      {hasCollectedImages && (
+        <>
+          <BigText>Registrering pågår...</BigText>
+          <Spinner />
+          <SmallText>Det kan ta en liten stund.</SmallText>
+        </>
       )}
-    </StyledCenterContent>
+    </CenterContent>
   );
 };
 

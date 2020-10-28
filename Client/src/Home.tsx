@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { time } from 'console';
 import React, { useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import './App.css';
@@ -24,9 +23,10 @@ export const Home = () => {
   const [paused, setPaused] = React.useState<boolean>(false);
   const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
 
-  const intervalRef = useRef(null);
   const timerRef = useRef(null);
+  const regulateSpeedTimer = useRef(null);
   const activeTimerRef = useRef(null);
+  const faceFoundTimer = useRef(null);
   const { isShowing, setIsShowing, toggle } = useModal();
   const history = useHistory();
 
@@ -42,9 +42,7 @@ export const Home = () => {
     };
 
     const predictFace = () => {
-      const imageCapture = new ImageCapture(
-        myStream.getVideoTracks()[0]
-      );
+      const imageCapture = new ImageCapture(myStream.getVideoTracks()[0]);
       if (
         imageCapture.track.readyState === 'live' &&
         imageCapture.track.enabled &&
@@ -74,19 +72,19 @@ export const Home = () => {
             predictFace();
           });
       }
-    }
+    };
 
     const regulateSpeedAndPredictFace = (requestTime: number) => {
-      const minimumPredictInterval = parseInt(process.env.REACT_APP_MINIMUM_PREDICT_INTERVAL) || 800;
-      if(requestTime < minimumPredictInterval){
-        setTimeout(() => {
+      const minimumPredictInterval =
+        parseInt(process.env.REACT_APP_MINIMUM_PREDICT_INTERVAL) || 800;
+      if (requestTime < minimumPredictInterval) {
+        regulateSpeedTimer.current = setTimeout(() => {
           predictFace();
         }, minimumPredictInterval - requestTime);
-      }
-      else {
+      } else {
         predictFace();
       }
-    }
+    };
 
     const uploadImage = (image: string) => {
       const startTime = new Date().getTime();
@@ -104,12 +102,11 @@ export const Home = () => {
           if (isMounted) {
             setResult(data);
             if (data.isFace) {
-              setTimeout(() => {
+              faceFoundTimer.current = setTimeout(() => {
                 predictFace();
                 updateTimer();
               }, process.env.REACT_APP_FOUND_FACE_WAIT_TIME || 2000);
-            }
-            else {
+            } else {
               regulateSpeedAndPredictFace(requestTime);
             }
           }
@@ -137,7 +134,6 @@ export const Home = () => {
       return canvas.toDataURL();
     };
 
-
     if (navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices
         .getUserMedia({
@@ -150,20 +146,21 @@ export const Home = () => {
         .then((stream: MediaStream) => {
           myStream = stream;
           if (!paused) {
-              predictFace();
+            predictFace();
           }
         });
-      }
+    }
 
-      startTimer();
+    startTimer();
 
     return () => {
       myStream.getTracks().forEach(function (t) {
         t.stop();
       });
-      clearInterval(intervalRef.current);
       clearTimeout(timerRef.current);
       clearTimeout(activeTimerRef.current);
+      clearTimeout(regulateSpeedTimer.current);
+      clearTimeout(faceFoundTimer.current);
       isMounted = false;
     };
   }, [paused, history]);
