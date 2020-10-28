@@ -101,10 +101,13 @@ export const Home = () => {
           console.log(`Request time: ${requestTime} ms`);
           if (isMounted) {
             setResult(data);
+            
             if (data.isFace) {
+              updateTimer();
+            } 
+            if (data.isKnownFace) {
               faceFoundTimer.current = setTimeout(() => {
                 predictFace();
-                updateTimer();
               }, process.env.REACT_APP_FOUND_FACE_WAIT_TIME || 2000);
             } else {
               regulateSpeedAndPredictFace(requestTime);
