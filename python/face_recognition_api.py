@@ -178,6 +178,8 @@ def predict(encoding, faces):
                     encoding,
                     faces)),
             "closest_comparison")
+        
+    print(closest_comparison)
 
     if closest_comparison.euclidean_distance_minimum > 0.5:
         return None
