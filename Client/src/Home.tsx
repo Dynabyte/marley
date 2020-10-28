@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { time } from 'console';
 import React, { useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import './App.css';
@@ -30,17 +31,113 @@ export const Home = () => {
   const history = useHistory();
 
   useEffect(() => {
+    let isMounted = true;
+    const canvas = document.createElement('canvas');
+    let myStream: MediaStream;
+
     const startTimer = () => {
       activeTimerRef.current = setTimeout(() => {
         history.push('/motion');
       }, process.env.REACT_APP_ACTIVE_TIMER_TIMEOUT || 60000);
     };
 
-    startTimer();
+    const predictFace = () => {
+      const imageCapture = new ImageCapture(
+        myStream.getVideoTracks()[0]
+      );
+      if (
+        imageCapture.track.readyState === 'live' &&
+        imageCapture.track.enabled &&
+        !imageCapture.track.muted
+      ) {
+        imageCapture
+          .grabFrame()
+          .then((imageBitmap) => {
+            const dataURL = getDataURL(imageBitmap);
+            uploadImage(dataURL);
+          })
+          .catch(() => console.trace());
+      } else {
+        myStream.getTracks().forEach(function (t) {
+          t.stop();
+        });
+        navigator.mediaDevices
+          .getUserMedia({
+            video: {
+              width: { ideal: 1920 },
+              height: { ideal: 1024 },
+            },
+          })
+          .then(function (stream) {
+            myStream = stream;
+            console.log('new stream created');
+            predictFace();
+          });
+      }
+    }
 
-    let isMounted = true;
-    const canvas = document.createElement('canvas');
-    let myStream: MediaStream;
+    const regulateSpeedAndPredictFace = (requestTime: number) => {
+      const minimumPredictInterval = parseInt(process.env.REACT_APP_MINIMUM_PREDICT_INTERVAL) || 800;
+      if(requestTime < minimumPredictInterval){
+        setTimeout(() => {
+          predictFace();
+        }, minimumPredictInterval - requestTime);
+      }
+      else {
+        predictFace();
+      }
+    }
+
+    const uploadImage = (image: string) => {
+      const startTime = new Date().getTime();
+      axios
+        .post(
+          'http://localhost:8080/predict',
+          { image },
+          {
+            headers: { 'Content-Type': 'application/json' },
+          }
+        )
+        .then(({ data }) => {
+          const requestTime = new Date().getTime() - startTime;
+          console.log(`Request time: ${requestTime} ms`);
+          if (isMounted) {
+            setResult(data);
+            if (data.isFace) {
+              setTimeout(() => {
+                predictFace();
+                updateTimer();
+              }, process.env.REACT_APP_FOUND_FACE_WAIT_TIME || 2000);
+            }
+            else {
+              regulateSpeedAndPredictFace(requestTime);
+            }
+          }
+        })
+        .catch((error) => {
+          const requestTime = new Date().getTime() - startTime;
+          console.log(`Request time: ${requestTime} ms`);
+          if (error.response) {
+            const errorData = error.response.data;
+            console.log(errorData);
+          }
+          regulateSpeedAndPredictFace(requestTime);
+        });
+    };
+
+    const updateTimer = () => {
+      clearTimeout(activeTimerRef.current);
+      startTimer();
+    };
+
+    const getDataURL = (img: ImageBitmap) => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      canvas.getContext('2d').drawImage(img, 0, 0);
+      return canvas.toDataURL();
+    };
+
+
     if (navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices
         .getUserMedia({
@@ -53,79 +150,13 @@ export const Home = () => {
         .then((stream: MediaStream) => {
           myStream = stream;
           if (!paused) {
-            intervalRef.current = setInterval(() => {
-              const imageCapture = new ImageCapture(
-                myStream.getVideoTracks()[0]
-              );
-              if (
-                imageCapture.track.readyState === 'live' &&
-                imageCapture.track.enabled &&
-                !imageCapture.track.muted
-              ) {
-                imageCapture
-                  .grabFrame()
-                  .then((imageBitmap) => {
-                    const dataURL = getDataURL(imageBitmap);
-                    uploadImage(dataURL);
-                  })
-                  .catch(() => console.trace());
-              } else {
-                myStream.getTracks().forEach(function (t) {
-                  t.stop();
-                });
-                navigator.mediaDevices
-                  .getUserMedia({
-                    video: {
-                      width: { ideal: 1920 },
-                      height: { ideal: 1024 },
-                    },
-                  })
-                  .then(function (stream) {
-                    myStream = stream;
-                    console.log('new stream created');
-                  });
-              }
-            }, process.env.REACT_APP_PREDICT_INTERVAL || 800);
+              predictFace();
           }
         });
+      }
 
-      const uploadImage = (image: string) => {
-        axios
-          .post(
-            'http://localhost:8080/predict',
-            { image },
-            {
-              headers: { 'Content-Type': 'application/json' },
-            }
-          )
-          .then(({ data }) => {
-            if (isMounted) {
-              setResult(data);
-              if (data.isFace) {
-                updateTimer();
-              }
-            }
-          })
-          .catch((error) => {
-            if (error.response) {
-              const errorData = error.response.data;
-              console.log(errorData);
-            }
-          });
-      };
+      startTimer();
 
-      const updateTimer = () => {
-        clearTimeout(activeTimerRef.current);
-        startTimer();
-      };
-
-      const getDataURL = (img: ImageBitmap) => {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        canvas.getContext('2d').drawImage(img, 0, 0);
-        return canvas.toDataURL();
-      };
-    }
     return () => {
       myStream.getTracks().forEach(function (t) {
         t.stop();
