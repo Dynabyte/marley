@@ -2,6 +2,16 @@
 
 Marley is a person recognition service that is run locally on a mini-PC at the entrance to the Dynabyte office. Users walk into the office and are greeted by Marley, which may become like a simplified automated receptionist in a future release.
 
+## Table of Contents
+<ul>
+	<li>[Use Cases](#use-cases)</li>
+	<li></li>
+	<li></li>
+	<li></li>
+	<li></li>
+	<li></li>
+</ul>
+
 ## Use Cases
 PREDICTION <br>
 The client application takes images and tries to check if a face can be found in each image, and if so predict which person is in the image. If Marley recognizes a person, it will greet them by name. If not, that person will still be greeted without a name and asked to register.
