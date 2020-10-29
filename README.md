@@ -119,3 +119,5 @@ Saves the face encoding to the faceId supplied in the request.
 <br><br>
 face-recognition/delete/{id} (delete)<br>
 Deletes all the related encodings of the face that matches the faceId.<br>
+<br>
+[Top](#project-marley)
