@@ -5,6 +5,9 @@ Marley is a person recognition service that is run locally on a mini-PC at the e
 ## Table of Contents
 - [Use Cases](#use-cases)
 - [Structure](#structure)
+- [Getting Started](#getting-started)
+- [Client App](#client-app)
+- [Person Recognition - Java Rest API](#
 
 ## Use Cases
 PREDICTION <br>
