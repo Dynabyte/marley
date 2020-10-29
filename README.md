@@ -16,7 +16,7 @@ If a person chooses to register, face encodings are saved along with their name 
 DELETION <br>
 A person can choose to no longer be recognized by Marley, in which case their personal data and face encodings will be removed.
 
-## Structure <br>
+## Structure
 <pre>
 Client application (React, typescript)
 🠗			 🠕
