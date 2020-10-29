@@ -32,7 +32,11 @@ person-recognition	(Java rest API)
 face-recognition	(Python rest API)
 </pre>
 
-## Requirements
+## Getting Started
+<ol>
+	<li>Make sure Docker is installed. If on windows or mac, Docker Desktop is recommended. If you don't have Docker Desktop then Docker Compose will need to be installed separetely</li>
+	<li>Clone the github repository</li>
+</ol>
 Docker must be installed. In the top folder of the project a file with the exact name “.env” must be created with the variables listed in example.env, found in the top folder. These variables are used in docker-compose.yml to run the backend docker containers. FACE_REC_URL should reference face-recognition (the docker container), NOT localhost.
 <br>
 A mongoDB database must be created with a collection called faces, which then face-recognition (the python rest API) can connect to.
