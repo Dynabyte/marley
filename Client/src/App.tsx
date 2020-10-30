@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import ErrorMessage from './components/ErrorMessage';
 import Motion from './components/Motion';
 import CaptureFrames from './components/register/CaptureFrames';
 import Positioning from './components/register/PositionInformation';
@@ -27,9 +26,6 @@ const App = () => (
         </Route>
         <Route path='/motion' exact>
           <Motion />
-        </Route>
-        <Route path='/error' exact>
-          <ErrorMessage />
         </Route>
       </Switch>
     </Router>
