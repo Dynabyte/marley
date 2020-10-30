@@ -4,6 +4,7 @@ import com.dynabyte.marleyrest.api.exception.InvalidArgumentException;
 import com.dynabyte.marleyrest.personrecognition.request.ImageRequest;
 import com.dynabyte.marleyrest.registration.request.RegistrationRequest;
 import com.dynabyte.marleyrest.api.util.RequestUtil;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -17,6 +18,11 @@ public class RequestUtilTests {
 
     //TODO import from file valid images
     private final List<String> images = Arrays.asList("image1", "image2");
+
+    @BeforeAll
+    static void initializeRequestsFromJson(){
+
+    }
 
     @Test
     void nullNameShouldThrowInvalidArgumentException(){
