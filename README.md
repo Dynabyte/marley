@@ -22,8 +22,8 @@ A person can choose to no longer be recognized by Marley, in which case their pe
 
 ## Structure
 <pre>
-Client application (React, typescript)
-🠗			 🠕
+Client application (React, typescript)	
+&#129047;			 🠕
 Person Recognition (Java rest API, Spring Boot)		⮌	PostgreSql - person info
 	🠗	🠕
 Face Recognition (Python Flask rest API)	        ⮌	MongoDB - face encodings
