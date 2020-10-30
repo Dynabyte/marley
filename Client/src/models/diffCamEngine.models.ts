@@ -36,7 +36,7 @@ export interface IDiffCamEngine {
 export interface IDiffCamEngineOptions {
   video?: HTMLVideoElement;
   motionCanvas?: HTMLCanvasElement;
-  captureIntervalTime?: number | string;
+  captureIntervalTime?: number;
   captureWidth?: number;
   captureHeight?: number;
   diffWidth?: number;

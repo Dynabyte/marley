@@ -24,7 +24,7 @@ export const DiffCamEngine: () => IDiffCamEngine = () => {
   let captureCallback: (payload: ICapturePayload) => void; // called when an image has been captured and diffed
 
   let captureInterval: any; // interval for continuous captures
-  let captureIntervalTime: number | string; // time between captures, in ms
+  let captureIntervalTime: number; // time between captures, in ms
   let captureWidth: number; // full captured image width
   let captureHeight: number; // full captured image height
   let diffWidth: number; // downscaled width for diff/motion

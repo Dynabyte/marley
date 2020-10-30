@@ -29,12 +29,13 @@ export const Motion = () => {
       }
     };
 
+    const motionDetectionInterval =
+      parseInt(process.env.REACT_APP_MOTION_DETECTION_INTERVAL) || 2000;
     diffCamEngine.init({
       initSuccessCallback: initSuccess,
       initErrorCallback: initError,
       captureCallback: capture,
-      captureIntervalTime:
-        process.env.REACT_APP_MOTION_DETECTION_INTERVAL || 2000,
+      captureIntervalTime: motionDetectionInterval,
     });
 
     return () => diffCamEngine.stop();
