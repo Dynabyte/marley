@@ -3,7 +3,8 @@
     "target": "es5",
     "module": "esnext",
     "jsx": "react",
-    "lib": ["dom", "dom.iterable", "esnext"]
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "noFallthroughCasesInSwitch": true
   },
   "extends": "../tsconfig.json",
   "exclude": ["../mockServer", "node_modules"],
