@@ -8,7 +8,7 @@ Marley is a person recognition service that is run locally on a mini-PC at the e
 - [Getting Started](#getting-started)
 - [Client - React App](#client---react-app)
 - [Person Recognition - Java Rest API](#person-recognition---java-rest-api)
-- [Face Recognition - Python rest API](#face-recognition---python-rest-api)
+- [Face Recognition - Python Rest API](#face-recognition---python-rest-api)
 
 ## Use Cases
 PREDICTION <br>
@@ -104,7 +104,7 @@ First a prediction request is sent to face recognition to verify that the person
 /delete/{id} (delete)<br>
 The supplied id is used to remove the person from postgreSql as well as the face encodings from the face recognition database.
 <br>
-## Face Recognition - Python rest API
+## Face Recognition - Python Rest API
 SWAGGER DOCUMENTATION URL: {insert URL here}<br>
 All endpoints take a face encoding from the supplied image. If no face is found an exception is thrown. 
 <br><br>
