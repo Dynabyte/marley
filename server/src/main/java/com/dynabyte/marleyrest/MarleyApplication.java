@@ -23,7 +23,7 @@ public class MarleyApplication {
 
     @Bean
     RouterFunction<ServerResponse> routerFunction() {
-        return route(GET("/swagger"), req ->
+        return route(GET("/"), req ->
                 ServerResponse.temporaryRedirect(URI.create("/documentation/swagger-ui/index.html#/marley-rest-controller")).build());
     }
 

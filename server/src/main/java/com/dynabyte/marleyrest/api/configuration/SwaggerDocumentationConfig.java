@@ -22,7 +22,7 @@ public class SwaggerDocumentationConfig {
 
     private static final Contact DEFAULT_CONTACT = new Contact("Dynabyte", "https://dynabyte.com", "daniel.hughes@dynabyte.com");
     public static final ApiInfo DEFAULT_API_INFO = new ApiInfo(
-            "Marley Java API", "Communication hub for Project Marley", "1.0",
+            "Person Recognition API", "Communication hub for Project Marley", "1.0",
             "N/A", DEFAULT_CONTACT,
             "Apache 2.0", "http://www.apache.org/licenses/LICENSE-2.0", Collections.emptyList());
     private static final Set<String> DEFAULT_PRODUCES_AND_CONSUMES =
