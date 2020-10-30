@@ -6,7 +6,7 @@ Marley is a person recognition service that is run locally on a mini-PC at the e
 - [Use Cases](#use-cases)
 - [Structure](#structure)
 - [Getting Started](#getting-started)
-- [Client App](#client-app)
+- [Client - React App](#client---react-app)
 - [Person Recognition - Java Rest API](#person-recognition---java-rest-api)
 - [Face Recognition - Python Flask rest API](#face-recognition---python-flask-rest-api)
 
@@ -54,7 +54,7 @@ face-recognition	(Python rest API)
 	<li>(optional) Use Docker Desktop to view the running backend containers and their respective logs</li>
 </ol>
 
-## Client App
+## Client - React App
 The client application is built with React and typescript. <br><br>
 
 PREDICTION<br>
