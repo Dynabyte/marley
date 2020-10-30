@@ -3,14 +3,13 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import Card from '../../ui/Card';
 import CenterContent from '../../ui/CenterContent';
+import LargeText from '../../ui/fonts/LargeText';
 import PinkButton from '../../ui/PinkButton';
 
 const StyledCard = styled(Card)`
   h1 {
     margin: 20px 0;
     color: #333;
-    font-size: 2rem;
-    font-weight: bold;
   }
   li {
     color: #6e6d6d;
@@ -26,7 +25,7 @@ const Positioning = () => {
   return (
     <CenterContent>
       <StyledCard>
-        <h1>Positionering</h1>
+        <LargeText>Positionering</LargeText>
         <ul>
           <li>Placera dig ensam mitt framför skärmen.</li>
           <li>Titta mot kameran och var still i ca. 2 sekunder.</li>

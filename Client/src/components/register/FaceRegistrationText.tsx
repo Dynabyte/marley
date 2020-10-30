@@ -2,15 +2,8 @@ import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import Title from '../../shared/Title';
+import LargeText from '../../ui/fonts/LargeText';
 import WhiteButton from '../../ui/WhiteButton';
-
-const Register = styled.div`
-  font-size: 3rem;
-  font-weight: bold;
-  p {
-    margin: 10px;
-  }
-`;
 
 const Row = styled.div`
   display: flex;
@@ -26,13 +19,11 @@ const FaceRegistrationText = () => {
   return (
     <>
       <Title>Välkommen till</Title>
-      <Register>
-        <p>Vi känner inte igen dig sen tidigare.</p>
-        <Row>
-          <p>Vill du registrera dig?</p>
-          <WhiteButton onClick={handleClick}>REGISTRERA DIG NU</WhiteButton>
-        </Row>
-      </Register>
+      <LargeText>Vi känner inte igen dig sen tidigare.</LargeText>
+      <Row>
+        <LargeText>Vill du registrera dig?</LargeText>
+        <WhiteButton onClick={handleClick}>REGISTRERA DIG NU</WhiteButton>
+      </Row>
     </>
   );
 };

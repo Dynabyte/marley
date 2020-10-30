@@ -1,25 +1,18 @@
 import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
 import CenterContent from '../../ui/CenterContent';
+import LargeText from '../../ui/fonts/LargeText';
+import SmallText from '../../ui/fonts/SmallText';
 import Spinner from '../../ui/Spinner';
-
-const BigText = styled.p`
-  font-size: 3rem;
-  font-weight: bold;
-`;
-
-const SmallText = styled.p`
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-top: 10px;
-`;
+import ErrorMessage from '../ErrorMessage';
 
 const CaptureFrames = () => {
   const history = useHistory();
 
   const [hasCollectedImages, setHasCollectedImages] = useState<boolean>(false);
+  const [hasError, setHasError] = useState<boolean>(false);
+
   const intervalRef = useRef<number>(null);
 
   useEffect(() => {
@@ -111,10 +104,7 @@ const CaptureFrames = () => {
                   console.log(errorData);
                   const exceptionClass = errorData.exceptionClass;
                   if (exceptionClass === 'PersonAlreadyInDbException') {
-                    history.push({
-                      pathname: '/error',
-                      state: 'Du är redan registrerad',
-                    });
+                    setHasError(true);
                   }
                 }
               });
@@ -129,19 +119,20 @@ const CaptureFrames = () => {
 
   return (
     <CenterContent>
-      {!hasCollectedImages && (
+      {!hasCollectedImages && !hasError && (
         <>
-          <BigText>Samlar data...</BigText>
+          <LargeText>Samlar data</LargeText>
           <Spinner />
         </>
       )}
-      {hasCollectedImages && (
+      {hasCollectedImages && !hasError && (
         <>
-          <BigText>Registrering pågår...</BigText>
+          <LargeText>Registrering pågår</LargeText>
           <Spinner />
-          <SmallText>Det kan ta en liten stund.</SmallText>
+          <SmallText>Det kan ta en liten stund</SmallText>
         </>
       )}
+      {hasError && <ErrorMessage message='Du är redan registrerad' />}
     </CenterContent>
   );
 };

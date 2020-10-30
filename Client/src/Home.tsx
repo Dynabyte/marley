@@ -8,6 +8,7 @@ import useModal from './hooks/useModal';
 import Logo from './shared/Logo';
 import Title from './shared/Title';
 import dynabyteLogo from './static/images/dynabyte_white.png';
+import LargeText from './ui/fonts/LargeText';
 import Spinner from './ui/Spinner';
 import WhiteButton from './ui/WhiteButton';
 
@@ -39,6 +40,11 @@ export const Home = () => {
       activeTimerRef.current = setTimeout(() => {
         history.push('/motion');
       }, process.env.REACT_APP_ACTIVE_TIMER_TIMEOUT || 60000);
+    };
+
+    const updateTimer = () => {
+      clearTimeout(activeTimerRef.current);
+      startTimer();
     };
 
     const predictFace = () => {
@@ -86,6 +92,13 @@ export const Home = () => {
       }
     };
 
+    const getDataURL = (img: ImageBitmap) => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      canvas.getContext('2d').drawImage(img, 0, 0);
+      return canvas.toDataURL();
+    };
+
     const uploadImage = (image: string) => {
       const startTime = new Date().getTime();
       axios
@@ -101,10 +114,10 @@ export const Home = () => {
           console.log(`Request time: ${requestTime} ms`);
           if (isMounted) {
             setResult(data);
-            
+
             if (data.isFace) {
               updateTimer();
-            } 
+            }
             if (data.isKnownFace) {
               faceFoundTimer.current = setTimeout(() => {
                 predictFace();
@@ -125,18 +138,6 @@ export const Home = () => {
         });
     };
 
-    const updateTimer = () => {
-      clearTimeout(activeTimerRef.current);
-      startTimer();
-    };
-
-    const getDataURL = (img: ImageBitmap) => {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      canvas.getContext('2d').drawImage(img, 0, 0);
-      return canvas.toDataURL();
-    };
-
     if (navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices
         .getUserMedia({
@@ -153,8 +154,6 @@ export const Home = () => {
           }
         });
     }
-
-    startTimer();
 
     return () => {
       myStream.getTracks().forEach(function (t) {
@@ -198,8 +197,8 @@ export const Home = () => {
 
   if (isDeleting) {
     return (
-      <div className='wrapper' style={{ fontSize: '3rem', fontWeight: 'bold' }}>
-        <p>Raderar från systemet....</p>
+      <div className='wrapper'>
+        <LargeText>Raderar från systemet</LargeText>
         <Spinner />
       </div>
     );

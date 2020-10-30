@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import styled from 'styled-components';
+import SmallText from '../ui/fonts/SmallText';
 import PinkButton from '../ui/PinkButton';
 
 const ModalWrapper = styled.div`
@@ -10,7 +11,6 @@ const ModalWrapper = styled.div`
   z-index: 1050;
   width: 100%;
   height: 100%;
-
   color: black;
   background: rgba(0, 0, 0, 0.8);
   display: flex;
@@ -22,18 +22,16 @@ const StyledModal = styled.div`
   z-index: 100;
   background: white;
   position: relative;
-
   border-radius: 3px;
   width: 550px;
   height: 200px;
   padding: 2rem;
 `;
 
-const Text = styled.p`
+const StyledSmallText = styled(SmallText)`
+  display: inline-block;
   margin-bottom: 3rem;
   text-align: center;
-  font-size: 1.5rem;
-  font-weight: 300;
 `;
 
 const Modal = ({ isShowing, hide, handleClick, setPaused }) => {
@@ -47,7 +45,9 @@ const Modal = ({ isShowing, hide, handleClick, setPaused }) => {
       <>
         <ModalWrapper aria-modal aria-hidden tabIndex={-1} role='dialog'>
           <StyledModal>
-            <Text>Vill du verkligen ta bort dig från systemet?</Text>
+            <StyledSmallText>
+              Vill du verkligen ta bort dig från systemet?
+            </StyledSmallText>
             <div style={{ display: 'flex' }}>
               <PinkButton
                 type='button'

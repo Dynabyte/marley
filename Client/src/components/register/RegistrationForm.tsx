@@ -8,6 +8,8 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import Card from '../../ui/Card';
 import CenterContent from '../../ui/CenterContent';
+import LargeText from '../../ui/fonts/LargeText';
+import SmallText from '../../ui/fonts/SmallText';
 import Input from '../../ui/Input';
 import PinkButton from '../../ui/PinkButton';
 
@@ -15,13 +17,10 @@ const Header = styled.div`
   margin: 20px 0;
   h1 {
     color: #333;
-    font-size: 2.5rem;
-    font-weight: bold;
     margin-bottom: 5px;
   }
-  p {
+  span {
     color: #6e6d6d;
-    font-size: 1.5rem;
     font-weight: 300;
   }
 `;
@@ -85,8 +84,8 @@ const RegistrationForm = () => {
       <Card>
         <form onSubmit={handleSubmit}>
           <Header>
-            <h1>Registrering</h1>
-            <p>Fyll i dina uppgifter</p>
+            <LargeText>Registrering</LargeText>
+            <SmallText>Fyll i dina uppgifter</SmallText>
           </Header>
           <Seperator />
           <Input
