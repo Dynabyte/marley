@@ -1,6 +1,6 @@
 # Project Marley
 
-Marley is a person recognition service that is run locally on a mini-PC at the entrance to the Dynabyte office. Users walk into the office and are greeted by Marley, which may become like a simplified automated receptionist in a future release.
+Marley is a person recognition service that runs locally. Users walk into the office and are greeted by Marley.
 
 ## Table of Contents
 - [Use Cases](#use-cases)
@@ -19,6 +19,9 @@ If a person chooses to register, face encodings are saved along with their name 
 
 DELETION <br>
 A person can choose to no longer be recognized by Marley, in which case their personal data and face encodings will be removed.
+
+MOTION DETECTION<br>
+The client application will switch to motion detection mode to save CPU usage if no faces are detected by the backend for a specific period of time, then switch back to sending requests to identify faces if motion is detected.
 
 ## Structure
 <pre>
@@ -82,7 +85,7 @@ If a user chooses to be removed from the system a request is sent to the backend
 MOTION DETECTION<br>
 To save CPU usage, the app will switch to motion detection when not detecting faces. A timer is running when doing face recognition and each time a face is detected the timer is refreshed. If the timer expires then face recognition requests are no longer sent and motion detection is turned on. If motion is detected then the app switches back to face recognition.<br><br>
 ## Person Recognition - Java Rest API
-SWAGGER DOCUMENTATION URL: {insert URL here}<br>
+[REST API DOCUMENTATION](http://localhost:8080) (The docker network must be running for the link to work!) <br>
 Java doc comments are in place so further documentation can easily be generated.
 <br><br>
 The person recognition backend is a java rest API using Spring Boot and functions as the main communication hub between the client application and the python face recognition application. All requests are validated before they are executed. Every request to face recognition involves an image String in base64 format. Label put requests also include a faceId.
