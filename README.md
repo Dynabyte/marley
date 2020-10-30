@@ -1,6 +1,8 @@
 # Project Marley
 
-Marley is a person recognition service that runs locally. Users walk into the office and are greeted by Marley.
+Marley is a person recognition service that runs locally. Users walk into the office and are greeted by Marley by name if recognized. If not recognized the user will be asked to register. If the no longer wish to be registered, a user can choose to be removed from the system. To save CPU, motion detection is used to determine when to start sending requests to the backend.<br>
+The application has a graphical interface which runs in the browser using localhost. To use the application a webcam is needed and permission to use the webcam must be granted. The client application sends requests to a person recognition spring boot rest api, which consolidates and manages information. The api in turn sends requests to a face recognition service to verify if the face is known or not, then looks up the personal information for the client application to greet the user.<br>
+The face recognition service is a python rest api that uses the library [face_recognition](https://github.com/ageitgey/face_recognition), which in turn is built using [dlib](http://dlib.net/)'s state-of-the-art face recognition built with deep learning. The model has an accuracy of 99.38% on the [Labeled Faces in the Wild](http://vis-www.cs.umass.edu/lfw/) benchmark. Only 1 person at a time is greeted. If multiple people faces are found, the face recognition api will only choose the face with the highest face detection rate.
 
 ## Table of Contents
 - [Use Cases](#use-cases)
@@ -12,7 +14,7 @@ Marley is a person recognition service that runs locally. Users walk into the of
 
 ## Use Cases
 PREDICTION <br>
-The client application takes images and tries to check if a face can be found in each image, and if so predict which person is in the image. If Marley recognizes a person, it will greet them by name. If not, that person will still be greeted without a name and asked to register.
+The client application takes images and sends requests to the backend to check if a face can be found in the image, and if so predict which person it is. If Marley recognizes a person, it will greet them by name. If not, that person will still be greeted without a name and asked to register.
 
 REGISTRATION <br>
 If a person chooses to register, face encodings are saved along with their name which Marley can then use to recognize them. If no face is found, then no greeting is displayed.
@@ -87,9 +89,16 @@ To save CPU usage, the app will switch to motion detection when not detecting fa
 ## Person Recognition - Java Rest API
 [REST API DOCUMENTATION](http://localhost:8080) (The docker network must be running for the link to work!) <br>
 Java doc comments are in place so further documentation can easily be generated.
-<br><br>
+### Description
 The person recognition backend is a java rest API using Spring Boot and functions as the main communication hub between the client application and the python face recognition application. All requests are validated before they are executed. Every request to face recognition involves an image String in base64 format. Label put requests also include a faceId.
-<br><br>
+### Database
+The database is a simple postgresql database with a single table representing a person using two columns:<br>
+<pre>
+faceId: String
+name: String
+</pre>
+The faceId is received from the face recognition service at the time of registration. This way the api can aggregate information from the two databases.
+### Endpoints
 /predict (post)<br>
 The request base64 image is sent to face recognition. If a known face is found, that faceId is used to look up the corresponding person. The following response is delivered to the client:
 <pre>
@@ -108,9 +117,21 @@ First a prediction request is sent to face recognition to verify that the person
 The supplied id is used to remove the person from postgreSql as well as the face encodings from the face recognition database.
 <br>
 ## Face Recognition - Python Rest API
-SWAGGER DOCUMENTATION URL: {insert URL here}<br>
-All endpoints take a face encoding from the supplied image. If no face is found an exception is thrown. 
-<br><br>
+[REST API DOCUMENTATION](http://localhost:5000) (The docker network must be running for the link to work!)<br>
+### Description
+The face recognition service is a flask rest api that uses the library [face_recognition](https://github.com/ageitgey/face_recognition), which in turn is built using [dlib](http://dlib.net/)'s state-of-the-art face recognition built with deep learning. The model has an accuracy of 99.38% on the [Labeled Faces in the Wild](http://vis-www.cs.umass.edu/lfw/) benchmark.<br>
+All endpoints take a face encoding from the supplied base64 image string. If no face is found an exception is thrown. The api saves an in-memory copy of the face encodings from the database in a variable which is reset to an empty list when the database is changed. If the variable is empty when a prediction request is received, then the database will be downloaded to that variable.
+### Database
+Each face in the database has a faceId, generated by MongoDb. Each face also gets a list of face encodings. Each encodings is a numpy array with 128 numeric values which is used to measure the euclidean distance when comparing encodings. That is in turn used to predict if the face encoding from the input image matches any face in the database.<br>
+A face in the MongoDb database looks like this:<br>
+<pre>
+{
+	_Id:ObjectId("IdString")
+	encodings:[array with 60 face encodings, each being a numpy array with 128 numeric values] 
+}
+</pre>
+
+### Endpoints
 face-recognition/predict (post)<br>
 The face encoding is compared to all the encodings in the database to find the euclidean distance and the minimum value (closest match encoding) for each face is compared to see which face is the closest match to the input encoding. If no match is lower than a certain threshold value then the faceId is None, otherwise the faceId for the closest match is the response.
 <br><br>
