@@ -14,19 +14,19 @@ The face recognition service is a python rest api that uses the library [face_re
 - [Face Recognition - Python Rest API](#face-recognition---python-rest-api)
 
 ## Use Cases
-PREDICTION <br>
+### PREDICTION
 The client application takes images and sends requests to the backend to check if a face can be found in the image, and if so predict which person it is. If Marley recognizes a person, it will greet them by name. If not, that person will still be greeted without a name and asked to register.
 ![Prediction Use Case](https://github.com/Dynabyte/marley/blob/documentation/Diagrams/Prediction%20Request.png)
 
-REGISTRATION <br>
+### REGISTRATION
 If a person chooses to register, up to 60 face encodings are saved along with their name which Marley can then use to recognize them.
 ![Registration Use Case](https://github.com/Dynabyte/marley/blob/documentation/Diagrams/Registration%20Request.png)
 
-DELETION <br>
+### DELETION
 A person can choose to no longer be recognized by Marley, in which case their personal data and face encodings will be removed.
 ![Deletion Use Case](https://github.com/Dynabyte/marley/blob/documentation/Diagrams/Deletion%20Request.png)
 
-MOTION DETECTION<br>
+### MOTION DETECTION
 The client application will switch to motion detection mode to save CPU usage if no faces are detected by the backend for a specific period of time, then switch back to sending requests to identify faces if motion is detected.
 ![Motion Detection Use Case](https://github.com/Dynabyte/marley/blob/documentation/Diagrams/Motion%20Detection.png)
 
