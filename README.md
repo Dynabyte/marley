@@ -16,6 +16,7 @@ The face recognition service is a python rest api that uses the library [face_re
 ## Use Cases
 PREDICTION <br>
 The client application takes images and sends requests to the backend to check if a face can be found in the image, and if so predict which person it is. If Marley recognizes a person, it will greet them by name. If not, that person will still be greeted without a name and asked to register.
+![Prediction Use Case](Diagrams/Prediction Request.png)
 
 REGISTRATION <br>
 If a person chooses to register, face encodings are saved along with their name which Marley can then use to recognize them. If no face is found, then no greeting is displayed.
