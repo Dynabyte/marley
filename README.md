@@ -27,7 +27,7 @@ A person can choose to no longer be recognized by Marley, in which case their pe
 ![Deletion Use Case](https://github.com/Dynabyte/marley/blob/documentation/Diagrams/Deletion%20Request.png)
 
 ### MOTION DETECTION
-The client application will switch to motion detection mode to save CPU usage if no faces are detected by the backend for a specific period of time, then switch back to sending requests to identify faces if motion is detected.
+The client application will switch to motion detection mode to save CPU usage if no faces are detected by the backend for a specific period of time, then switch back to sending prediction requests to identify faces if motion is detected.
 ![Motion Detection Use Case](https://github.com/Dynabyte/marley/blob/documentation/Diagrams/Motion%20Detection.png)
 
 ## Backend Information
