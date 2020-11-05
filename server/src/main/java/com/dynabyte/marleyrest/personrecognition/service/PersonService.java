@@ -1,7 +1,9 @@
 package com.dynabyte.marleyrest.personrecognition.service;
 
+import com.dynabyte.marleyrest.calendar.model.GoogleTokens;
 import com.dynabyte.marleyrest.personrecognition.model.Person;
 import com.dynabyte.marleyrest.personrecognition.repository.PersonRepository;
+import com.dynabyte.marleyrest.registration.exception.MissingPersonInDbException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,5 +49,16 @@ public class PersonService {
     public void save(Person person) {
         personRepository.save(person);
         LOGGER.info("Person saved to database: " + person);
+    }
+
+    public void saveGoogleTokens(GoogleTokens googleTokens) {
+        Optional<Person> personOptional = findById(googleTokens.getFaceId());
+
+        personOptional.ifPresentOrElse(person -> {
+            person.setGoogleTokens(googleTokens);
+            save(person);
+        }, ()-> {
+            throw new MissingPersonInDbException("No person found with faceId: " + googleTokens.getFaceId());
+        });
     }
 }

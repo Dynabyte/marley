@@ -50,6 +50,7 @@ services:
       - DB_PASS=${DB_PASS}
       - DB_URL=${DB_URL}
       - FACE_REC_URL=${FACE_REC_URL}
+      - GOOGLE_CALENDAR_API_KEY=${GOOGLE_CALENDAR_API_KEY}
     ports:
       - 8080:8080
     depends_on:

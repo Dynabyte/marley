@@ -1,5 +1,7 @@
 package com.dynabyte.marleyrest.api.exception;
 
+import com.dynabyte.marleyrest.calendar.exception.GoogleAPIException;
+import com.dynabyte.marleyrest.calendar.exception.GoogleCredentialsMissingException;
 import com.dynabyte.marleyrest.deletion.exception.IdNotFoundException;
 import com.dynabyte.marleyrest.prediction.exception.*;
 import com.dynabyte.marleyrest.registration.exception.MissingPersonInDbException;
@@ -31,7 +33,7 @@ public class ApiExceptionHandler {
      * @param e The thrown exception
      * @return ResponseEntity including an ApiExceptionReport object that details the error as well as the http status.
      */
-    @ExceptionHandler(value = {ImageEncodingException.class, InvalidArgumentException.class, ResponseBodyNotFoundException.class})
+    @ExceptionHandler(value = {ImageEncodingException.class, InvalidArgumentException.class, RequestBodyNotFoundException.class})
     public ResponseEntity<ApiExceptionReport> handleBadRequestExceptions(Exception e) {
         return getErrorResponse(e, HttpStatus.BAD_REQUEST);
     }
@@ -68,6 +70,16 @@ public class ApiExceptionHandler {
     @ExceptionHandler(value = {ResourceAccessException.class})
     public ResponseEntity<ApiExceptionReport> handleExternalAPIException(ResourceAccessException e){
         return getErrorResponse(e, HttpStatus.SERVICE_UNAVAILABLE, "Face recognition service unavailable");
+    }
+
+    /**
+     * Handles internal issues that can occur if credentials are not properly set up or if Google API throws Exception
+     * @param e The thrown exception
+     * @return ResponseEntity including an ApiExceptionReport object that details the error as well as the http status.
+     */
+    @ExceptionHandler(value = {GoogleAPIException.class, GoogleCredentialsMissingException.class})
+    public ResponseEntity<ApiExceptionReport> handleGoogleRelatedException(Exception e){
+        return getErrorResponse(e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.dynabyte.marleyrest.api.controller;
 
-import com.dynabyte.marleyrest.api.exception.ResponseBodyNotFoundException;
+import com.dynabyte.marleyrest.api.exception.RequestBodyNotFoundException;
 import com.dynabyte.marleyrest.deletion.DeleteUseCase;
 import com.dynabyte.marleyrest.prediction.PredictionUseCase;
 import com.dynabyte.marleyrest.registration.RegistrationUseCase;
@@ -89,7 +89,7 @@ public class MarleyRestController {
      */
     private void validateNotNull(ImageRequest imageRequest) {
         if (Objects.isNull(imageRequest)) {
-            throw new ResponseBodyNotFoundException("Image request missing!");
+            throw new RequestBodyNotFoundException("Image request missing!");
         }
     }
 
@@ -99,7 +99,7 @@ public class MarleyRestController {
      */
     private void validateNotNull(RegistrationRequest registrationRequest) {
         if (Objects.isNull(registrationRequest)) {
-            throw new ResponseBodyNotFoundException("Registration request missing!");
+            throw new RequestBodyNotFoundException("Registration request missing!");
         }
     }
 
