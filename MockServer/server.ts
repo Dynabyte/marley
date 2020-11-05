@@ -53,6 +53,13 @@ app.delete('/delete/:id', (req: Request, res: Response) => {
   return res.sendStatus(200);
 });
 
+app.post('/calendar/:id', (req: Request, res: Response) => {
+  const id = req.params.id;
+  console.log('id: ', id);
+
+  return res.sendStatus(401);
+});
+
 app.listen(PORT, () => {
   console.log(`App listening at port: ${PORT}`);
 });
