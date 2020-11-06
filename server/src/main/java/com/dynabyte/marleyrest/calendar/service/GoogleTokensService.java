@@ -24,4 +24,8 @@ public class GoogleTokensService {
     public Optional<GoogleTokens> findGoogleTokensById(String faceId){
         return googleTokensRepository.findById(faceId);
     }
+
+    public void deleteById(String faceId){
+        googleTokensRepository.deleteById(faceId);
+    }
 }

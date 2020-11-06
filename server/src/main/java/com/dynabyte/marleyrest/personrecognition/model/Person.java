@@ -19,6 +19,7 @@ public class Person implements Serializable {
     private String faceId;
     private String name;
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL) //TODO check that deleteRequest removes googleTokens as well
+    @MapsId
     @JoinColumn(name = "face_id")
     private GoogleTokens googleTokens;
 

@@ -2,8 +2,6 @@ package com.dynabyte.marleyrest.calendar.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
@@ -13,7 +11,6 @@ import javax.persistence.Id;
 public class GoogleTokens {
 
     @Id
-    @Column(name = "face_id")
     private String faceId;
     private String accessToken;
     private String refreshToken;
