@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css';
+import CalendarEvents from './CalendarEvents';
 import logo from './logo.svg';
 
 function App() {
+  const [calendarEvents, setCalendarEvents] = useState([]);
   const faceId = '5f97ecb54d7fd812180ae5fa';
+
   const handleClick = () => {
     fetch(`http://localhost:8080/calendar/${faceId}`, {
       method: 'GET',
@@ -36,21 +39,42 @@ function App() {
                     })
                       .then((res) => res.json())
                       .then((data) => {
-                        console.log(data);
+                        if (data === 200) {
+                          // Send request to get calendar
+                        }
                       });
                   })
                   .catch((error) => console.log(error));
               });
           });
+        } else {
+          let calendarEventList = [];
+          data.calendarEvents.map((event) =>
+            calendarEventList.push(...calendarEvents, {
+              start: new Date(event.start.dateTime.value).toUTCString(),
+              attendees: event.attendees,
+              location: event.location || 'Ej specificerat',
+              summary: event.summary || 'No Title',
+              description: event.description || 'No Description',
+            })
+          );
+          setCalendarEvents(calendarEventList);
         }
       })
       .catch((error) => {
-        console.log('error');
         if (error.response) {
           console.log(error.response.data);
         }
       });
   };
+
+  if (calendarEvents.length) {
+    return (
+      <div className='App'>
+        <CalendarEvents events={calendarEvents} />
+      </div>
+    );
+  }
 
   return (
     <div className='App'>
