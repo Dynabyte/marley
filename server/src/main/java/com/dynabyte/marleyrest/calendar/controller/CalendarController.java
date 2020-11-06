@@ -6,14 +6,11 @@ import com.dynabyte.marleyrest.calendar.response.CalendarResponse;
 import com.dynabyte.marleyrest.calendar.service.CalendarService;
 import com.dynabyte.marleyrest.calendar.service.GoogleTokensService;
 import com.dynabyte.marleyrest.calendar.util.CalendarRequestUtil;
-import com.dynabyte.marleyrest.personrecognition.service.PersonService;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import static java.lang.System.currentTimeMillis;
 
 @CrossOrigin
 @RestController
