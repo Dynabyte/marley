@@ -49,7 +49,7 @@ public class CalendarService {
                             clientSecrets.getDetails().getClientId(),
                             clientSecrets.getDetails().getClientSecret(),
                             authCode,
-                            "")  // Specify the same redirect URI that you use with your web app.
+                            "http://localhost:3000")  // Specify the same redirect URI that you use with your web app.
                                             // If you don't have a web version of your app, you can specify an empty string.
                             .execute();
         } catch (IOException e) {
