@@ -6,6 +6,7 @@ import com.dynabyte.marleyrest.calendar.response.CalendarResponse;
 import com.dynabyte.marleyrest.calendar.service.CalendarService;
 import com.dynabyte.marleyrest.calendar.service.GoogleTokensService;
 import com.dynabyte.marleyrest.calendar.util.CalendarRequestUtil;
+import com.dynabyte.marleyrest.personrecognition.service.PersonService;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,12 +22,16 @@ public class CalendarController {
 
     private final CalendarService calendarService;
     private final GoogleTokensService googleTokensService;
+    private final PersonService personService;
 
     @Autowired
-    public CalendarController(CalendarService calendarService, GoogleTokensService googleTokensService) {
+    public CalendarController(CalendarService calendarService, GoogleTokensService googleTokensService, PersonService personService) {
         this.calendarService = calendarService;
         this.googleTokensService = googleTokensService;
+        this.personService = personService;
     }
+
+
 
 
     @GetMapping("/calendar/{faceId}")
@@ -41,9 +46,10 @@ public class CalendarController {
     public HttpStatus saveGoogleTokens(@RequestBody GoogleCalendarAuthenticationRequest authenticationRequest){
         LOGGER.info("Request to save tokens received");
         CalendarRequestUtil.validateAuthenticationRequest(authenticationRequest);
+        personService.validatePersonExists(authenticationRequest.getFaceId());
+
         GoogleTokenResponse tokenResponse = calendarService.getTokensFromGoogle(authenticationRequest.getAuthCode());
         Long expirationSystemTime = System.currentTimeMillis() + tokenResponse.getExpiresInSeconds()*1000;
-        //TODO save via personService or googleTokensService? Check that everything saves correctly in both tables
         googleTokensService.save(new GoogleTokens(authenticationRequest.getFaceId(), tokenResponse.getAccessToken(), tokenResponse.getRefreshToken(), expirationSystemTime));
         LOGGER.info("Request successful. Tokens have been saved to database");
         return HttpStatus.OK;

@@ -2,10 +2,8 @@ package com.dynabyte.marleyrest.calendar.util;
 
 import com.dynabyte.marleyrest.api.exception.InvalidArgumentException;
 import com.dynabyte.marleyrest.api.exception.RequestBodyNotFoundException;
-import com.dynabyte.marleyrest.calendar.model.GoogleTokens;
 import com.dynabyte.marleyrest.calendar.request.GoogleCalendarAuthenticationRequest;
 
-import java.util.Objects;
 
 import static java.util.Objects.isNull;
 

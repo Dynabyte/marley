@@ -2,8 +2,8 @@ package com.dynabyte.marleyrest.calendar.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+
+import javax.persistence.*;
 
 @Entity
 @Data

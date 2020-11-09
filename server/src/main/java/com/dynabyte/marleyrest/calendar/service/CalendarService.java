@@ -82,7 +82,7 @@ public class CalendarService {
     private List<Event> getCalendarEventsFromGoogle(GoogleTokens tokens) throws IOException {
         long remainingMilliseconds = tokens.getExpirationSystemTime() - System.currentTimeMillis();
         LOGGER.info("Token expires in (ms): " + remainingMilliseconds);
-        if(System.currentTimeMillis() > tokens.getExpirationSystemTime()){
+        if(remainingMilliseconds < 0){
             LOGGER.info("Access token expired. Requesting new token");
             GoogleTokenResponse tokenResponse = refreshAccessToken(tokens.getRefreshToken());
             tokens.setAccessToken(tokenResponse.getAccessToken());
