@@ -3,7 +3,7 @@ import './App.css';
 import CalendarEvents from './CalendarEvents';
 import logo from './logo.svg';
 
-function App() {
+const App = () => {
   const [calendarEvents, setCalendarEvents] = useState([]);
   const faceId = '5f97ecb54d7fd812180ae5fa';
 
@@ -14,7 +14,6 @@ function App() {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
         if (data.calendarEvents === null) {
           window.gapi.load('client:auth2', () => {
             window.gapi.client
@@ -71,7 +70,7 @@ function App() {
   if (calendarEvents.length) {
     return (
       <div className='App'>
-        <CalendarEvents events={calendarEvents} />
+        <CalendarEvents events={calendarEvents} setEvents={setCalendarEvents} />
       </div>
     );
   }
@@ -85,6 +84,6 @@ function App() {
       </header>
     </div>
   );
-}
+};
 
 export default App;

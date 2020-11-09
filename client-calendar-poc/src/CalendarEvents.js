@@ -1,8 +1,8 @@
 import React from 'react';
 
-const CalendarEvents = ({ events }) => {
+const CalendarEvents = ({ events, setEvents }) => {
   const handleClick = () => {
-    //history.push('/');
+    setEvents([]);
   };
 
   return (
