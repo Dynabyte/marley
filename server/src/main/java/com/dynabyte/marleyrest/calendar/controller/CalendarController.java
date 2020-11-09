@@ -2,12 +2,13 @@ package com.dynabyte.marleyrest.calendar.controller;
 
 import com.dynabyte.marleyrest.calendar.model.GoogleTokens;
 import com.dynabyte.marleyrest.calendar.request.GoogleCalendarAuthenticationRequest;
-import com.dynabyte.marleyrest.calendar.response.CalendarResponse;
+import com.dynabyte.marleyrest.calendar.response.GoogleCredentials;
 import com.dynabyte.marleyrest.calendar.service.CalendarService;
 import com.dynabyte.marleyrest.calendar.service.GoogleTokensService;
 import com.dynabyte.marleyrest.calendar.util.CalendarRequestUtil;
 import com.dynabyte.marleyrest.personrecognition.service.PersonService;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
+import com.google.api.services.calendar.model.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
 @RestController
+@RequestMapping("calendar/")
 public class CalendarController {
     private final Logger LOGGER = LoggerFactory.getLogger(CalendarController.class);
 
@@ -34,15 +36,21 @@ public class CalendarController {
 
 
 
-    @GetMapping("/calendar/{faceId}")
-    public ResponseEntity<CalendarResponse> getCalendarEvents(@PathVariable String faceId){
+    @GetMapping("{faceId}")
+    public ResponseEntity<Event> getCalendarEvent(@PathVariable String faceId){
         LOGGER.info("Calendar request received");
-        CalendarResponse calendarResponse = calendarService.getCalendarEventsOrCredentials(faceId);
+        Event calendarEvent = calendarService.getCalendarEvent(faceId);
         LOGGER.info("Calendar request successful");
-        return ResponseEntity.ok(calendarResponse);
+        return ResponseEntity.ok(calendarEvent);
     }
 
-    @PostMapping("/calendar/tokens")
+    @GetMapping("credentials")
+    public ResponseEntity<GoogleCredentials> getCalendarCredentials(){
+        return ResponseEntity.ok(calendarService.getCredentials());
+    }
+
+
+    @PostMapping("tokens")
     public HttpStatus saveGoogleTokens(@RequestBody GoogleCalendarAuthenticationRequest authenticationRequest){
         LOGGER.info("Request to save tokens received");
         CalendarRequestUtil.validateAuthenticationRequest(authenticationRequest);
@@ -55,7 +63,7 @@ public class CalendarController {
         return HttpStatus.OK;
     }
 
-    @DeleteMapping("/calendar/tokens/{faceId}")
+    @DeleteMapping("tokens/{faceId}")
     public HttpStatus deleteGoogleTokens(@PathVariable String faceId){
         googleTokensService.deleteById(faceId);
         return HttpStatus.OK;

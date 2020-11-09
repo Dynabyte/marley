@@ -1,4 +1,4 @@
-package com.dynabyte.marleyrest.calendar.model;
+package com.dynabyte.marleyrest.calendar.response;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;

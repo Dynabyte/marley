@@ -1,10 +1,10 @@
 package com.dynabyte.marleyrest.calendar.service;
 
 import com.dynabyte.marleyrest.calendar.exception.GoogleAPIException;
-import com.dynabyte.marleyrest.calendar.response.CalendarResponse;
-import com.dynabyte.marleyrest.calendar.model.GoogleCredentials;
+import com.dynabyte.marleyrest.calendar.exception.GoogleTokensMissingException;
 import com.dynabyte.marleyrest.calendar.exception.GoogleCredentialsMissingException;
 import com.dynabyte.marleyrest.calendar.model.GoogleTokens;
+import com.dynabyte.marleyrest.calendar.response.GoogleCredentials;
 import com.google.api.client.googleapis.auth.oauth2.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -32,13 +31,26 @@ public class CalendarService {
     private static final String CREDENTIALS_FILE_PATH = "/google-credentials.json";
 
     private final GoogleTokensService googleTokensService;
-    private final GoogleClientSecrets clientSecrets = getGoogleClientSecrets();
+    private final GoogleClientSecrets clientSecrets = getGoogleClientSecretsFromJSON();
 
     @Autowired
     public CalendarService(GoogleTokensService googleTokensService) {
         this.googleTokensService = googleTokensService;
     }
 
+    /**
+     * Retrieves client id and Google API key which frontend needs in order to request calendar permission
+     * @return GoogleCredentials object to identify application with Google
+     */
+    public GoogleCredentials getCredentials() {
+        return new GoogleCredentials(clientSecrets.getDetails().getClientId());
+    }
+
+    /**
+     * Makes a request to Google to get tokens for to a particular user that has granted permission to view calendar
+     * @param authCode authentication code received from the frontend after a user has granted calendar access
+     * @return GoogleTokenResponse including access token and refresh token
+     */
     public GoogleTokenResponse getTokensFromGoogle(String authCode){
         LOGGER.info("Obtaining tokens from Google using authorization code");
         try {
@@ -58,28 +70,33 @@ public class CalendarService {
         }
     }
 
-    public CalendarResponse getCalendarEventsOrCredentials(String faceId) {
-        CalendarResponse calendarResponse = new CalendarResponse();
-
+    /**
+     * Get upcoming calendar event for a particular faceId
+     * @param faceId the faceId to get a calendar event for
+     * @return next upcoming calendar event from Google Calendar
+     */
+    public Event getCalendarEvent(String faceId) {
         Optional<GoogleTokens> googleTokensOptional = googleTokensService.findGoogleTokensById(faceId);
-        googleTokensOptional.ifPresentOrElse(googleTokens -> {
+        if(googleTokensOptional.isPresent()){
             try {
-                calendarResponse.setCalendarEvents(getCalendarEventsFromGoogle(googleTokens));
-                LOGGER.info("Calendar events received from Google");
+                return getCalendarEventFromGoogle(googleTokensOptional.get());
             } catch (IOException e) {
                 e.printStackTrace();
                 throw new GoogleAPIException("Could not get events from Google Calendar API");
             }
-        }, ()-> {
-            calendarResponse.setGoogleCredentials(
-                    new GoogleCredentials(clientSecrets.getDetails().getClientId()));
-            LOGGER .info("No tokens found for faceId. Sending app credentials");
-        });
-
-        return calendarResponse;
+        }
+        throw new GoogleTokensMissingException("Google Tokens not found in database for faceId: " + faceId);
     }
 
-    private List<Event> getCalendarEventsFromGoogle(GoogleTokens tokens) throws IOException {
+    /**
+     * Makes a request to Google Calendar API to get the next calendar event. The access token will be used if it has
+     * not expired. If the token has expired then a new access token will be requested and saved to the database before
+     * the calendar request is made.
+     * @param tokens access token, refresh token and token expiration time from the database
+     * @return the next upcoming calendar event
+     * @throws IOException throws IOException if something goes wrong in a request to Google
+     */
+    private Event getCalendarEventFromGoogle(GoogleTokens tokens) throws IOException {
         long remainingMilliseconds = tokens.getExpirationSystemTime() - System.currentTimeMillis();
         LOGGER.info("Token expires in (ms): " + remainingMilliseconds);
         if(remainingMilliseconds < 0){
@@ -94,17 +111,26 @@ public class CalendarService {
                 .setApplicationName(APPLICATION_NAME)
                 .build();
 
-        //List the next 10 events from the primary calendar.
+        //List the next event from the primary calendar, then convert from list to single event.
         DateTime now = new DateTime(System.currentTimeMillis());
         Events events = calendar.events().list("primary")
-                .setMaxResults(10)
+                .setMaxResults(1)
                 .setTimeMin(now)
                 .setOrderBy("startTime")
                 .setSingleEvents(true)
                 .execute();
-        return events.getItems();
+        if(events.isEmpty()){
+            return null;
+        }
+        return events.getItems().get(0);
     }
 
+    /**
+     * Makes a request to Google to acquire a new access token using existing refresh token
+     * @param refreshToken refresh token related to a particular faceId
+     * @return GoogleTokenResponse including a new limited time access token that gives access to calendar data
+     * @throws IOException Google API may throw IOException if something goes wrong
+     */
     private GoogleTokenResponse refreshAccessToken(String refreshToken) throws IOException {
             return new GoogleRefreshTokenRequest(
                             new NetHttpTransport(),
@@ -115,8 +141,11 @@ public class CalendarService {
                     .execute();
     }
 
-    private static GoogleClientSecrets getGoogleClientSecrets() {
-        // Load client secrets.
+    /**
+     * Loads GoogleClientSecrets from json file
+     * @return GoogleClientSecrets object including credentials to make requests to Google API
+     */
+    private static GoogleClientSecrets getGoogleClientSecretsFromJSON() {
         GoogleClientSecrets clientSecrets;
         try {
             InputStream in = CalendarService.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
