@@ -7,6 +7,20 @@ const App = () => {
   const [calendarEvents, setCalendarEvents] = useState([]);
   const faceId = '5f97ecb54d7fd812180ae5fa';
 
+  const saveCalendarEvents = (events) => {
+    let calendarEventList = [];
+    events.map((event) =>
+      calendarEventList.push(...calendarEvents, {
+        start: new Date(event.start.dateTime.value).toUTCString(),
+        attendees: event.attendees,
+        location: event.location || 'Ej specificerat',
+        summary: event.summary || 'No Title',
+        description: event.description || 'No Description',
+      })
+    );
+    setCalendarEvents(calendarEventList);
+  };
+
   const handleClick = () => {
     fetch(`http://localhost:8080/calendar/${faceId}`, {
       method: 'GET',
@@ -38,8 +52,16 @@ const App = () => {
                     })
                       .then((res) => res.json())
                       .then((data) => {
-                        if (data === 200) {
-                          // Send request to get calendar
+                        if (data === 'OK') {
+                          // Send request to get calendar after verified
+                          fetch(`http://localhost:8080/calendar/${faceId}`, {
+                            method: 'GET',
+                            headers: { 'Content-Type': 'application/json' },
+                          })
+                            .then((res) => res.json())
+                            .then((data) => {
+                              saveCalendarEvents(data.calendarEvents);
+                            });
                         }
                       });
                   })
@@ -47,17 +69,7 @@ const App = () => {
               });
           });
         } else {
-          let calendarEventList = [];
-          data.calendarEvents.map((event) =>
-            calendarEventList.push(...calendarEvents, {
-              start: new Date(event.start.dateTime.value).toUTCString(),
-              attendees: event.attendees,
-              location: event.location || 'Ej specificerat',
-              summary: event.summary || 'No Title',
-              description: event.description || 'No Description',
-            })
-          );
-          setCalendarEvents(calendarEventList);
+          saveCalendarEvents(data.calendarEvents);
         }
       })
       .catch((error) => {
