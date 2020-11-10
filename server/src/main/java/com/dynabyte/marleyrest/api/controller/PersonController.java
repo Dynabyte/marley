@@ -9,6 +9,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * An entity controller for Person, used for manual feature testing as /register and /delete/{faceId} handle Person
+ * along with their face encodings. This controller does not involve the facial recognition service and should therefore
+ * not be used in production.
+ */
 @RestController
 @RequestMapping("/person")
 public class PersonController {
@@ -38,5 +43,4 @@ public class PersonController {
         return HttpStatus.OK;
     }
 
-//    @GetMapping("/{id}")
 }
