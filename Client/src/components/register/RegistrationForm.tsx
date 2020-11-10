@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React, {
   ChangeEvent,
   MouseEvent,
@@ -38,14 +39,19 @@ const Errors = styled.div`
   color: black;
 `;
 
+const StyledSmallText = styled(SmallText)`
+  color: black;
+`;
+
 const RegistrationForm = () => {
-  const [value, setValue] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [checked, isChecked] = useState<boolean>(false);
   const [errors, setErrors] = useState<string[]>([]);
   const history = useHistory();
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
-    setValue(event.currentTarget.value);
+    setName(event.currentTarget.value);
   };
 
   const handleCancelButton = (event: MouseEvent<HTMLButtonElement>) => {
@@ -53,10 +59,32 @@ const RegistrationForm = () => {
     history.push('/');
   };
 
+  const googleAuthRequest = (googleCredentials) => {
+    window.gapi.load('client:auth2', () => {
+      window.gapi.client
+        .init({
+          apiKey: googleCredentials.googleCalendarApiKey,
+          clientId: googleCredentials.clientId,
+          scope: 'https://www.googleapis.com/auth/calendar.readonly',
+        })
+        .then(() => {
+          window.gapi.auth2
+            .getAuthInstance()
+            .grantOfflineAccess()
+            .then(({ code }) => {
+              history.push({
+                pathname: '/positioning',
+                state: { name, authCode: code },
+              });
+            });
+        });
+    });
+  };
+
   const handleSubmit = (event: SyntheticEvent) => {
     event.preventDefault();
 
-    const errors = validate(value);
+    const errors = validate(name);
 
     if (errors.length > 0) {
       setErrors(errors);
@@ -64,16 +92,28 @@ const RegistrationForm = () => {
     }
 
     setErrors([]);
-    history.push({ pathname: '/positioning', state: value });
+
+    if (checked) {
+      axios
+        .get('http://localhost:8080/calendar/credentials', {
+          headers: { 'Content-Type': 'application/json' },
+        })
+        .then(({ data }) => {
+          googleAuthRequest(data);
+        })
+        .catch((error) => console.log(error));
+    } else {
+      history.push({ pathname: '/positioning', state: { name } });
+    }
   };
 
-  const validate = (value: string) => {
+  const validate = (name: string) => {
     let errors = [];
-    if (value.trim().length === 0) {
+    if (name.trim().length === 0) {
       errors.push('Du måste fylla i ett namn');
     }
 
-    if (value.length > 50) {
+    if (name.length > 50) {
       errors.push('Det får inte vara fler än 50 tecken');
     }
     return errors;
@@ -90,10 +130,20 @@ const RegistrationForm = () => {
           <Seperator />
           <Input
             type='text'
-            value={value}
+            value={name}
             onChange={handleChange}
             placeholder='För- och efternamn'
           />
+          <div>
+            <StyledSmallText>
+              Vill du koppla din Google-kalender för att kunna se dina möten?
+            </StyledSmallText>
+            <input
+              type='checkbox'
+              onChange={() => isChecked(!checked)}
+              checked={checked}
+            />
+          </div>
           <Errors>
             {errors.map((error, index) => (
               <p key={index}>{error}</p>

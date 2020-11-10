@@ -1,11 +1,12 @@
 import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import CenterContent from '../../ui/CenterContent';
 import LargeText from '../../ui/fonts/LargeText';
 import SmallText from '../../ui/fonts/SmallText';
 import Spinner from '../../ui/Spinner';
 import ErrorMessage from '../ErrorMessage';
+import { registrationData } from './PositionInformation';
 
 const CaptureFrames = () => {
   const history = useHistory();
@@ -14,9 +15,10 @@ const CaptureFrames = () => {
   const [hasError, setHasError] = useState<boolean>(false);
 
   const intervalRef = useRef<number>(null);
+  const location = useLocation<registrationData>();
+  const { name, authCode } = location.state;
 
   useEffect(() => {
-    const name = history.location.state;
     const canvas: HTMLCanvasElement = document.createElement('canvas');
     let myStream: MediaStream;
     if (navigator.mediaDevices.getUserMedia) {
@@ -85,6 +87,26 @@ const CaptureFrames = () => {
             return base64images;
           };
 
+          const saveGoogleCalendarTokens = (faceId: string) => {
+            axios
+              .post(
+                'http://localhost:8080/calendar/tokens',
+                { faceId, authCode },
+                {
+                  headers: { 'Content-Type': 'application/json' },
+                }
+              )
+              .catch((error) => {
+                if (error.response) {
+                  const errorData = error.response.data;
+                  console.log(errorData);
+                }
+              })
+              .finally(() => {
+                history.push('/');
+              });
+          };
+
           const uploadImages = (images: string[]) => {
             axios
               .post(
@@ -94,9 +116,9 @@ const CaptureFrames = () => {
                   headers: { 'Content-Type': 'application/json' },
                 }
               )
-              .then(() => {
+              .then(({ data }) => {
                 console.log('Uploaded images');
-                history.push('/');
+                saveGoogleCalendarTokens(data);
               })
               .catch((error) => {
                 if (error.response) {
