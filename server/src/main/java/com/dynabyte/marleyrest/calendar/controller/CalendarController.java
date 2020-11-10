@@ -34,10 +34,8 @@ public class CalendarController {
     }
 
 
-
-
     @GetMapping("{faceId}")
-    public ResponseEntity<Event> getCalendarEvent(@PathVariable String faceId){
+    public ResponseEntity<Event> getCalendarEvent(@PathVariable String faceId) {
         LOGGER.info("Calendar request received");
         Event calendarEvent = calendarService.getCalendarEvent(faceId);
         LOGGER.info("Calendar request successful");
@@ -45,26 +43,26 @@ public class CalendarController {
     }
 
     @GetMapping("credentials")
-    public ResponseEntity<GoogleCredentials> getCalendarCredentials(){
+    public ResponseEntity<GoogleCredentials> getCalendarCredentials() {
         return ResponseEntity.ok(calendarService.getCredentials());
     }
 
 
     @PostMapping("tokens")
-    public HttpStatus saveGoogleTokens(@RequestBody GoogleCalendarAuthenticationRequest authenticationRequest){
+    public HttpStatus saveGoogleTokens(@RequestBody GoogleCalendarAuthenticationRequest authenticationRequest) {
         LOGGER.info("Request to save tokens received");
         CalendarRequestUtil.validateAuthenticationRequest(authenticationRequest);
         personService.validatePersonExists(authenticationRequest.getFaceId());
 
         GoogleTokenResponse tokenResponse = calendarService.getTokensFromGoogle(authenticationRequest.getAuthCode());
-        Long expirationSystemTime = System.currentTimeMillis() + tokenResponse.getExpiresInSeconds()*1000;
+        Long expirationSystemTime = System.currentTimeMillis() + tokenResponse.getExpiresInSeconds() * 1000;
         googleTokensService.save(new GoogleTokens(authenticationRequest.getFaceId(), tokenResponse.getAccessToken(), tokenResponse.getRefreshToken(), expirationSystemTime));
         LOGGER.info("Request successful. Tokens have been saved to database");
         return HttpStatus.OK;
     }
 
     @DeleteMapping("tokens/{faceId}")
-    public HttpStatus deleteGoogleTokens(@PathVariable String faceId){
+    public HttpStatus deleteGoogleTokens(@PathVariable String faceId) {
         googleTokensService.deleteById(faceId);
         return HttpStatus.OK;
     }

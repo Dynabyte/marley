@@ -1,9 +1,7 @@
 package com.dynabyte.marleyrest.registration;
 
 import com.dynabyte.marleyrest.api.util.RequestUtil;
-import com.dynabyte.marleyrest.prediction.PredictionUseCase;
 import com.dynabyte.marleyrest.personrecognition.request.ImageRequest;
-import com.dynabyte.marleyrest.personrecognition.response.FaceRecognitionResponse;
 import com.dynabyte.marleyrest.personrecognition.service.FaceRecognitionService;
 import com.dynabyte.marleyrest.registration.exception.MissingPersonInDbException;
 import com.dynabyte.marleyrest.registration.exception.PersonAlreadyInDbException;
@@ -41,13 +39,14 @@ public class RegistrationUseCase {
      * images to the face recognition API. The face encodings and the person will have a matching faceId.
      *
      * @param registrationRequest a request with a name and a list of base64 image strings
+     * @return faceId as String
      */
-    public void execute(RegistrationRequest registrationRequest) {
+    public String execute(RegistrationRequest registrationRequest) {
         LOGGER.info("Registration request initiated");
         registrationRequest = RequestUtil.validateAndPrepareRegistrationRequest(registrationRequest);
         LOGGER.debug("Registration request validated");
 
-        registerPersonWithMultipleImages(registrationRequest);
+        return registerPersonWithMultipleImages(registrationRequest);
     }
 
     /**
@@ -60,7 +59,7 @@ public class RegistrationUseCase {
      *
      * @param registrationRequest The request object accepted in the register endpoint
      */
-    private void registerPersonWithMultipleImages(RegistrationRequest registrationRequest) {
+    private String registerPersonWithMultipleImages(RegistrationRequest registrationRequest) {
         LOGGER.info("Registering images...");
         String registeredFaceId = null;
         int registeredImagesCount = 0;
@@ -97,6 +96,7 @@ public class RegistrationUseCase {
             throw new RegistrationException("Could not register any images or save person to Db");
         }
         LOGGER.info("Registration Complete. Total registered images: " + registeredImagesCount + " out of " + images.size());
+        return registeredFaceId;
     }
 
     /**

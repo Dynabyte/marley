@@ -63,14 +63,14 @@ public class MarleyRestController {
      * @return HttpStatus.OK
      */
     @PostMapping("/register")
-    public HttpStatus register(@RequestBody RegistrationRequest registrationRequest) {
+    public ResponseEntity<String> register(@RequestBody RegistrationRequest registrationRequest) {
 
         validateNotNull(registrationRequest);
 
-        registrationUseCase.execute(registrationRequest);
+        String faceId = registrationUseCase.execute(registrationRequest);
 
         LOGGER.info("Registration request successful");
-        return HttpStatus.OK;
+        return ResponseEntity.ok(faceId);
     }
 
     @DeleteMapping("/delete/{id}")
