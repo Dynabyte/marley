@@ -2,13 +2,13 @@ package com.dynabyte.marleyrest.calendar.controller;
 
 import com.dynabyte.marleyrest.calendar.model.GoogleTokens;
 import com.dynabyte.marleyrest.calendar.request.GoogleCalendarAuthenticationRequest;
+import com.dynabyte.marleyrest.calendar.response.EventResponse;
 import com.dynabyte.marleyrest.calendar.response.GoogleCredentials;
 import com.dynabyte.marleyrest.calendar.service.CalendarService;
 import com.dynabyte.marleyrest.calendar.service.GoogleTokensService;
 import com.dynabyte.marleyrest.calendar.util.CalendarRequestUtil;
 import com.dynabyte.marleyrest.personrecognition.service.PersonService;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
-import com.google.api.services.calendar.model.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +35,9 @@ public class CalendarController {
 
 
     @GetMapping("{faceId}")
-    public ResponseEntity<Event> getCalendarEvent(@PathVariable String faceId) {
+    public ResponseEntity<EventResponse> getCalendarEvent(@PathVariable String faceId) {
         LOGGER.info("Calendar request received");
-        Event calendarEvent = calendarService.getCalendarEvent(faceId);
+        EventResponse calendarEvent = calendarService.getCalendarEvent(faceId);
         LOGGER.info("Calendar request successful");
         return ResponseEntity.ok(calendarEvent);
     }

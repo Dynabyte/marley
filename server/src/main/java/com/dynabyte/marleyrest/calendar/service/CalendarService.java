@@ -4,8 +4,10 @@ import com.dynabyte.marleyrest.calendar.exception.GoogleAPIException;
 import com.dynabyte.marleyrest.calendar.exception.GoogleTokensMissingException;
 import com.dynabyte.marleyrest.calendar.exception.GoogleCredentialsMissingException;
 import com.dynabyte.marleyrest.calendar.model.GoogleTokens;
+import com.dynabyte.marleyrest.calendar.response.EventResponse;
 import com.dynabyte.marleyrest.calendar.response.GoogleCredentials;
-import com.dynabyte.marleyrest.calendar.util.DateUtil;
+import com.dynabyte.marleyrest.calendar.util.CalendarDateUtil;
+import com.dynabyte.marleyrest.calendar.util.CalendarRequestUtil;
 import com.google.api.client.googleapis.auth.oauth2.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -21,8 +23,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -78,7 +78,7 @@ public class CalendarService {
      * @param faceId the faceId to get a calendar event for
      * @return next upcoming calendar event from Google Calendar
      */
-    public Event getCalendarEvent(String faceId) {
+    public EventResponse getCalendarEvent(String faceId) {
         Optional<GoogleTokens> googleTokensOptional = googleTokensService.findGoogleTokensById(faceId);
         if(googleTokensOptional.isPresent()){
             try {
@@ -99,7 +99,7 @@ public class CalendarService {
      * @return the next upcoming calendar event
      * @throws IOException throws IOException if something goes wrong in a request to Google
      */
-    private Event getCalendarEventFromGoogle(GoogleTokens tokens) throws IOException {
+    private EventResponse getCalendarEventFromGoogle(GoogleTokens tokens) throws IOException {
         long remainingMilliseconds = tokens.getExpirationSystemTime() - System.currentTimeMillis();
         LOGGER.info("Token expires in (ms): " + remainingMilliseconds);
         if(remainingMilliseconds < 0){
@@ -114,7 +114,7 @@ public class CalendarService {
                 .setApplicationName(APPLICATION_NAME)
                 .build();
 
-        //List the next event from the primary calendar, then convert from list to single event.
+        //List the next upcoming event from the primary calendar. Ongoing event also counts
         DateTime now = new DateTime(System.currentTimeMillis());
         Events events = calendar.events().list("primary")
                 .setMaxResults(1)
@@ -125,16 +125,27 @@ public class CalendarService {
         if(events.isEmpty()){
             return null;
         }
-        Event event = events.getItems().get(0);
-        Date eventDate = DateUtil.removeTime(new Date(event.getStart().getDateTime().getValue()));
-        Date currentDate = DateUtil.removeTime(new Date(System.currentTimeMillis()));
-
-        if(eventDate.compareTo(currentDate) != 0){ //If the event start date is not today
-            return null;
-        }
+        Event event = events.getItems().get(0); //Get the next event as single Event object
 
         //An event will only be returned if there is an event today that hasn't already passed
-        return event;
+        if(CalendarDateUtil.isEventToday(event)){
+            EventResponse eventResponse = new EventResponse(event);
+            int minutesRemaining = CalendarDateUtil.getMinutesRemaining(event);
+            if(minutesRemaining >= 60 || minutesRemaining <= -60){
+                eventResponse.setHoursRemaining(minutesRemaining/60);
+                minutesRemaining %= 60;
+            }
+            if(minutesRemaining < 0){
+                eventResponse.setOngoing(true);
+            }
+            eventResponse.setMinutesRemaining(minutesRemaining);
+
+            System.out.println("Hours: " + eventResponse.getHoursRemaining());
+            System.out.println("Minutes: " + eventResponse.getMinutesRemaining());
+           return eventResponse;
+        }
+
+        return null;
     }
 
     /**
