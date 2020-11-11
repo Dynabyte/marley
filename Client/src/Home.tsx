@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import './App.css';
+import calendarEventLogic from './utility/calendarEventLogic';
 import Modal from './components/Modal';
 import FaceRegistrationText from './components/register/FaceRegistrationText';
 import useModal from './hooks/useModal';
@@ -16,13 +17,14 @@ interface IResult {
   isKnownFace?: boolean;
   isFace?: boolean;
   name?: string;
-  id?: number;
+  id?: string;
 }
 
 export const Home = () => {
   const [result, setResult] = React.useState<IResult>({});
   const [paused, setPaused] = React.useState<boolean>(false);
   const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
+  const [eventMessage, setEventMessage] = React.useState<string>('');
 
   const timerRef = useRef(null);
   const regulateSpeedTimer = useRef(null);
@@ -58,7 +60,7 @@ export const Home = () => {
           .grabFrame()
           .then((imageBitmap) => {
             const dataURL = getDataURL(imageBitmap);
-            uploadImage(dataURL);
+            sendPredictionRequest(dataURL);
           })
           .catch(() => console.trace());
       } else {
@@ -99,7 +101,24 @@ export const Home = () => {
       return canvas.toDataURL();
     };
 
-    const uploadImage = (image: string) => {
+    const sendCalendarRequest = (faceId: string) => {
+      axios
+        .get(
+          `http://localhost:8080/calendar/${faceId}`
+        )
+        .then(({data}) => {
+            console.log(data);
+            setEventMessage(calendarEventLogic(data));
+        })
+        .catch((error) => {
+            if (error.response) {
+              const errorData = error.response.data;
+              console.log(errorData);
+            }
+        });
+    }
+
+    const sendPredictionRequest = (image: string) => {
       const startTime = new Date().getTime();
       axios
         .post(
@@ -114,8 +133,10 @@ export const Home = () => {
           const requestTime = new Date().getTime() - startTime;
           console.log(`Request time: ${requestTime} ms`);
           if (isMounted) {
+            console.log(`Current id: ${data.id}`);
+            
             setResult(data);
-
+          
             if (data.isFace) {
               updateTimer();
             }
@@ -123,6 +144,10 @@ export const Home = () => {
               faceFoundTimer.current = setTimeout(() => {
                 predictFace();
               }, process.env.REACT_APP_FOUND_FACE_WAIT_TIME || 2000);
+              if(data.hasAllowedCalendar){
+                sendCalendarRequest(data.id);
+              }
+              
             } else {
               regulateSpeedAndPredictFace(requestTime);
             }
@@ -215,6 +240,7 @@ export const Home = () => {
       {isKnownFace && (
         <>
           <Title>{`Välkommen ${name} till`}</Title>
+          <p>{eventMessage}&nbsp;</p>
           <WhiteButton className='button-default' onClick={handleModal}>
             Ta bort mig från systemet
           </WhiteButton>
