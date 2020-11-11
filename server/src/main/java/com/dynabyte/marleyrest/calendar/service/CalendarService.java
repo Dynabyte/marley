@@ -5,6 +5,7 @@ import com.dynabyte.marleyrest.calendar.exception.GoogleTokensMissingException;
 import com.dynabyte.marleyrest.calendar.exception.GoogleCredentialsMissingException;
 import com.dynabyte.marleyrest.calendar.model.GoogleTokens;
 import com.dynabyte.marleyrest.calendar.response.GoogleCredentials;
+import com.dynabyte.marleyrest.calendar.util.DateUtil;
 import com.google.api.client.googleapis.auth.oauth2.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -20,6 +21,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -122,7 +125,16 @@ public class CalendarService {
         if(events.isEmpty()){
             return null;
         }
-        return events.getItems().get(0);
+        Event event = events.getItems().get(0);
+        Date eventDate = DateUtil.removeTime(new Date(event.getStart().getDateTime().getValue()));
+        Date currentDate = DateUtil.removeTime(new Date(System.currentTimeMillis()));
+
+        if(eventDate.compareTo(currentDate) != 0){ //If the event start date is not today
+            return null;
+        }
+
+        //An event will only be returned if there is an event today that hasn't already passed
+        return event;
     }
 
     /**

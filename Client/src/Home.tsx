@@ -110,6 +110,7 @@ export const Home = () => {
           }
         )
         .then(({ data }) => {
+          console.log(data);
           const requestTime = new Date().getTime() - startTime;
           console.log(`Request time: ${requestTime} ms`);
           if (isMounted) {

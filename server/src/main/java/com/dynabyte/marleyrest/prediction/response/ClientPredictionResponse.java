@@ -16,11 +16,13 @@ public class ClientPredictionResponse {
     private boolean isFace;
     @JsonProperty(value = "isKnownFace")
     private boolean isKnownFace;
+    private boolean hasAllowedCalendar;
 
-    public ClientPredictionResponse(String id, String name, boolean isFace, boolean isKnownFace) {
+    public ClientPredictionResponse(String id, String name, boolean isFace, boolean isKnownFace, boolean hasAllowedCalendar) {
         this.id = id;
         this.name = name;
         this.isFace = isFace;
         this.isKnownFace = isKnownFace;
+        this.hasAllowedCalendar = hasAllowedCalendar;
     }
 }
