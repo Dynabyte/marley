@@ -118,7 +118,14 @@ const CaptureFrames = () => {
               )
               .then(({ data }) => {
                 console.log('Uploaded images');
-                saveGoogleCalendarTokens(data);
+                console.log(`Auth code: ${authCode}`);
+                
+                if(authCode !== undefined){
+                  saveGoogleCalendarTokens(data);
+                }
+                else{
+                  history.push('/');
+                }
               })
               .catch((error) => {
                 if (error.response) {
