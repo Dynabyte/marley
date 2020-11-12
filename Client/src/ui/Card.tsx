@@ -6,7 +6,7 @@ const Card = styled.div`
   box-shadow: 0px 0px 0px 5px rgba(255, 255, 255, 0.4),
     0px 4px 20px rgba(0, 0, 0, 0.33);
   border-radius: 5px;
-  width: 40rem;
+  width: 45rem;
 
   @media screen and (max-width: 575.98px) {
     width: 95%;

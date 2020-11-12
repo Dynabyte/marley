@@ -1,17 +1,19 @@
 import axios from 'axios';
 import React, { useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
+import styled, { css, keyframes } from 'styled-components';
 import './App.css';
-import calendarEventLogic from './utility/calendarEventLogic';
 import Modal from './components/Modal';
 import FaceRegistrationText from './components/register/FaceRegistrationText';
 import useModal from './hooks/useModal';
 import Logo from './shared/Logo';
 import Title from './shared/Title';
 import dynabyteLogo from './static/images/dynabyte_white.png';
+import DefaultText from './ui/fonts/DefaultText';
 import LargeText from './ui/fonts/LargeText';
 import Spinner from './ui/Spinner';
 import WhiteButton from './ui/WhiteButton';
+import calendarEventLogic from './utility/calendarEventLogic';
 
 interface IResult {
   isKnownFace?: boolean;
@@ -19,6 +21,33 @@ interface IResult {
   name?: string;
   id?: string;
 }
+
+const slideIn = keyframes`
+ from { opacity: 0; }
+`;
+
+const fadeIn = css`
+  animation: 2s ease-in-out 0s 1 ${slideIn};
+`;
+
+const Container = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+
+  .button-modal {
+    position: absolute;
+    right: 0;
+    bottom: 10px;
+  }
+`;
+
+const ContainerWithFadeIn = styled(Container)`
+  ${() => fadeIn};
+`;
 
 export const Home = () => {
   const [result, setResult] = React.useState<IResult>({});
@@ -103,20 +132,18 @@ export const Home = () => {
 
     const sendCalendarRequest = (faceId: string) => {
       axios
-        .get(
-          `http://localhost:8080/calendar/${faceId}`
-        )
-        .then(({data}) => {
-            console.log(data);
-            setEventMessage(calendarEventLogic(data));
+        .get(`http://localhost:8080/calendar/${faceId}`)
+        .then(({ data }) => {
+          const calendarEventMessage = calendarEventLogic(data);
+          setEventMessage(calendarEventMessage);
         })
         .catch((error) => {
-            if (error.response) {
-              const errorData = error.response.data;
-              console.log(errorData);
-            }
+          if (error.response) {
+            const errorData = error.response.data;
+            console.log(errorData);
+          }
         });
-    }
+    };
 
     const sendPredictionRequest = (image: string) => {
       const startTime = new Date().getTime();
@@ -129,14 +156,9 @@ export const Home = () => {
           }
         )
         .then(({ data }) => {
-          console.log(data);
           const requestTime = new Date().getTime() - startTime;
-          console.log(`Request time: ${requestTime} ms`);
           if (isMounted) {
-            console.log(`Current id: ${data.id}`);
-            
             setResult(data);
-          
             if (data.isFace) {
               updateTimer();
             }
@@ -144,10 +166,9 @@ export const Home = () => {
               faceFoundTimer.current = setTimeout(() => {
                 predictFace();
               }, process.env.REACT_APP_FOUND_FACE_WAIT_TIME || 2000);
-              if(data.hasAllowedCalendar){
+              if (data.hasAllowedCalendar) {
                 sendCalendarRequest(data.id);
               }
-              
             } else {
               regulateSpeedAndPredictFace(requestTime);
             }
@@ -155,7 +176,6 @@ export const Home = () => {
         })
         .catch((error) => {
           const requestTime = new Date().getTime() - startTime;
-          console.log(`Request time: ${requestTime} ms`);
           if (error.response) {
             const errorData = error.response.data;
             console.log(errorData);
@@ -236,26 +256,32 @@ export const Home = () => {
   };
 
   return (
-    <div className='wrapper'>
+    <div>
       {isKnownFace && (
-        <>
+        <ContainerWithFadeIn>
           <Title>{`Välkommen ${name} till`}</Title>
-          <p>{eventMessage}&nbsp;</p>
-          <WhiteButton className='button-default' onClick={handleModal}>
+          <DefaultText>{eventMessage}&nbsp;</DefaultText>
+          <WhiteButton className='button-modal' onClick={handleModal}>
             Ta bort mig från systemet
           </WhiteButton>
-          <Modal
-            isShowing={isShowing}
-            hide={() => setIsShowing(false)}
-            handleClick={handleClick}
-            setPaused={setPaused}
-          />
-        </>
+        </ContainerWithFadeIn>
       )}
-      {!isKnownFace && isFace && <FaceRegistrationText />}
+      {!isKnownFace && isFace && (
+        <Container>
+          <FaceRegistrationText />
+        </Container>
+      )}
       {!isKnownFace && !isFace && (
-        <Logo src={dynabyteLogo} width='200' height='80' alt='logo' />
+        <Container>
+          <Logo src={dynabyteLogo} width='200' height='80' alt='logo' />
+        </Container>
       )}
+      <Modal
+        isShowing={isShowing}
+        hide={() => setIsShowing(false)}
+        handleClick={handleClick}
+        setPaused={setPaused}
+      />
 
       <footer>
         <span>

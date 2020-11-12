@@ -9,6 +9,7 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import Card from '../../ui/Card';
 import CenterContent from '../../ui/CenterContent';
+import Checkbox from '../../ui/Checkbox';
 import LargeText from '../../ui/fonts/LargeText';
 import SmallText from '../../ui/fonts/SmallText';
 import Input from '../../ui/Input';
@@ -39,13 +40,17 @@ const Errors = styled.div`
   color: black;
 `;
 
-const StyledSmallText = styled(SmallText)`
+const LabelText = styled.span`
+  display: inline-block;
+  font-size: 1.25rem;
+  font-family: Arial, Helvetica, sans-serif;
   color: black;
+  margin-bottom: 2rem;
 `;
 
 const RegistrationForm = () => {
   const [name, setName] = useState<string>('');
-  const [checked, isChecked] = useState<boolean>(false);
+  const [checked, setIsChecked] = useState<boolean>(false);
   const [errors, setErrors] = useState<string[]>([]);
   const history = useHistory();
 
@@ -134,21 +139,23 @@ const RegistrationForm = () => {
             onChange={handleChange}
             placeholder='För- och efternamn'
           />
-          <div>
-            <StyledSmallText>
+          {errors && (
+            <Errors>
+              {errors.map((error, index) => (
+                <p key={index}>{error}</p>
+              ))}
+            </Errors>
+          )}
+          <label>
+            <LabelText>
               Vill du koppla din Google-kalender för att kunna se dina möten?
-            </StyledSmallText>
-            <input
-              type='checkbox'
-              onChange={() => isChecked(!checked)}
+            </LabelText>
+            <Checkbox
               checked={checked}
+              onChange={() => setIsChecked(!checked)}
             />
-          </div>
-          <Errors>
-            {errors.map((error, index) => (
-              <p key={index}>{error}</p>
-            ))}
-          </Errors>
+          </label>
+
           <div style={{ display: 'flex' }}>
             <PinkButton
               type='button'
