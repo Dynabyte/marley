@@ -9,15 +9,16 @@ import com.dynabyte.marleyrest.calendar.service.GoogleTokensService;
 import com.dynabyte.marleyrest.calendar.util.CalendarRequestUtil;
 import com.dynabyte.marleyrest.personrecognition.service.PersonService;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("calendar/")
 public class CalendarController {
     private final Logger LOGGER = LoggerFactory.getLogger(CalendarController.class);
@@ -25,14 +26,6 @@ public class CalendarController {
     private final CalendarService calendarService;
     private final GoogleTokensService googleTokensService;
     private final PersonService personService;
-
-    @Autowired
-    public CalendarController(CalendarService calendarService, GoogleTokensService googleTokensService, PersonService personService) {
-        this.calendarService = calendarService;
-        this.googleTokensService = googleTokensService;
-        this.personService = personService;
-    }
-
 
     @GetMapping("{faceId}")
     public ResponseEntity<EventResponse> getCalendarEvent(@PathVariable String faceId) {

@@ -3,7 +3,6 @@ package com.dynabyte.marleyrest.api.exception;
 import com.dynabyte.marleyrest.calendar.exception.GoogleAPIException;
 import com.dynabyte.marleyrest.calendar.exception.GoogleCredentialsMissingException;
 import com.dynabyte.marleyrest.calendar.exception.GoogleTokensMissingException;
-import com.dynabyte.marleyrest.calendar.model.GoogleTokens;
 import com.dynabyte.marleyrest.deletion.exception.IdNotFoundException;
 import com.dynabyte.marleyrest.prediction.exception.*;
 import com.dynabyte.marleyrest.registration.exception.MissingPersonInDbException;
@@ -16,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.ResourceAccessException;
-
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
