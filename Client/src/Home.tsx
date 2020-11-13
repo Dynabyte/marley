@@ -156,6 +156,7 @@ export const Home = () => {
           }
         )
         .then(({ data }) => {
+          console.log(data);
           const requestTime = new Date().getTime() - startTime;
           if (isMounted) {
             setResult(data);
@@ -267,9 +268,9 @@ export const Home = () => {
         </ContainerWithFadeIn>
       )}
       {!isKnownFace && isFace && (
-        <Container>
+        <ContainerWithFadeIn>
           <FaceRegistrationText />
-        </Container>
+        </ContainerWithFadeIn>
       )}
       {!isKnownFace && !isFace && (
         <Container>
