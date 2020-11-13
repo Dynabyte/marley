@@ -5,6 +5,7 @@ import styled, { css, keyframes } from 'styled-components';
 import './App.css';
 import Modal from './components/Modal';
 import FaceRegistrationText from './components/register/FaceRegistrationText';
+import { FaceIdContext } from './contexts/FaceIdContext';
 import useModal from './hooks/useModal';
 import Logo from './shared/Logo';
 import Title from './shared/Title';
@@ -51,10 +52,12 @@ const ContainerWithFadeIn = styled(Container)`
 
 export const Home = () => {
   const [result, setResult] = React.useState<IResult>({});
+  const [faceId, setFaceId] = React.useContext(FaceIdContext);
   const [paused, setPaused] = React.useState<boolean>(false);
   const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
   const [eventMessage, setEventMessage] = React.useState<string>('');
-
+  console.log(`faceId after declaration: ${faceId}`);
+  
   const timerRef = useRef(null);
   const regulateSpeedTimer = useRef(null);
   const activeTimerRef = useRef(null);
@@ -159,7 +162,15 @@ export const Home = () => {
           console.log(data);
           const requestTime = new Date().getTime() - startTime;
           if (isMounted) {
+            console.log(`faceId: ${faceId}`);
+            console.log(`data.id: ${data.id}`);
+            if(faceId !== data.id){
+              setEventMessage('');
+            }
             setResult(data);
+            setFaceId(data.id);
+            console.log(`faceId after set: ${faceId}`);
+
             if (data.isFace) {
               updateTimer();
             }
