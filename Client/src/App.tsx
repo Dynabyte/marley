@@ -4,7 +4,6 @@ import Motion from './components/Motion';
 import CaptureFrames from './components/register/CaptureFrames';
 import Positioning from './components/register/PositionInformation';
 import RegisterForm from './components/register/RegistrationForm';
-import { FaceIdProvider } from './contexts/FaceIdContext';
 import Home from './Home';
 import GlobalStyle from './styling/GlobalStyle';
 
@@ -14,9 +13,7 @@ const App = () => (
     <Router>
       <Switch>
         <Route path='/' exact>
-          <FaceIdProvider>
             <Home />
-          </FaceIdProvider>
         </Route>
         <Route path='/registration' exact>
           <RegisterForm />
