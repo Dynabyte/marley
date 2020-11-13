@@ -1,12 +1,12 @@
 import axios from 'axios';
-import React, { useEffect, useRef, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { RegistrationDataContext } from '../../contexts/RegistrationDataContext';
 import CenterContent from '../../ui/CenterContent';
 import LargeText from '../../ui/fonts/LargeText';
 import SmallText from '../../ui/fonts/SmallText';
 import Spinner from '../../ui/Spinner';
 import ErrorMessage from '../ErrorMessage';
-import { registrationData } from './PositionInformation';
 
 const CaptureFrames = () => {
   const history = useHistory();
@@ -15,8 +15,10 @@ const CaptureFrames = () => {
   const [hasError, setHasError] = useState<boolean>(false);
 
   const intervalRef = useRef<number>(null);
-  const location = useLocation<registrationData>();
-  const { name, authCode } = location.state;
+  const { registrationData, setRegistrationData } = useContext(
+    RegistrationDataContext
+  );
+  const { name, authCode } = registrationData;
 
   useEffect(() => {
     const canvas: HTMLCanvasElement = document.createElement('canvas');
@@ -119,7 +121,7 @@ const CaptureFrames = () => {
               .then(({ data }) => {
                 console.log('Uploaded images');
 
-                if (authCode !== undefined) {
+                if (authCode !== null) {
                   saveGoogleCalendarTokens(data);
                 } else {
                   history.push('/');
