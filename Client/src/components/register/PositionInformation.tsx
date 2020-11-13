@@ -1,5 +1,5 @@
 import React from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import Card from '../../ui/Card';
 import CenterContent from '../../ui/CenterContent';
@@ -19,15 +19,9 @@ const StyledCard = styled(Card)`
   }
 `;
 
-export interface registrationData {
-  name: string;
-  authCode: string;
-}
-
 const Positioning = () => {
   const history = useHistory();
-  const location = useLocation<registrationData>();
-  const { name, authCode } = location.state;
+
   return (
     <CenterContent>
       <StyledCard>
@@ -46,12 +40,7 @@ const Positioning = () => {
           </PinkButton>
           <PinkButton
             type='button'
-            onClick={() =>
-              history.push({
-                pathname: '/capture-frames',
-                state: { name, authCode },
-              })
-            }
+            onClick={() => history.push('/capture-frames')}
           >
             REDO
           </PinkButton>
