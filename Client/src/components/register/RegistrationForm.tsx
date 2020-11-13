@@ -3,10 +3,12 @@ import React, {
   ChangeEvent,
   MouseEvent,
   SyntheticEvent,
+  useContext,
   useState,
 } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import { RegistrationDataContext } from '../../contexts/RegistrationDataContext';
 import Card from '../../ui/Card';
 import CenterContent from '../../ui/CenterContent';
 import Checkbox from '../../ui/Checkbox';
@@ -49,8 +51,12 @@ const LabelText = styled.span`
 `;
 
 const RegistrationForm = () => {
-  const [name, setName] = useState<string>('');
+  const { registrationData, setRegistrationData } = useContext(
+    RegistrationDataContext
+  );
+  console.log(registrationData);
   const [checked, setIsChecked] = useState<boolean>(false);
+  const [name, setName] = useState<string>('');
   const [errors, setErrors] = useState<string[]>([]);
   const history = useHistory();
 
@@ -77,10 +83,8 @@ const RegistrationForm = () => {
             .getAuthInstance()
             .grantOfflineAccess()
             .then(({ code }) => {
-              history.push({
-                pathname: '/positioning',
-                state: { name, authCode: code },
-              });
+              setRegistrationData({ name, authCode: code });
+              history.push('/positioning');
             });
         });
     });
@@ -108,7 +112,8 @@ const RegistrationForm = () => {
         })
         .catch((error) => console.log(error));
     } else {
-      history.push({ pathname: '/positioning', state: { name } });
+      setRegistrationData({ name, authCode: null });
+      history.push('/positioning');
     }
   };
 
