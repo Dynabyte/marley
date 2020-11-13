@@ -7,7 +7,6 @@ import com.dynabyte.marleyrest.calendar.model.GoogleTokens;
 import com.dynabyte.marleyrest.calendar.response.EventResponse;
 import com.dynabyte.marleyrest.calendar.response.GoogleCredentials;
 import com.dynabyte.marleyrest.calendar.util.CalendarDateUtil;
-import com.dynabyte.marleyrest.calendar.util.CalendarRequestUtil;
 import com.google.api.client.googleapis.auth.oauth2.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;

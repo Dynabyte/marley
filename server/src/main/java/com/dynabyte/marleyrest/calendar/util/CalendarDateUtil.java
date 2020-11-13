@@ -19,7 +19,7 @@ public class CalendarDateUtil {
     public static int getMinutesRemaining(Event event){
         long eventSystemTime = event.getStart().getDateTime().getValue();
         long remainingSeconds = (eventSystemTime - System.currentTimeMillis())/1000;
-        return (int) remainingSeconds/60;
+        return (int) Math.ceil(remainingSeconds/60.0);
     }
 
     private static Date removeTime(Date date){
