@@ -10,13 +10,13 @@ import GlobalStyle from './styling/GlobalStyle';
 
 const App = () => (
   <>
-    <GlobalStyle />
-    <Router>
-      <Switch>
-        <Route path='/' exact>
-          <Home />
-        </Route>
-        <RegistrationDataProvider>
+    <RegistrationDataProvider>
+      <GlobalStyle />
+      <Router>
+        <Switch>
+          <Route path='/' exact>
+            <Home />
+          </Route>
           <Route path='/registration' exact>
             <RegisterForm />
           </Route>
@@ -26,12 +26,12 @@ const App = () => (
           <Route path='/capture-frames' exact>
             <CaptureFrames />
           </Route>
-        </RegistrationDataProvider>
-        <Route path='/motion' exact>
-          <Motion />
-        </Route>
-      </Switch>
-    </Router>
+          <Route path='/motion' exact>
+            <Motion />
+          </Route>
+        </Switch>
+      </Router>
+    </RegistrationDataProvider>
   </>
 );
 
