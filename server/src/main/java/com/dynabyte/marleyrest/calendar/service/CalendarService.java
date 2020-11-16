@@ -7,6 +7,7 @@ import com.dynabyte.marleyrest.calendar.model.GoogleTokens;
 import com.dynabyte.marleyrest.calendar.response.EventResponse;
 import com.dynabyte.marleyrest.calendar.response.GoogleCredentials;
 import com.dynabyte.marleyrest.calendar.util.CalendarDateUtil;
+import com.dynabyte.marleyrest.calendar.util.CalendarUtil;
 import com.google.api.client.googleapis.auth.oauth2.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -125,9 +126,10 @@ public class CalendarService {
                 .setSingleEvents(true)
                 .execute();
 
-        //Filter to only include today's events
+        //Filter to only include today's events that are Dynabyte events
         List<Event> todayEvents = events.getItems().stream()
                 .filter(CalendarDateUtil::isEventToday)
+                .filter(CalendarUtil::isDynabyteEvent)
                 .collect(Collectors.toList());
 
         if (todayEvents.isEmpty()) {
@@ -136,12 +138,14 @@ public class CalendarService {
 
         Event event = todayEvents.get(0); //Get the next event as single Event object
 
+        System.out.println(event.getLocation());
         EventResponse eventResponse = new EventResponse(event);
         int minutesRemaining = CalendarDateUtil.getMinutesRemaining(event);
         if (minutesRemaining <= -60) {
             //Since the meeting started over an hour ago, the next meeting will be shown instead, if it's for today
             if (todayEvents.size() > 1) {
                 Event nextEvent = todayEvents.get(1);
+                System.out.println(nextEvent.getLocation());
                 eventResponse = new EventResponse(nextEvent);
                 minutesRemaining = CalendarDateUtil.getMinutesRemaining(nextEvent);
             } else return null; //The are no more meetings for today
