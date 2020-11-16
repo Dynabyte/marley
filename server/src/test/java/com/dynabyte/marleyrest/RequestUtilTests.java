@@ -1,46 +1,64 @@
 package com.dynabyte.marleyrest;
 
+import com.dynabyte.marleyrest.api.exception.ImageEncodingException;
 import com.dynabyte.marleyrest.api.exception.InvalidArgumentException;
 import com.dynabyte.marleyrest.personrecognition.request.ImageRequest;
 import com.dynabyte.marleyrest.registration.request.RegistrationRequest;
 import com.dynabyte.marleyrest.api.util.RequestUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.util.ResourceUtils;
 
-import java.util.Arrays;
+import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class RequestUtilTests {
 
-    //TODO import from file valid images
-    private final List<String> images = Arrays.asList("image1", "image2");
+    private static RegistrationRequest validJpegRegistrationRequest;
+    private static RegistrationRequest validPngRegistrationRequest;
+    private static RegistrationRequest oneInvalidImageRegistrationRequest;
 
     @BeforeAll
     static void initializeRequestsFromJson(){
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            File file = ResourceUtils.getFile(ResourceUtils.CLASSPATH_URL_PREFIX + "valid-registration-request-jpeg.json");
+            validJpegRegistrationRequest = mapper.readValue(file, RegistrationRequest.class);
 
+            file = ResourceUtils.getFile(ResourceUtils.CLASSPATH_URL_PREFIX + "valid-registration-request-png.json");
+            validPngRegistrationRequest = mapper.readValue(file, RegistrationRequest.class);
+
+            file = ResourceUtils.getFile(ResourceUtils.CLASSPATH_URL_PREFIX + "invalid-image-registration-request.json");
+            oneInvalidImageRegistrationRequest = mapper.readValue(file, RegistrationRequest.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
     void nullNameShouldThrowInvalidArgumentException(){
-        RegistrationRequest noNameRegistrationRequest = new RegistrationRequest();
-        noNameRegistrationRequest.setImages(images);
+        RegistrationRequest nullNameRegistrationRequest = new RegistrationRequest();
+        nullNameRegistrationRequest.setImages(validJpegRegistrationRequest.getImages());
         assertThrows(
                 InvalidArgumentException.class,
-                () -> RequestUtil.validateAndPrepareRegistrationRequest(noNameRegistrationRequest)
+                () -> RequestUtil.validateAndPrepareRegistrationRequest(nullNameRegistrationRequest)
         );
     }
 
     @Test
     void emptyNameShouldThrowInvalidArgumentException(){
-        RegistrationRequest noNameRegistrationRequest = new RegistrationRequest();
-        noNameRegistrationRequest.setImages(images);
+        RegistrationRequest emptyNameRegistrationRequest = new RegistrationRequest();
+        emptyNameRegistrationRequest.setName("");
+        emptyNameRegistrationRequest.setImages(validJpegRegistrationRequest.getImages());
         assertThrows(
                 InvalidArgumentException.class,
-                () -> RequestUtil.validateAndPrepareRegistrationRequest(noNameRegistrationRequest)
+                () -> RequestUtil.validateAndPrepareRegistrationRequest(emptyNameRegistrationRequest)
         );
     }
 
@@ -56,11 +74,11 @@ public class RequestUtilTests {
 
     @Test
     void nullImagesListShouldThrowInvalidArgumentException(){
-        RegistrationRequest noImagesRegistrationRequest = new RegistrationRequest();
-        noImagesRegistrationRequest.setName("Valid Name");
+        RegistrationRequest nullImagesRegistrationRequest = new RegistrationRequest();
+        nullImagesRegistrationRequest.setName("Valid Name");
         assertThrows(
                 InvalidArgumentException.class,
-                () -> RequestUtil.validateAndPrepareRegistrationRequest(noImagesRegistrationRequest)
+                () -> RequestUtil.validateAndPrepareRegistrationRequest(nullImagesRegistrationRequest)
         );
     }
     @Test
@@ -71,6 +89,28 @@ public class RequestUtilTests {
         assertThrows(
                 InvalidArgumentException.class,
                 () -> RequestUtil.validateAndPrepareRegistrationRequest(emptyImagesRegistrationRequest)
+        );
+    }
+
+    @Test
+    void validRegistrationRequestShouldBeValid(){
+        RequestUtil.validateAndPrepareRegistrationRequest(validJpegRegistrationRequest);
+        RequestUtil.validateAndPrepareRegistrationRequest(validPngRegistrationRequest);
+    }
+
+    @Test
+    void validPredictionRequestShouldBeValid(){
+        String validBase64Image = validJpegRegistrationRequest.getImages().get(0);
+        ImageRequest validImageRequest = new ImageRequest(validBase64Image);
+        ImageRequest validatedImageRequest = RequestUtil.validateAndPreparePredictionRequest(validImageRequest);
+        assertTrue(validatedImageRequest.getImage().startsWith("/9j/4QAwRXhpZgAASUkqAAgAAAABAJiCAgAMAAAAGgAAAAAAAABSb3kgUm9jaGxpbgAAAP"));
+    }
+
+    @Test
+    void invalidImageRegistrationShouldThrowException(){
+        assertThrows(
+                ImageEncodingException.class,
+                () -> RequestUtil.validateAndPrepareRegistrationRequest(oneInvalidImageRegistrationRequest)
         );
     }
 }
