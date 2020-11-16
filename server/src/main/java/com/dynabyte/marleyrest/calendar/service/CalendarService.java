@@ -113,10 +113,10 @@ public class CalendarService {
                 .setApplicationName(APPLICATION_NAME)
                 .build();
 
-        //List the next upcoming event from the primary calendar. Ongoing event also counts
+        //List the next two upcoming event from the primary calendar. Ongoing event also counts
         DateTime now = new DateTime(System.currentTimeMillis());
         Events events = calendar.events().list("primary")
-                .setMaxResults(1)
+                .setMaxResults(2)
                 .setTimeMin(now)
                 .setOrderBy("startTime")
                 .setSingleEvents(true)
@@ -130,11 +130,24 @@ public class CalendarService {
         if(CalendarDateUtil.isEventToday(event)){
             EventResponse eventResponse = new EventResponse(event);
             int minutesRemaining = CalendarDateUtil.getMinutesRemaining(event);
-            if(minutesRemaining >= 60 || minutesRemaining <= -60){
+            if(minutesRemaining <= -60){
+                //Since the meeting started over an hour ago, the next meeting will be shown instead, if it's for today
+                if(events.getItems().size() > 1){
+                    Event nextEvent = events.getItems().get(1);
+                    if (CalendarDateUtil.isEventToday(nextEvent)){
+                        eventResponse = new EventResponse(nextEvent);
+                        minutesRemaining = CalendarDateUtil.getMinutesRemaining(nextEvent);
+                    }
+                    else return null; //There is no next meeting
+                }
+                else return null; //The next meeting is not for today
+            }
+
+            if(minutesRemaining >= 60){
                 eventResponse.setHoursRemaining(minutesRemaining/60);
                 minutesRemaining %= 60;
             }
-            if(minutesRemaining < 0){
+            else if(minutesRemaining < 0){
                 eventResponse.setOngoing(true);
             }
             eventResponse.setMinutesRemaining(minutesRemaining);
