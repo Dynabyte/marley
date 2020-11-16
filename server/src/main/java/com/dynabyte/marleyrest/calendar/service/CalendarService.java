@@ -1,8 +1,8 @@
 package com.dynabyte.marleyrest.calendar.service;
 
 import com.dynabyte.marleyrest.calendar.exception.GoogleAPIException;
-import com.dynabyte.marleyrest.calendar.exception.GoogleTokensMissingException;
 import com.dynabyte.marleyrest.calendar.exception.GoogleCredentialsMissingException;
+import com.dynabyte.marleyrest.calendar.exception.GoogleTokensMissingException;
 import com.dynabyte.marleyrest.calendar.model.GoogleTokens;
 import com.dynabyte.marleyrest.calendar.response.EventResponse;
 import com.dynabyte.marleyrest.calendar.response.GoogleCredentials;
@@ -19,10 +19,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CalendarService {
@@ -113,42 +116,42 @@ public class CalendarService {
                 .setApplicationName(APPLICATION_NAME)
                 .build();
 
-        //List the next two upcoming event from the primary calendar. Ongoing event also counts
+        //Get upcoming events from the primary calendar. Ongoing event also counts
         DateTime now = new DateTime(System.currentTimeMillis());
         Events events = calendar.events().list("primary")
-                .setMaxResults(2)
+                .setMaxResults(10)
                 .setTimeMin(now)
                 .setOrderBy("startTime")
                 .setSingleEvents(true)
                 .execute();
-        if(events.isEmpty()){
+
+        //Filter to only include today's events
+        List<Event> todayEvents = events.getItems().stream()
+                .filter(CalendarDateUtil::isEventToday)
+                .collect(Collectors.toList());
+
+        if (todayEvents.isEmpty()) {
             return null;
         }
-        Event event = events.getItems().get(0); //Get the next event as single Event object
 
-        //An event will only be returned if there is an event today that hasn't already passed
-        if(CalendarDateUtil.isEventToday(event)){
-            EventResponse eventResponse = new EventResponse(event);
-            int minutesRemaining = CalendarDateUtil.getMinutesRemaining(event);
-            if(minutesRemaining <= -60){
-                //Since the meeting started over an hour ago, the next meeting will be shown instead, if it's for today
-                if(events.getItems().size() > 1){
-                    Event nextEvent = events.getItems().get(1);
-                    if (CalendarDateUtil.isEventToday(nextEvent)){
-                        eventResponse = new EventResponse(nextEvent);
-                        minutesRemaining = CalendarDateUtil.getMinutesRemaining(nextEvent);
-                    }
-                    else return null; //There is no next meeting
-                }
-                else return null; //The next meeting is not for today
-            }
+        Event event = todayEvents.get(0); //Get the next event as single Event object
 
-            if(minutesRemaining >= 60){
-                eventResponse.setHoursRemaining(minutesRemaining/60);
-                minutesRemaining %= 60;
-            }
-            else if(minutesRemaining < 0){
-                eventResponse.setOngoing(true);
+        EventResponse eventResponse = new EventResponse(event);
+        int minutesRemaining = CalendarDateUtil.getMinutesRemaining(event);
+        if (minutesRemaining <= -60) {
+            //Since the meeting started over an hour ago, the next meeting will be shown instead, if it's for today
+            if (todayEvents.size() > 1) {
+                Event nextEvent = todayEvents.get(1);
+                eventResponse = new EventResponse(nextEvent);
+                minutesRemaining = CalendarDateUtil.getMinutesRemaining(nextEvent);
+            } else return null; //The are no more meetings for today
+        }
+
+        if (minutesRemaining >= 60) {
+            eventResponse.setHoursRemaining(minutesRemaining / 60);
+            minutesRemaining %= 60;
+        } else if (minutesRemaining < 0) {
+            eventResponse.setOngoing(true);
             }
             eventResponse.setMinutesRemaining(minutesRemaining);
 
@@ -156,9 +159,6 @@ public class CalendarService {
             System.out.println("Minutes: " + eventResponse.getMinutesRemaining());
            return eventResponse;
         }
-
-        return null;
-    }
 
     /**
      * Makes a request to Google to acquire a new access token using existing refresh token
