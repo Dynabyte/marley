@@ -27,11 +27,11 @@ public class CalendarUtil {
 
     public static boolean isDynabyteEvent(Event event) {
         List<EventAttendee> attendees = event.getAttendees();
-        if(isNull(attendees)){
-            return false;
-        }
         if(hasDynabyteCreator(event)){
             return true;
+        }
+        if(isNull(attendees)){
+            return false;
         }
         for (EventAttendee attendee: attendees) {
             if(isDynabyteAttendee(attendee) || isDynabyteRoom(attendee)){
@@ -46,6 +46,9 @@ public class CalendarUtil {
     }
 
     private static boolean isDynabyteRoom(EventAttendee attendee) {
+        if(attendee.getDisplayName() == null){
+            return false;
+        }
         return attendee.getDisplayName().contains("Dynabyte") && attendee.isResource();
     }
 
