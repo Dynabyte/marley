@@ -7,7 +7,7 @@ import com.dynabyte.marleyrest.calendar.request.GoogleCalendarAuthenticationRequ
 
 import static java.util.Objects.isNull;
 
-public class CalendarRequestUtil {
+public class CalendarUtil {
 
     public static void validateAuthenticationRequest(GoogleCalendarAuthenticationRequest authenticationRequest){
         if(isNull(authenticationRequest)){
@@ -20,4 +20,6 @@ public class CalendarRequestUtil {
             throw new InvalidArgumentException("authCode cannot be null!");
         }
     }
+
+
 }

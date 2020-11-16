@@ -6,7 +6,7 @@ import com.dynabyte.marleyrest.calendar.response.EventResponse;
 import com.dynabyte.marleyrest.calendar.response.GoogleCredentials;
 import com.dynabyte.marleyrest.calendar.service.CalendarService;
 import com.dynabyte.marleyrest.calendar.service.GoogleTokensService;
-import com.dynabyte.marleyrest.calendar.util.CalendarRequestUtil;
+import com.dynabyte.marleyrest.calendar.util.CalendarUtil;
 import com.dynabyte.marleyrest.personrecognition.service.PersonService;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +44,7 @@ public class CalendarController {
     @PostMapping("tokens")
     public HttpStatus saveGoogleTokens(@RequestBody GoogleCalendarAuthenticationRequest authenticationRequest) {
         LOGGER.info("Request to save tokens received");
-        CalendarRequestUtil.validateAuthenticationRequest(authenticationRequest);
+        CalendarUtil.validateAuthenticationRequest(authenticationRequest);
         personService.validatePersonExists(authenticationRequest.getFaceId());
 
         GoogleTokenResponse tokenResponse = calendarService.getTokensFromGoogle(authenticationRequest.getAuthCode());
