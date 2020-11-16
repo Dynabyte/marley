@@ -31,13 +31,11 @@ const calendarEventLogic = (eventResponse: any) => {
         message += `${hoursRemaining} timmar och `;
       }
     }
-    if (minutesRemaining === 1) {
-      message += '1 minut';
-    } 
-    else if (minutesRemaining === 0){
+    if (minutesRemaining === 0) {
       message = `Ditt möte "${eventTitle}" börjar nu`;
-    }
-    else {
+    } else if (minutesRemaining === 1) {
+      message += '1 minut';
+    } else {
       message += `${minutesRemaining} minuter`;
     }
   }

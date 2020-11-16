@@ -156,8 +156,10 @@ const CaptureFrames = () => {
       )}
       {hasCollectedImages && !hasError && (
         <>
-          <LargeText>Registrering pågår</LargeText>
+          <LargeText>Tack! </LargeText>
+          <LargeText>Vi har nu samlat in all data som behövs</LargeText>
           <Spinner />
+          <SmallText>Registrering pågår. </SmallText>
           <SmallText>Det kan ta en liten stund</SmallText>
         </>
       )}
