@@ -23,9 +23,7 @@ const CaptureFrames = () => {
   });
 
   const intervalRef = useRef<number>(null);
-  const { registrationData, setRegistrationData } = useContext(
-    RegistrationDataContext
-  );
+  const { registrationData } = useContext(RegistrationDataContext);
   const { name, authCode } = registrationData;
 
   useEffect(() => {

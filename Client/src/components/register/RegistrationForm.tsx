@@ -51,10 +51,7 @@ const LabelText = styled.span`
 `;
 
 const RegistrationForm = () => {
-  const { registrationData, setRegistrationData } = useContext(
-    RegistrationDataContext
-  );
-  console.log(registrationData);
+  const { setRegistrationData } = useContext(RegistrationDataContext);
   const [checked, setIsChecked] = useState<boolean>(false);
   const [name, setName] = useState<string>('');
   const [errors, setErrors] = useState<string[]>([]);

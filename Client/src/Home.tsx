@@ -55,7 +55,7 @@ export const Home = () => {
   const [paused, setPaused] = React.useState<boolean>(false);
   const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
   const [eventMessage, setEventMessage] = React.useState<string>('');
-  
+
   const timerRef = useRef(null);
   const regulateSpeedTimer = useRef(null);
   const activeTimerRef = useRef(null);
@@ -157,17 +157,13 @@ export const Home = () => {
           }
         )
         .then(({ data }) => {
-          console.log(data);
           const requestTime = new Date().getTime() - startTime;
           if (isMounted) {
-            console.log(`faceId before set: ${faceIdRef.current}`);
-            console.log(`data.id: ${data.id}`);
-            if(faceIdRef.current !== data.id){
+            if (faceIdRef.current !== data.id) {
               setEventMessage('');
             }
             setResult(data);
             faceIdRef.current = data.id;
-            console.log(`faceId after set: ${faceIdRef.current}`);
 
             if (data.isFace) {
               updateTimer();
