@@ -3,6 +3,7 @@ package com.dynabyte.marleyrest.personrecognition.service;
 import com.dynabyte.marleyrest.personrecognition.request.ImageRequest;
 import com.dynabyte.marleyrest.registration.request.LabelPutRequest;
 import com.dynabyte.marleyrest.personrecognition.response.FaceRecognitionResponse;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,12 +14,13 @@ import org.springframework.web.client.RestTemplate;
  * Face Recognition Service sends requests to the python rest api for face recognition and delivers a response.
  */
 @Service
+@RequiredArgsConstructor
 public class FaceRecognitionService {
 
     private final Logger LOGGER = LoggerFactory.getLogger(FaceRecognitionService.class);
     @Value("${FACE_REC_URL:http://localhost:5000/face-recognition/}")
     private String faceRecognitionURL;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
 
 
     /**
@@ -30,6 +32,7 @@ public class FaceRecognitionService {
     @SuppressWarnings("ConstantConditions") //null is checked later
     public String predict(ImageRequest imageRequest) {
         LOGGER.debug("Sending prediction request to face recognition API");
+        System.out.println(faceRecognitionURL);
         return restTemplate
                 .postForObject(faceRecognitionURL + "predict", imageRequest, FaceRecognitionResponse.class)
                 .getFaceId();
