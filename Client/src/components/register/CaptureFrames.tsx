@@ -8,11 +8,19 @@ import SmallText from '../../ui/fonts/SmallText';
 import Spinner from '../../ui/Spinner';
 import ErrorMessage from '../ErrorMessage';
 
+interface IErrorData {
+  hasError: boolean;
+  errorMessage: string;
+}
+
 const CaptureFrames = () => {
   const history = useHistory();
 
   const [hasCollectedImages, setHasCollectedImages] = useState<boolean>(false);
-  const [hasError, setHasError] = useState<boolean>(false);
+  const [errorData, setErrorData] = useState<IErrorData>({
+    hasError: false,
+    errorMessage: '',
+  });
 
   const intervalRef = useRef<number>(null);
   const { registrationData, setRegistrationData } = useContext(
@@ -133,7 +141,16 @@ const CaptureFrames = () => {
                   console.log(errorData);
                   const exceptionClass = errorData.exceptionClass;
                   if (exceptionClass === 'PersonAlreadyInDbException') {
-                    setHasError(true);
+                    setErrorData({
+                      hasError: true,
+                      errorMessage: 'Du är redan registrerad',
+                    });
+                  } else {
+                    setErrorData({
+                      hasError: true,
+                      errorMessage:
+                        'Det gick inte att registrera dig just nu. Försök igen lite senare',
+                    });
                   }
                 }
               });
@@ -145,6 +162,8 @@ const CaptureFrames = () => {
       clearInterval(intervalRef.current);
     };
   }, [history, name, authCode]);
+
+  const { hasError, errorMessage } = errorData;
 
   return (
     <CenterContent>
@@ -163,7 +182,7 @@ const CaptureFrames = () => {
           <SmallText>Det kan ta en liten stund</SmallText>
         </>
       )}
-      {hasError && <ErrorMessage message='Du är redan registrerad' />}
+      {hasError && <ErrorMessage message={errorMessage} />}
     </CenterContent>
   );
 };
