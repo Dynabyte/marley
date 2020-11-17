@@ -9,7 +9,13 @@ const calendarEventLogic = (eventResponse: any) => {
   const { event, hoursRemaining, minutesRemaining, isOngoing } = eventResponse;
   const eventTitle = event.summary;
 
-  message += `Ditt möte "${eventTitle}" `;
+  if(eventTitle === undefined){
+    message = 'Ditt möte ';
+  }
+  else {
+    message = `Ditt möte "${eventTitle}" `;
+  }
+
   if (isOngoing) {
     const minutesPassed = minutesRemaining * -1;
     if (hoursRemaining === 0) {
