@@ -8,7 +8,7 @@ const ModalWrapper = styled.div`
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 1050;
+  z-index: 1200;
   width: 100%;
   height: 100%;
   color: black;
@@ -34,9 +34,9 @@ const StyledSmallText = styled(SmallText)`
   text-align: center;
 `;
 
-const Modal = ({ isShowing, hide, handleClick, setPaused }) => {
+const DeleteConfirmationModal = ({ isShowing, hide, deleteUser }) => {
   const onClick = () => {
-    handleClick();
+    deleteUser();
     hide();
   };
 
@@ -61,7 +61,6 @@ const Modal = ({ isShowing, hide, handleClick, setPaused }) => {
                 type='button'
                 aria-label='No'
                 onClick={() => {
-                  setPaused(false);
                   hide();
                 }}
               >
@@ -76,4 +75,4 @@ const Modal = ({ isShowing, hide, handleClick, setPaused }) => {
   } else return null;
 };
 
-export default Modal;
+export default DeleteConfirmationModal;

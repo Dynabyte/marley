@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React, {
   ChangeEvent,
   MouseEvent,
@@ -16,6 +15,7 @@ import LargeText from '../../ui/fonts/LargeText';
 import SmallText from '../../ui/fonts/SmallText';
 import Input from '../../ui/Input';
 import PinkButton from '../../ui/PinkButton';
+import { authorizeCalendar } from '../../utility/googleAuth';
 
 const Header = styled.div`
   margin: 20px 0;
@@ -67,26 +67,6 @@ const RegistrationForm = () => {
     history.push('/');
   };
 
-  const googleAuthRequest = (googleCredentials) => {
-    window.gapi.load('client:auth2', () => {
-      window.gapi.client
-        .init({
-          apiKey: googleCredentials.googleCalendarApiKey,
-          clientId: googleCredentials.clientId,
-          scope: 'https://www.googleapis.com/auth/calendar.readonly',
-        })
-        .then(() => {
-          window.gapi.auth2
-            .getAuthInstance()
-            .grantOfflineAccess()
-            .then(({ code }) => {
-              setRegistrationData({ name, authCode: code });
-              history.push('/positioning');
-            });
-        });
-    });
-  };
-
   const handleSubmit = (event: SyntheticEvent) => {
     event.preventDefault();
 
@@ -100,14 +80,10 @@ const RegistrationForm = () => {
     setErrors([]);
 
     if (checked) {
-      axios
-        .get('http://localhost:8080/calendar/credentials', {
-          headers: { 'Content-Type': 'application/json' },
-        })
-        .then(({ data }) => {
-          googleAuthRequest(data);
-        })
-        .catch((error) => console.log(error));
+      authorizeCalendar((code) => {
+        setRegistrationData({ name, authCode: code });
+        history.push('/positioning');
+      });
     } else {
       setRegistrationData({ name, authCode: null });
       history.push('/positioning');

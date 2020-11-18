@@ -1,10 +1,12 @@
+import { faCog } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import axios from 'axios';
 import React, { useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled, { css, keyframes } from 'styled-components';
 import './App.css';
-import Modal from './components/Modal';
 import FaceRegistrationText from './components/register/FaceRegistrationText';
+import Modal from './components/SettingsModal';
 import useModal from './hooks/useModal';
 import Logo from './shared/Logo';
 import Title from './shared/Title';
@@ -12,7 +14,6 @@ import dynabyteLogo from './static/images/dynabyte_white.png';
 import DefaultText from './ui/fonts/DefaultText';
 import LargeText from './ui/fonts/LargeText';
 import Spinner from './ui/Spinner';
-import WhiteButton from './ui/WhiteButton';
 import calendarEventLogic from './utility/calendarEventLogic';
 
 interface IResult {
@@ -20,6 +21,7 @@ interface IResult {
   isFace?: boolean;
   name?: string;
   id?: string;
+  hasAllowedCalendar?: boolean;
 }
 
 const slideIn = keyframes`
@@ -37,12 +39,15 @@ const Container = styled.div`
   align-items: center;
   justify-content: center;
   height: 100vh;
+`;
 
-  .button-modal {
-    position: absolute;
-    right: 0;
-    bottom: 10px;
-  }
+const SettingsButton = styled.button`
+  position: absolute;
+  right: 30px;
+  bottom: 30px;
+  background: none;
+  border: none;
+  outline: inherit;
 `;
 
 const ContainerWithFadeIn = styled(Container)`
@@ -56,7 +61,6 @@ export const Home = () => {
   const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
   const [eventMessage, setEventMessage] = React.useState<string>('');
 
-  const timerRef = useRef(null);
   const regulateSpeedTimer = useRef(null);
   const activeTimerRef = useRef(null);
   const faceFoundTimer = useRef(null);
@@ -159,7 +163,7 @@ export const Home = () => {
         .then(({ data }) => {
           const requestTime = new Date().getTime() - startTime;
           if (isMounted) {
-            if (faceIdRef.current !== data.id) {
+            if (faceIdRef.current !== data.id || !data.hasAllowedCalendar) {
               setEventMessage('');
             }
             setResult(data);
@@ -211,7 +215,6 @@ export const Home = () => {
       myStream.getTracks().forEach(function (t) {
         t.stop();
       });
-      clearTimeout(timerRef.current);
       clearTimeout(activeTimerRef.current);
       clearTimeout(regulateSpeedTimer.current);
       clearTimeout(faceFoundTimer.current);
@@ -219,33 +222,7 @@ export const Home = () => {
     };
   }, [paused, history]);
 
-  const { isKnownFace, isFace, name, id } = result;
-
-  const handleClick = () => {
-    setIsDeleting(true);
-
-    axios
-      .delete(`http://localhost:8080/delete/${id}`, {
-        headers: { 'Content-Type': 'application/json' },
-      })
-      .then(() => {
-        console.log('Deleted from system!');
-        timerRef.current = setTimeout(() => {
-          setIsDeleting(false);
-          setResult({});
-          setPaused(false);
-        }, 2000);
-      })
-      .catch((error) => {
-        setIsDeleting(false);
-        setResult({});
-        setPaused(false);
-        if (error.response) {
-          const errorData = error.response.data;
-          console.log(errorData);
-        }
-      });
-  };
+  const { isKnownFace, isFace, name, id, hasAllowedCalendar } = result;
 
   if (isDeleting) {
     return (
@@ -256,7 +233,7 @@ export const Home = () => {
     );
   }
 
-  const handleModal = () => {
+  const handleSettingsModal = () => {
     toggle();
     setPaused(true);
   };
@@ -264,13 +241,24 @@ export const Home = () => {
   return (
     <div>
       {isKnownFace && (
-        <ContainerWithFadeIn>
-          <Title>{`Välkommen ${name} till`}</Title>
-          <DefaultText>{eventMessage}&nbsp;</DefaultText>
-          <WhiteButton className='button-modal' onClick={handleModal}>
-            Ta bort mig från systemet
-          </WhiteButton>
-        </ContainerWithFadeIn>
+        <>
+          <ContainerWithFadeIn>
+            <Title>{`Välkommen ${name} till`}</Title>
+            <DefaultText>{eventMessage}&nbsp;</DefaultText>
+            <SettingsButton onClick={handleSettingsModal}>
+              <FontAwesomeIcon icon={faCog} color='white' size='4x' />
+            </SettingsButton>
+          </ContainerWithFadeIn>
+          <Modal
+            isShowing={isShowing}
+            hide={() => setIsShowing(false)}
+            faceId={id}
+            hasAllowedCalendar={hasAllowedCalendar}
+            setPaused={setPaused}
+            setIsDeleting={setIsDeleting}
+            setResult={setResult}
+          />
+        </>
       )}
       {!isKnownFace && isFace && (
         <ContainerWithFadeIn>
@@ -282,12 +270,6 @@ export const Home = () => {
           <Logo src={dynabyteLogo} width='200' height='80' alt='logo' />
         </Container>
       )}
-      <Modal
-        isShowing={isShowing}
-        hide={() => setIsShowing(false)}
-        handleClick={handleClick}
-        setPaused={setPaused}
-      />
 
       <footer>
         <span>
