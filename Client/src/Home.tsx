@@ -1,10 +1,12 @@
+import { faCog } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import axios from 'axios';
 import React, { useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled, { css, keyframes } from 'styled-components';
 import './App.css';
-import Modal from './components/Modal';
 import FaceRegistrationText from './components/register/FaceRegistrationText';
+import Modal from './components/SettingsModal';
 import useModal from './hooks/useModal';
 import Logo from './shared/Logo';
 import Title from './shared/Title';
@@ -12,7 +14,6 @@ import dynabyteLogo from './static/images/dynabyte_white.png';
 import DefaultText from './ui/fonts/DefaultText';
 import LargeText from './ui/fonts/LargeText';
 import Spinner from './ui/Spinner';
-import WhiteButton from './ui/WhiteButton';
 import calendarEventLogic from './utility/calendarEventLogic';
 
 interface IResult {
@@ -20,6 +21,7 @@ interface IResult {
   isFace?: boolean;
   name?: string;
   id?: string;
+  hasAllowedCalendar?: boolean;
 }
 
 const slideIn = keyframes`
@@ -37,12 +39,15 @@ const Container = styled.div`
   align-items: center;
   justify-content: center;
   height: 100vh;
+`;
 
-  .button-modal {
-    position: absolute;
-    right: 0;
-    bottom: 10px;
-  }
+const ButtonSettings = styled.button`
+  position: absolute;
+  right: 30px;
+  bottom: 30px;
+  background: none;
+  border: none;
+  outline: inherit;
 `;
 
 const ContainerWithFadeIn = styled(Container)`
@@ -219,7 +224,7 @@ export const Home = () => {
     };
   }, [paused, history]);
 
-  const { isKnownFace, isFace, name, id } = result;
+  const { isKnownFace, isFace, name, id, hasAllowedCalendar } = result;
 
   const handleClick = () => {
     setIsDeleting(true);
@@ -256,7 +261,12 @@ export const Home = () => {
     );
   }
 
-  const handleModal = () => {
+  // const handleModal = () => {
+  //   toggle();
+  //   setPaused(true);
+  // };
+
+  const handleSettingsModal = () => {
     toggle();
     setPaused(true);
   };
@@ -264,13 +274,27 @@ export const Home = () => {
   return (
     <div>
       {isKnownFace && (
-        <ContainerWithFadeIn>
-          <Title>{`Välkommen ${name} till`}</Title>
-          <DefaultText>{eventMessage}&nbsp;</DefaultText>
-          <WhiteButton className='button-modal' onClick={handleModal}>
+        <>
+          <ContainerWithFadeIn>
+            <Title>{`Välkommen ${name} till`}</Title>
+            <DefaultText>{eventMessage}&nbsp;</DefaultText>
+            <ButtonSettings onClick={handleSettingsModal}>
+              <FontAwesomeIcon icon={faCog} color='white' size='4x' />
+            </ButtonSettings>
+            {/* <WhiteButton className='button-modal' onClick={handleModal}>
             Ta bort mig från systemet
-          </WhiteButton>
-        </ContainerWithFadeIn>
+          </WhiteButton> */}
+          </ContainerWithFadeIn>
+          <Modal
+            isShowing={isShowing}
+            hide={() => setIsShowing(false)}
+            handleClick={handleSettingsModal}
+            faceId={id}
+            hasAllowedCalendar={hasAllowedCalendar}
+          >
+            jek
+          </Modal>
+        </>
       )}
       {!isKnownFace && isFace && (
         <ContainerWithFadeIn>
@@ -282,12 +306,13 @@ export const Home = () => {
           <Logo src={dynabyteLogo} width='200' height='80' alt='logo' />
         </Container>
       )}
-      <Modal
+      {/* <Modal
         isShowing={isShowing}
         hide={() => setIsShowing(false)}
         handleClick={handleClick}
-        setPaused={setPaused}
-      />
+      >
+        hej
+      </Modal> */}
 
       <footer>
         <span>
