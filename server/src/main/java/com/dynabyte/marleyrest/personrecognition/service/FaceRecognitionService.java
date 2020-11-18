@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Collections;
+
 /**
  * Face Recognition Service sends requests to the python rest api for face recognition and delivers a response.
  */
@@ -32,7 +34,7 @@ public class FaceRecognitionService {
     @SuppressWarnings("ConstantConditions") //null is checked later
     public String predict(ImageRequest imageRequest) {
         LOGGER.debug("Sending prediction request to face recognition API");
-        System.out.println(faceRecognitionURL);
+        System.out.println("URL: " + faceRecognitionURL);
         return restTemplate
                 .postForObject(faceRecognitionURL + "predict", imageRequest, FaceRecognitionResponse.class)
                 .getFaceId();

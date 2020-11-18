@@ -3,6 +3,8 @@ package com.dynabyte.marleyrest.personrecognition.service;
 import com.dynabyte.marleyrest.personrecognition.request.ImageRequest;
 import com.dynabyte.marleyrest.personrecognition.response.FaceRecognitionResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,9 +38,20 @@ class FaceRecognitionServiceTest {
     private static String faceRecognitionURL;
     private static FaceRecognitionResponse faceRecognitionResponse;
 
+//    @BeforeClass
+//    public static void beforeClass() {
+//        faceRecognitionURL = "http://localhost:5000/face-recognition/";
+//        System.getenv().put("FACE_REC_URL", faceRecognitionURL);
+//    }
+//
+//    // Optionally:
+//    @AfterClass
+//    public static void afterClass() {
+//        System.getenv().remove("FACE_REC_URL");
+//    }
+
     @BeforeAll
     static void setUp() {
-        faceRecognitionURL = "http://localhost:5000/face-recognition/";
         faceId = "5fad4b9e1bbac38873e8cdbd";
         faceRecognitionResponse = new FaceRecognitionResponse();
         faceRecognitionResponse.setFaceId(faceId);
