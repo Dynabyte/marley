@@ -1,7 +1,15 @@
-import React from 'react';
+import { faWindowClose } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import axios from 'axios';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import styled from 'styled-components';
 import PinkButton from '../ui/PinkButton';
+import {
+  authorizeCalendar,
+  saveGoogleCalendarTokens,
+} from '../utility/googleAuth';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
 
 const ModalWrapper = styled.div`
   position: fixed;
@@ -27,45 +35,127 @@ const StyledModal = styled.div`
   padding: 2rem;
 `;
 
-const StyledPinkButton = styled(PinkButton)`
+const StyledButton = styled.button`
   position: absolute;
-  bottom: 5px;
+  top: 5px;
+  right: 5px;
+  background: none;
+  border: none;
+  outline: inherit;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  height: 100%;
 `;
 
 const SettingsModal = ({
   isShowing,
   hide,
-  handleClick,
-  children,
   faceId,
   hasAllowedCalendar,
+  setPaused,
+  setIsDeleting,
+  setResult,
 }) => {
-  const onClick = () => {
-    handleClick();
+  const [allowedCalendar, setAllowedCalendar] = useState<boolean>(
+    hasAllowedCalendar
+  );
+  const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(
+    false
+  );
+  const deleteUser = () => {
     hide();
+    setIsDeleting(true);
+
+    axios
+      .delete(`http://localhost:8080/delete/${faceId}`, {
+        headers: { 'Content-Type': 'application/json' },
+      })
+      .then(() => {
+        console.log('Deleted from system!');
+        setTimeout(() => {
+          setIsDeleting(false);
+          setPaused(false);
+          setResult({});
+        }, 1500);
+      })
+      .catch((error) => {
+        setIsDeleting(false);
+        setPaused(false);
+        if (error.response) {
+          const errorData = error.response.data;
+          console.log(errorData);
+        }
+      });
   };
 
-  const deleteCalendar = () => {};
+  const deleteCalendar = () => {
+    axios
+      .delete(`http://localhost:8080/calendar/tokens/${faceId}`, {
+        headers: { 'Content-Type': 'application/json' },
+      })
+      .then(() => {
+        setAllowedCalendar(false);
+        console.log('removed calendar');
+      })
+      .catch((error) => {
+        if (error.response) {
+          const errorData = error.response.data;
+          console.log(errorData);
+        }
+      });
+  };
 
-  const addCalendar = () => {};
+  const addCalendar = () => {
+    authorizeCalendar((code) => {
+      saveGoogleCalendarTokens(
+        faceId,
+        code,
+        () => setAllowedCalendar(true),
+        () => setAllowedCalendar(false)
+      );
+    });
+  };
 
   if (isShowing) {
     return ReactDOM.createPortal(
       <>
         <ModalWrapper aria-modal aria-hidden tabIndex={-1} role='dialog'>
           <StyledModal>
-            <PinkButton
-              onClick={() =>
-                hasAllowedCalendar ? deleteCalendar : addCalendar
-              }
+            <ButtonContainer>
+              <PinkButton
+                onClick={() =>
+                  allowedCalendar ? deleteCalendar() : addCalendar()
+                }
+              >
+                {allowedCalendar
+                  ? 'Ta bort kalender-notifikationer'
+                  : 'Lägg till kalender-notifikationer'}
+              </PinkButton>
+              <PinkButton onClick={() => setShowConfirmationModal(true)}>
+                Ta bort mig från systemet
+              </PinkButton>
+            </ButtonContainer>
+            <StyledButton
+              onClick={() => {
+                hide();
+                setResult({});
+                setPaused(false);
+              }}
             >
-              {hasAllowedCalendar
-                ? 'Ta bort kalender-notifikationer'
-                : 'Lägg till kalender-notifikationer'}
-            </PinkButton>
-            <StyledPinkButton onClick={onClick}>Stäng</StyledPinkButton>
+              <FontAwesomeIcon icon={faWindowClose} color='#910D18' size='3x' />
+            </StyledButton>
           </StyledModal>
         </ModalWrapper>
+        <DeleteConfirmationModal
+          isShowing={showConfirmationModal}
+          hide={() => setShowConfirmationModal(false)}
+          deleteUser={deleteUser}
+        />
       </>,
       document.body
     );

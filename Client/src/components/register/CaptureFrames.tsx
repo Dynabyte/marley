@@ -6,6 +6,7 @@ import CenterContent from '../../ui/CenterContent';
 import LargeText from '../../ui/fonts/LargeText';
 import SmallText from '../../ui/fonts/SmallText';
 import Spinner from '../../ui/Spinner';
+import { saveGoogleCalendarTokens } from '../../utility/googleAuth';
 import ErrorMessage from '../ErrorMessage';
 
 interface IErrorData {
@@ -95,26 +96,6 @@ const CaptureFrames = () => {
             return base64images;
           };
 
-          const saveGoogleCalendarTokens = (faceId: string) => {
-            axios
-              .post(
-                'http://localhost:8080/calendar/tokens',
-                { faceId, authCode },
-                {
-                  headers: { 'Content-Type': 'application/json' },
-                }
-              )
-              .catch((error) => {
-                if (error.response) {
-                  const errorData = error.response.data;
-                  console.log(errorData);
-                }
-              })
-              .finally(() => {
-                history.push('/');
-              });
-          };
-
           const uploadImages = (images: string[]) => {
             axios
               .post(
@@ -128,7 +109,12 @@ const CaptureFrames = () => {
                 console.log('Uploaded images');
 
                 if (authCode !== null) {
-                  saveGoogleCalendarTokens(data);
+                  saveGoogleCalendarTokens(
+                    data,
+                    authCode,
+                    () => history.push('/'),
+                    () => history.push('/')
+                  );
                 } else {
                   history.push('/');
                 }

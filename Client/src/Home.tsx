@@ -41,7 +41,7 @@ const Container = styled.div`
   height: 100vh;
 `;
 
-const ButtonSettings = styled.button`
+const SettingsButton = styled.button`
   position: absolute;
   right: 30px;
   bottom: 30px;
@@ -61,7 +61,6 @@ export const Home = () => {
   const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
   const [eventMessage, setEventMessage] = React.useState<string>('');
 
-  const timerRef = useRef(null);
   const regulateSpeedTimer = useRef(null);
   const activeTimerRef = useRef(null);
   const faceFoundTimer = useRef(null);
@@ -164,7 +163,7 @@ export const Home = () => {
         .then(({ data }) => {
           const requestTime = new Date().getTime() - startTime;
           if (isMounted) {
-            if (faceIdRef.current !== data.id) {
+            if (faceIdRef.current !== data.id || !data.hasAllowedCalendar) {
               setEventMessage('');
             }
             setResult(data);
@@ -216,7 +215,6 @@ export const Home = () => {
       myStream.getTracks().forEach(function (t) {
         t.stop();
       });
-      clearTimeout(timerRef.current);
       clearTimeout(activeTimerRef.current);
       clearTimeout(regulateSpeedTimer.current);
       clearTimeout(faceFoundTimer.current);
@@ -226,32 +224,6 @@ export const Home = () => {
 
   const { isKnownFace, isFace, name, id, hasAllowedCalendar } = result;
 
-  const handleClick = () => {
-    setIsDeleting(true);
-
-    axios
-      .delete(`http://localhost:8080/delete/${id}`, {
-        headers: { 'Content-Type': 'application/json' },
-      })
-      .then(() => {
-        console.log('Deleted from system!');
-        timerRef.current = setTimeout(() => {
-          setIsDeleting(false);
-          setResult({});
-          setPaused(false);
-        }, 2000);
-      })
-      .catch((error) => {
-        setIsDeleting(false);
-        setResult({});
-        setPaused(false);
-        if (error.response) {
-          const errorData = error.response.data;
-          console.log(errorData);
-        }
-      });
-  };
-
   if (isDeleting) {
     return (
       <div className='wrapper'>
@@ -260,11 +232,6 @@ export const Home = () => {
       </div>
     );
   }
-
-  // const handleModal = () => {
-  //   toggle();
-  //   setPaused(true);
-  // };
 
   const handleSettingsModal = () => {
     toggle();
@@ -278,22 +245,19 @@ export const Home = () => {
           <ContainerWithFadeIn>
             <Title>{`Välkommen ${name} till`}</Title>
             <DefaultText>{eventMessage}&nbsp;</DefaultText>
-            <ButtonSettings onClick={handleSettingsModal}>
+            <SettingsButton onClick={handleSettingsModal}>
               <FontAwesomeIcon icon={faCog} color='white' size='4x' />
-            </ButtonSettings>
-            {/* <WhiteButton className='button-modal' onClick={handleModal}>
-            Ta bort mig från systemet
-          </WhiteButton> */}
+            </SettingsButton>
           </ContainerWithFadeIn>
           <Modal
             isShowing={isShowing}
             hide={() => setIsShowing(false)}
-            handleClick={handleSettingsModal}
             faceId={id}
             hasAllowedCalendar={hasAllowedCalendar}
-          >
-            jek
-          </Modal>
+            setPaused={setPaused}
+            setIsDeleting={setIsDeleting}
+            setResult={setResult}
+          />
         </>
       )}
       {!isKnownFace && isFace && (
@@ -306,13 +270,6 @@ export const Home = () => {
           <Logo src={dynabyteLogo} width='200' height='80' alt='logo' />
         </Container>
       )}
-      {/* <Modal
-        isShowing={isShowing}
-        hide={() => setIsShowing(false)}
-        handleClick={handleClick}
-      >
-        hej
-      </Modal> */}
 
       <footer>
         <span>
