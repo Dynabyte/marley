@@ -2,9 +2,8 @@ package com.dynabyte.marleyrest.personrecognition.service;
 
 import com.dynabyte.marleyrest.personrecognition.request.ImageRequest;
 import com.dynabyte.marleyrest.personrecognition.response.FaceRecognitionResponse;
+import com.dynabyte.marleyrest.registration.request.LabelPutRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,21 +37,10 @@ class FaceRecognitionServiceTest {
     private static String faceRecognitionURL;
     private static FaceRecognitionResponse faceRecognitionResponse;
 
-//    @BeforeClass
-//    public static void beforeClass() {
-//        faceRecognitionURL = "http://localhost:5000/face-recognition/";
-//        System.getenv().put("FACE_REC_URL", faceRecognitionURL);
-//    }
-//
-//    // Optionally:
-//    @AfterClass
-//    public static void afterClass() {
-//        System.getenv().remove("FACE_REC_URL");
-//    }
-
     @BeforeAll
     static void setUp() {
         faceId = "5fad4b9e1bbac38873e8cdbd";
+        faceRecognitionURL = "http://localhost:5000/face-recognition/";
         faceRecognitionResponse = new FaceRecognitionResponse();
         faceRecognitionResponse.setFaceId(faceId);
         try {
@@ -66,13 +54,12 @@ class FaceRecognitionServiceTest {
 
     @BeforeEach
     void setProperties(){
-
+        ReflectionTestUtils.setField(faceRecognitionService, "faceRecognitionURL", faceRecognitionURL);
     }
 
     @Test
     void predict() {
-        //TODO inject @Value and test with proper value
-        when(restTemplate.postForObject(null + "predict", imageRequest, FaceRecognitionResponse.class))
+        when(restTemplate.postForObject(faceRecognitionURL + "predict", imageRequest, FaceRecognitionResponse.class))
                 .thenReturn(faceRecognitionResponse);
         String predictedFaceId = faceRecognitionService.predict(imageRequest);
         assertEquals(faceId, predictedFaceId);
@@ -81,13 +68,22 @@ class FaceRecognitionServiceTest {
 
     @Test
     void postLabel() {
+        when(restTemplate.postForObject(faceRecognitionURL + "label", imageRequest, FaceRecognitionResponse.class))
+                .thenReturn(faceRecognitionResponse);
+        String labeledFaceId = faceRecognitionService.postLabel(imageRequest);
+        assertEquals(faceId, labeledFaceId);
     }
 
     @Test
     void putLabel() {
+        LabelPutRequest labelPutRequest = new LabelPutRequest(imageRequest.getImage(), faceId);
+        faceRecognitionService.putLabel(labelPutRequest);
+        verify(restTemplate).put(faceRecognitionURL + "label/" + labelPutRequest.getFaceId(), labelPutRequest);
     }
 
     @Test
     void delete() {
+        faceRecognitionService.delete(faceId);
+        verify(restTemplate).delete(faceRecognitionURL + "delete/" + faceId);
     }
 }

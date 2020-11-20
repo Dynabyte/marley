@@ -1,10 +1,9 @@
-package com.dynabyte.marleyrest;
+package com.dynabyte.marleyrest.api.util;
 
 import com.dynabyte.marleyrest.api.exception.ImageEncodingException;
 import com.dynabyte.marleyrest.api.exception.InvalidArgumentException;
 import com.dynabyte.marleyrest.personrecognition.request.ImageRequest;
 import com.dynabyte.marleyrest.registration.request.RegistrationRequest;
-import com.dynabyte.marleyrest.api.util.RequestUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -14,11 +13,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-
-public class RequestUtilTests {
+class RequestUtilTest {
 
     private static RegistrationRequest validJpegRegistrationRequest;
     private static RegistrationRequest validPngRegistrationRequest;
@@ -113,4 +110,5 @@ public class RequestUtilTests {
                 () -> RequestUtil.validateAndPrepareRegistrationRequest(oneInvalidImageRegistrationRequest)
         );
     }
+
 }
