@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { IGoogleCredentials } from '../models/models';
 
 export const authorizeCalendar = (
   onCompleteFunction: (code: string) => void
@@ -13,7 +14,10 @@ export const authorizeCalendar = (
     .catch((error) => console.log(error));
 };
 
-const googleAuthRequest = (googleCredentials, onCompleteFunction) => {
+const googleAuthRequest = (
+  googleCredentials: IGoogleCredentials,
+  onCompleteFunction: (code: string) => void
+) => {
   window.gapi.load('client:auth2', () => {
     window.gapi.client
       .init({

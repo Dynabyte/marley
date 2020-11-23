@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import styled from 'styled-components';
+import { IDeleteConfirmationModal } from '../models/models';
 import SmallText from '../ui/fonts/SmallText';
 import PinkButton from '../ui/PinkButton';
 
@@ -34,7 +35,11 @@ const StyledSmallText = styled(SmallText)`
   text-align: center;
 `;
 
-const DeleteConfirmationModal = ({ isShowing, hide, deleteUser }) => {
+const DeleteConfirmationModal = ({
+  isShowing,
+  hide,
+  deleteUser,
+}: IDeleteConfirmationModal) => {
   const onClick = () => {
     deleteUser();
     hide();

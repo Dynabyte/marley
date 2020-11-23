@@ -1,21 +1,17 @@
 import React, { useState } from 'react';
+import { IRegistrationData } from '../models/models';
 
 type RegistrationDataType = {
-  registrationData: RegistrationData;
-  setRegistrationData: React.Dispatch<React.SetStateAction<RegistrationData>>;
+  registrationData: IRegistrationData;
+  setRegistrationData: React.Dispatch<React.SetStateAction<IRegistrationData>>;
 };
-
-interface RegistrationData {
-  name: string;
-  authCode: string;
-}
 
 export const RegistrationDataContext = React.createContext<
   RegistrationDataType
 >(undefined);
 
 export const RegistrationDataProvider = ({ children }) => {
-  const [registrationData, setRegistrationData] = useState<RegistrationData>({
+  const [registrationData, setRegistrationData] = useState<IRegistrationData>({
     name: null,
     authCode: null,
   });

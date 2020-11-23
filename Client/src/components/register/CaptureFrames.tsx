@@ -2,17 +2,13 @@ import axios from 'axios';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { RegistrationDataContext } from '../../contexts/RegistrationDataContext';
+import { IErrorData } from '../../models/models';
 import CenterContent from '../../ui/CenterContent';
 import LargeText from '../../ui/fonts/LargeText';
 import SmallText from '../../ui/fonts/SmallText';
 import Spinner from '../../ui/Spinner';
 import { saveGoogleCalendarTokens } from '../../utility/googleAuth';
 import ErrorMessage from '../ErrorMessage';
-
-interface IErrorData {
-  hasError: boolean;
-  errorMessage: string;
-}
 
 const CaptureFrames = () => {
   const history = useHistory();

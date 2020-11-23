@@ -8,6 +8,7 @@ import './App.css';
 import FaceRegistrationText from './components/register/FaceRegistrationText';
 import Modal from './components/SettingsModal';
 import useModal from './hooks/useModal';
+import { IPredictionResult } from './models/models';
 import Logo from './shared/Logo';
 import Title from './shared/Title';
 import dynabyteLogo from './static/images/dynabyte_white.png';
@@ -15,14 +16,6 @@ import DefaultText from './ui/fonts/DefaultText';
 import LargeText from './ui/fonts/LargeText';
 import Spinner from './ui/Spinner';
 import calendarEventLogic from './utility/calendarEventLogic';
-
-interface IResult {
-  isKnownFace?: boolean;
-  isFace?: boolean;
-  name?: string;
-  id?: string;
-  hasAllowedCalendar?: boolean;
-}
 
 const slideIn = keyframes`
  from { opacity: 0; }
@@ -55,7 +48,7 @@ const ContainerWithFadeIn = styled(Container)`
 `;
 
 export const Home = () => {
-  const [result, setResult] = React.useState<IResult>({});
+  const [result, setResult] = React.useState<IPredictionResult>({});
   const faceIdRef = useRef(null);
   const [paused, setPaused] = React.useState<boolean>(false);
   const [isDeleting, setIsDeleting] = React.useState<boolean>(false);

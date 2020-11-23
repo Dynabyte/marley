@@ -1,9 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-
-interface CheckboxProps {
-  checked: boolean;
-}
+import { ICheckboxProps } from '../models/models';
 
 const CheckboxContainer = styled.div`
   position: relative;
@@ -21,7 +18,7 @@ const HiddenCheckbox = styled.input.attrs({ type: 'checkbox' })`
   opacity: 0;
 `;
 
-const StyledCheckbox = styled.div<CheckboxProps>`
+const StyledCheckbox = styled.div<ICheckboxProps>`
   position: absolute;
   left: 0;
   top: -5px;

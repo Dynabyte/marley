@@ -1650,6 +1650,13 @@
   dependencies:
     "@types/gapi" "*"
 
+"@types/gapi.calendar@^3.0.4":
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/@types/gapi.calendar/-/gapi.calendar-3.0.4.tgz#acdeb0d9b4af8b5f259c8a8a1e796d884c9ad345"
+  integrity sha512-MzI1Dc/yl8OdpwzJSrZ0wr7Ikh0X75r6MJSPA9jEoVhOevFfa0okffKpnoO9r9SeKyR2fks5RQ6wdx27YnJlMg==
+  dependencies:
+    "@types/gapi" "*"
+
 "@types/gapi@*", "@types/gapi@^0.0.39":
   version "0.0.39"
   resolved "https://registry.yarnpkg.com/@types/gapi/-/gapi-0.0.39.tgz#bc7fa8cd0cb175b36e3609790fb2ed73a33f6881"

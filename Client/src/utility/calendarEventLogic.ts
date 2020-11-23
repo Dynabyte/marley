@@ -1,4 +1,6 @@
-const calendarEventLogic = (eventResponse: any) => {
+import { IEventResponse } from '../models/models';
+
+const calendarEventLogic = (eventResponse: IEventResponse) => {
   let message: string = '';
 
   if (!eventResponse) {
@@ -9,10 +11,9 @@ const calendarEventLogic = (eventResponse: any) => {
   const { event, hoursRemaining, minutesRemaining, isOngoing } = eventResponse;
   const eventTitle = event.summary;
 
-  if(eventTitle === undefined){
+  if (eventTitle === undefined) {
     message = 'Ditt möte ';
-  }
-  else {
+  } else {
     message = `Ditt möte "${eventTitle}" `;
   }
 

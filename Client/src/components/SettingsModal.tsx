@@ -4,6 +4,7 @@ import axios from 'axios';
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import styled from 'styled-components';
+import { ISettingsModal } from '../models/models';
 import PinkButton from '../ui/PinkButton';
 import {
   authorizeCalendar,
@@ -60,7 +61,7 @@ const SettingsModal = ({
   setPaused,
   setIsDeleting,
   setResult,
-}) => {
+}: ISettingsModal) => {
   const [allowedCalendar, setAllowedCalendar] = useState<boolean>(
     hasAllowedCalendar
   );
