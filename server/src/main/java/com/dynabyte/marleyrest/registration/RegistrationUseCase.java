@@ -1,9 +1,7 @@
 package com.dynabyte.marleyrest.registration;
 
 import com.dynabyte.marleyrest.api.util.RequestUtil;
-import com.dynabyte.marleyrest.prediction.PredictionUseCase;
 import com.dynabyte.marleyrest.personrecognition.request.ImageRequest;
-import com.dynabyte.marleyrest.personrecognition.response.FaceRecognitionResponse;
 import com.dynabyte.marleyrest.personrecognition.service.FaceRecognitionService;
 import com.dynabyte.marleyrest.registration.exception.MissingPersonInDbException;
 import com.dynabyte.marleyrest.registration.exception.PersonAlreadyInDbException;

@@ -31,7 +31,7 @@ public class ApiExceptionHandler {
      * @param e The thrown exception
      * @return ResponseEntity including an ApiExceptionReport object that details the error as well as the http status.
      */
-    @ExceptionHandler(value = {ImageEncodingException.class, InvalidArgumentException.class, ResponseBodyNotFoundException.class})
+    @ExceptionHandler(value = {ImageEncodingException.class, InvalidArgumentException.class})
     public ResponseEntity<ApiExceptionReport> handleBadRequestExceptions(Exception e) {
         return getErrorResponse(e, HttpStatus.BAD_REQUEST);
     }
