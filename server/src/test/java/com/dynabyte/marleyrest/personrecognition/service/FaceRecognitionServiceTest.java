@@ -63,7 +63,6 @@ class FaceRecognitionServiceTest {
                 .thenReturn(faceRecognitionResponse);
         String predictedFaceId = faceRecognitionService.predict(imageRequest);
         assertEquals(faceId, predictedFaceId);
-//        verify(restTemplate).postForEntity(faceRecognitionURL + "predict", imageRequest, FaceRecognitionResponse.class);
     }
 
     @Test
