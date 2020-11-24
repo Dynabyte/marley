@@ -46,12 +46,12 @@ public class PredictionUseCase {
             faceId = faceRecognitionService.predict(imageRequest);
         } catch (RestClientResponseException e) {
             if (e.getRawStatusCode() == 409) {
-                return new ClientPredictionResponse(null, "Unknown", false, false);
+                return new ClientPredictionResponse(null, "Unknown", false, false, false);
             }
             throw new FaceRecognitionException("Something went wrong with the face recognition API", HttpStatus.valueOf(e.getRawStatusCode()));
         }
 
-        ClientPredictionResponse clientPredictionResponse = new ClientPredictionResponse(null,"Unknown", true, false);
+        ClientPredictionResponse clientPredictionResponse = new ClientPredictionResponse(null,"Unknown", true, false, false);
 
         if (faceId == null) {
             return clientPredictionResponse;
@@ -61,6 +61,9 @@ public class PredictionUseCase {
             clientPredictionResponse.setId(person.getFaceId());
             clientPredictionResponse.setName(person.getName());
             clientPredictionResponse.setKnownFace(true);
+            if(person.getGoogleTokens() != null){
+                clientPredictionResponse.setHasAllowedCalendar(true);
+            }
         }, () -> {
             throw new MissingPersonInDbException("Found faceId in face recognition API but no matching person in the database");
         });

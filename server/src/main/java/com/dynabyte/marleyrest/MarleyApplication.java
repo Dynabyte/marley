@@ -3,6 +3,7 @@ package com.dynabyte.marleyrest;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.ServerResponse;
 
@@ -25,6 +26,11 @@ public class MarleyApplication {
     RouterFunction<ServerResponse> routerFunction() {
         return route(GET("/"), req ->
                 ServerResponse.temporaryRedirect(URI.create("/documentation/swagger-ui/index.html#/marley-rest-controller")).build());
+    }
+
+    @Bean
+    public RestTemplate restTemplate(){
+        return new RestTemplate();
     }
 
 }

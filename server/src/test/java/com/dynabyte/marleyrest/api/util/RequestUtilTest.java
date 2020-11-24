@@ -115,7 +115,6 @@ class RequestUtilTest {
     void invalidImagePredictionShouldThrowException(){
         String validBase64Image = validPngRegistrationRequest.getImages().get(0);
         String invalidBase64Image = validBase64Image.substring(2);
-        System.out.println(invalidBase64Image);
         assertThrows(ImageEncodingException.class,
                 ()-> RequestUtil.validateAndPreparePredictionRequest(new ImageRequest(invalidBase64Image)));
     }

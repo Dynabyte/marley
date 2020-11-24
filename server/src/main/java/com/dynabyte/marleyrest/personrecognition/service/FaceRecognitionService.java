@@ -7,10 +7,10 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Collections;
 
 /**
  * Face Recognition Service sends requests to the python rest api for face recognition and delivers a response.
@@ -24,7 +24,6 @@ public class FaceRecognitionService {
     private String faceRecognitionURL;
     private final RestTemplate restTemplate;
 
-
     /**
      * Sends a prediction request to find out whether an image includes a face and if it is recognized as a known person
      *
@@ -34,7 +33,6 @@ public class FaceRecognitionService {
     @SuppressWarnings("ConstantConditions") //null is checked later
     public String predict(ImageRequest imageRequest) {
         LOGGER.debug("Sending prediction request to face recognition API");
-        System.out.println("URL: " + faceRecognitionURL);
         return restTemplate
                 .postForObject(faceRecognitionURL + "predict", imageRequest, FaceRecognitionResponse.class)
                 .getFaceId();

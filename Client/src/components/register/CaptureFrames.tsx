@@ -1,22 +1,29 @@
 import axios from 'axios';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { RegistrationDataContext } from '../../contexts/RegistrationDataContext';
+import { IErrorData } from '../../models/models';
 import CenterContent from '../../ui/CenterContent';
 import LargeText from '../../ui/fonts/LargeText';
 import SmallText from '../../ui/fonts/SmallText';
 import Spinner from '../../ui/Spinner';
+import { saveGoogleCalendarTokens } from '../../utility/googleAuth';
 import ErrorMessage from '../ErrorMessage';
 
 const CaptureFrames = () => {
   const history = useHistory();
 
   const [hasCollectedImages, setHasCollectedImages] = useState<boolean>(false);
-  const [hasError, setHasError] = useState<boolean>(false);
+  const [errorData, setErrorData] = useState<IErrorData>({
+    hasError: false,
+    errorMessage: '',
+  });
 
   const intervalRef = useRef<number>(null);
+  const { registrationData } = useContext(RegistrationDataContext);
+  const { name, authCode } = registrationData;
 
   useEffect(() => {
-    const name = history.location.state;
     const canvas: HTMLCanvasElement = document.createElement('canvas');
     let myStream: MediaStream;
     if (navigator.mediaDevices.getUserMedia) {
@@ -94,9 +101,19 @@ const CaptureFrames = () => {
                   headers: { 'Content-Type': 'application/json' },
                 }
               )
-              .then(() => {
+              .then(({ data }) => {
                 console.log('Uploaded images');
-                history.push('/');
+
+                if (authCode !== null) {
+                  saveGoogleCalendarTokens(
+                    data,
+                    authCode,
+                    () => history.push('/'),
+                    () => history.push('/')
+                  );
+                } else {
+                  history.push('/');
+                }
               })
               .catch((error) => {
                 if (error.response) {
@@ -104,7 +121,16 @@ const CaptureFrames = () => {
                   console.log(errorData);
                   const exceptionClass = errorData.exceptionClass;
                   if (exceptionClass === 'PersonAlreadyInDbException') {
-                    setHasError(true);
+                    setErrorData({
+                      hasError: true,
+                      errorMessage: 'Du är redan registrerad',
+                    });
+                  } else {
+                    setErrorData({
+                      hasError: true,
+                      errorMessage:
+                        'Det gick inte att registrera dig just nu. Försök igen lite senare',
+                    });
                   }
                 }
               });
@@ -115,7 +141,9 @@ const CaptureFrames = () => {
     return () => {
       clearInterval(intervalRef.current);
     };
-  }, [history]);
+  }, [history, name, authCode]);
+
+  const { hasError, errorMessage } = errorData;
 
   return (
     <CenterContent>
@@ -127,12 +155,14 @@ const CaptureFrames = () => {
       )}
       {hasCollectedImages && !hasError && (
         <>
-          <LargeText>Registrering pågår</LargeText>
+          <LargeText>Tack! </LargeText>
+          <LargeText>Vi har nu samlat in all data som behövs</LargeText>
           <Spinner />
+          <SmallText>Registrering pågår. </SmallText>
           <SmallText>Det kan ta en liten stund</SmallText>
         </>
       )}
-      {hasError && <ErrorMessage message='Du är redan registrerad' />}
+      {hasError && <ErrorMessage message={errorMessage} />}
     </CenterContent>
   );
 };

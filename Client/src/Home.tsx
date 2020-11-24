@@ -1,30 +1,59 @@
+import { faCog } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import axios from 'axios';
 import React, { useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
+import styled, { css, keyframes } from 'styled-components';
 import './App.css';
-import Modal from './components/Modal';
 import FaceRegistrationText from './components/register/FaceRegistrationText';
+import Modal from './components/SettingsModal';
 import useModal from './hooks/useModal';
+import { IPredictionResult } from './models/models';
 import Logo from './shared/Logo';
 import Title from './shared/Title';
 import dynabyteLogo from './static/images/dynabyte_white.png';
+import DefaultText from './ui/fonts/DefaultText';
 import LargeText from './ui/fonts/LargeText';
 import Spinner from './ui/Spinner';
-import WhiteButton from './ui/WhiteButton';
+import calendarEventLogic from './utility/calendarEventLogic';
 
-interface IResult {
-  isKnownFace?: boolean;
-  isFace?: boolean;
-  name?: string;
-  id?: number;
-}
+const slideIn = keyframes`
+ from { opacity: 0; }
+`;
+
+const fadeIn = css`
+  animation: 2s ease-in-out 0s 1 ${slideIn};
+`;
+
+const Container = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+`;
+
+const SettingsButton = styled.button`
+  position: absolute;
+  right: 30px;
+  bottom: 30px;
+  background: none;
+  border: none;
+  outline: inherit;
+`;
+
+const ContainerWithFadeIn = styled(Container)`
+  ${() => fadeIn};
+`;
 
 export const Home = () => {
-  const [result, setResult] = React.useState<IResult>({});
+  const [result, setResult] = React.useState<IPredictionResult>({});
+  const faceIdRef = useRef(null);
   const [paused, setPaused] = React.useState<boolean>(false);
   const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
+  const [eventMessage, setEventMessage] = React.useState<string>('');
 
-  const timerRef = useRef(null);
   const regulateSpeedTimer = useRef(null);
   const activeTimerRef = useRef(null);
   const faceFoundTimer = useRef(null);
@@ -58,7 +87,7 @@ export const Home = () => {
           .grabFrame()
           .then((imageBitmap) => {
             const dataURL = getDataURL(imageBitmap);
-            uploadImage(dataURL);
+            sendPredictionRequest(dataURL);
           })
           .catch(() => console.trace());
       } else {
@@ -99,7 +128,22 @@ export const Home = () => {
       return canvas.toDataURL();
     };
 
-    const uploadImage = (image: string) => {
+    const sendCalendarRequest = (faceId: string) => {
+      axios
+        .get(`http://localhost:8080/calendar/${faceId}`)
+        .then(({ data }) => {
+          const calendarEventMessage = calendarEventLogic(data);
+          setEventMessage(calendarEventMessage);
+        })
+        .catch((error) => {
+          if (error.response) {
+            const errorData = error.response.data;
+            console.log(errorData);
+          }
+        });
+    };
+
+    const sendPredictionRequest = (image: string) => {
       const startTime = new Date().getTime();
       axios
         .post(
@@ -111,9 +155,12 @@ export const Home = () => {
         )
         .then(({ data }) => {
           const requestTime = new Date().getTime() - startTime;
-          console.log(`Request time: ${requestTime} ms`);
           if (isMounted) {
+            if (faceIdRef.current !== data.id || !data.hasAllowedCalendar) {
+              setEventMessage('');
+            }
             setResult(data);
+            faceIdRef.current = data.id;
 
             if (data.isFace) {
               updateTimer();
@@ -122,6 +169,9 @@ export const Home = () => {
               faceFoundTimer.current = setTimeout(() => {
                 predictFace();
               }, process.env.REACT_APP_FOUND_FACE_WAIT_TIME || 2000);
+              if (data.hasAllowedCalendar) {
+                sendCalendarRequest(data.id);
+              }
             } else {
               regulateSpeedAndPredictFace(requestTime);
             }
@@ -129,7 +179,6 @@ export const Home = () => {
         })
         .catch((error) => {
           const requestTime = new Date().getTime() - startTime;
-          console.log(`Request time: ${requestTime} ms`);
           if (error.response) {
             const errorData = error.response.data;
             console.log(errorData);
@@ -159,7 +208,6 @@ export const Home = () => {
       myStream.getTracks().forEach(function (t) {
         t.stop();
       });
-      clearTimeout(timerRef.current);
       clearTimeout(activeTimerRef.current);
       clearTimeout(regulateSpeedTimer.current);
       clearTimeout(faceFoundTimer.current);
@@ -167,33 +215,7 @@ export const Home = () => {
     };
   }, [paused, history]);
 
-  const { isKnownFace, isFace, name, id } = result;
-
-  const handleClick = () => {
-    setIsDeleting(true);
-
-    axios
-      .delete(`http://localhost:8080/delete/${id}`, {
-        headers: { 'Content-Type': 'application/json' },
-      })
-      .then(() => {
-        console.log('Deleted from system!');
-        timerRef.current = setTimeout(() => {
-          setIsDeleting(false);
-          setResult({});
-          setPaused(false);
-        }, 2000);
-      })
-      .catch((error) => {
-        setIsDeleting(false);
-        setResult({});
-        setPaused(false);
-        if (error.response) {
-          const errorData = error.response.data;
-          console.log(errorData);
-        }
-      });
-  };
+  const { isKnownFace, isFace, name, id, hasAllowedCalendar } = result;
 
   if (isDeleting) {
     return (
@@ -204,30 +226,42 @@ export const Home = () => {
     );
   }
 
-  const handleModal = () => {
+  const handleSettingsModal = () => {
     toggle();
     setPaused(true);
   };
 
   return (
-    <div className='wrapper'>
+    <div>
       {isKnownFace && (
         <>
-          <Title>{`Välkommen ${name} till`}</Title>
-          <WhiteButton className='button-default' onClick={handleModal}>
-            Ta bort mig från systemet
-          </WhiteButton>
+          <ContainerWithFadeIn>
+            <Title>{`Välkommen ${name} till`}</Title>
+            <DefaultText>{eventMessage}&nbsp;</DefaultText>
+            <SettingsButton onClick={handleSettingsModal}>
+              <FontAwesomeIcon icon={faCog} color='white' size='4x' />
+            </SettingsButton>
+          </ContainerWithFadeIn>
           <Modal
             isShowing={isShowing}
             hide={() => setIsShowing(false)}
-            handleClick={handleClick}
+            faceId={id}
+            hasAllowedCalendar={hasAllowedCalendar}
             setPaused={setPaused}
+            setIsDeleting={setIsDeleting}
+            setResult={setResult}
           />
         </>
       )}
-      {!isKnownFace && isFace && <FaceRegistrationText />}
+      {!isKnownFace && isFace && (
+        <ContainerWithFadeIn>
+          <FaceRegistrationText />
+        </ContainerWithFadeIn>
+      )}
       {!isKnownFace && !isFace && (
-        <Logo src={dynabyteLogo} width='200' height='80' alt='logo' />
+        <Container>
+          <Logo src={dynabyteLogo} width='200' height='80' alt='logo' />
+        </Container>
       )}
 
       <footer>

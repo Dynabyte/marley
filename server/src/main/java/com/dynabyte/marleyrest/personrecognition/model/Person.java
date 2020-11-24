@@ -1,10 +1,10 @@
 package com.dynabyte.marleyrest.personrecognition.model;
 
+import com.dynabyte.marleyrest.calendar.model.GoogleTokens;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.io.Serializable;
 
 /**
@@ -18,6 +18,9 @@ public class Person implements Serializable {
     @Id
     private String faceId;
     private String name;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)//TODO check that deleteRequest removes googleTokens as well
+    @JoinColumn(name = "face_id")
+    private GoogleTokens googleTokens;
 
     public Person(String faceId, String name) {
         this.faceId = faceId;

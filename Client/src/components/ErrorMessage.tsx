@@ -1,6 +1,7 @@
 import React, { FC, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import { ErrorMessageProps } from '../models/models';
 import Card from '../ui/Card';
 import CenterContent from '../ui/CenterContent';
 import DefaultText from '../ui/fonts/DefaultText';
@@ -14,10 +15,6 @@ const StyledCard = styled(Card)`
   }
   text-align: center;
 `;
-
-interface ErrorMessageProps {
-  message: string;
-}
 
 const ErrorMessage: FC<ErrorMessageProps> = ({ message }) => {
   const history = useHistory();

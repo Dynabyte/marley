@@ -2,16 +2,20 @@ import React, {
   ChangeEvent,
   MouseEvent,
   SyntheticEvent,
+  useContext,
   useState,
 } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import { RegistrationDataContext } from '../../contexts/RegistrationDataContext';
 import Card from '../../ui/Card';
 import CenterContent from '../../ui/CenterContent';
+import Checkbox from '../../ui/Checkbox';
 import LargeText from '../../ui/fonts/LargeText';
 import SmallText from '../../ui/fonts/SmallText';
 import Input from '../../ui/Input';
 import PinkButton from '../../ui/PinkButton';
+import { authorizeCalendar } from '../../utility/googleAuth';
 
 const Header = styled.div`
   margin: 20px 0;
@@ -38,14 +42,24 @@ const Errors = styled.div`
   color: black;
 `;
 
+const LabelText = styled.span`
+  display: inline-block;
+  font-size: 1.25rem;
+  font-family: Arial, Helvetica, sans-serif;
+  color: black;
+  margin-bottom: 2rem;
+`;
+
 const RegistrationForm = () => {
-  const [value, setValue] = useState<string>('');
+  const { setRegistrationData } = useContext(RegistrationDataContext);
+  const [checked, setIsChecked] = useState<boolean>(false);
+  const [name, setName] = useState<string>('');
   const [errors, setErrors] = useState<string[]>([]);
   const history = useHistory();
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
-    setValue(event.currentTarget.value);
+    setName(event.currentTarget.value);
   };
 
   const handleCancelButton = (event: MouseEvent<HTMLButtonElement>) => {
@@ -56,7 +70,7 @@ const RegistrationForm = () => {
   const handleSubmit = (event: SyntheticEvent) => {
     event.preventDefault();
 
-    const errors = validate(value);
+    const errors = validate(name);
 
     if (errors.length > 0) {
       setErrors(errors);
@@ -64,16 +78,25 @@ const RegistrationForm = () => {
     }
 
     setErrors([]);
-    history.push({ pathname: '/positioning', state: value });
+
+    if (checked) {
+      authorizeCalendar((code) => {
+        setRegistrationData({ name, authCode: code });
+        history.push('/positioning');
+      });
+    } else {
+      setRegistrationData({ name, authCode: null });
+      history.push('/positioning');
+    }
   };
 
-  const validate = (value: string) => {
+  const validate = (name: string) => {
     let errors = [];
-    if (value.trim().length === 0) {
+    if (name.trim().length === 0) {
       errors.push('Du måste fylla i ett namn');
     }
 
-    if (value.length > 50) {
+    if (name.length > 50) {
       errors.push('Det får inte vara fler än 50 tecken');
     }
     return errors;
@@ -90,15 +113,27 @@ const RegistrationForm = () => {
           <Seperator />
           <Input
             type='text'
-            value={value}
+            value={name}
             onChange={handleChange}
             placeholder='För- och efternamn'
           />
-          <Errors>
-            {errors.map((error, index) => (
-              <p key={index}>{error}</p>
-            ))}
-          </Errors>
+          {errors && (
+            <Errors>
+              {errors.map((error, index) => (
+                <p key={index}>{error}</p>
+              ))}
+            </Errors>
+          )}
+          <label>
+            <LabelText>
+              Vill du koppla din Google-kalender för att kunna se dina möten?
+            </LabelText>
+            <Checkbox
+              checked={checked}
+              onChange={() => setIsChecked(!checked)}
+            />
+          </label>
+
           <div style={{ display: 'flex' }}>
             <PinkButton
               type='button'

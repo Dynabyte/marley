@@ -1,10 +1,5 @@
 import React from 'react';
-
-interface ILogo
-  extends React.DetailedHTMLProps<
-    React.ImgHTMLAttributes<HTMLImageElement>,
-    HTMLImageElement
-  > {}
+import { ILogo } from '../models/models';
 
 export const Logo: React.FC<ILogo> = (props) => {
   return (

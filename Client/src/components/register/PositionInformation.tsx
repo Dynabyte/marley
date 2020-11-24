@@ -21,7 +21,7 @@ const StyledCard = styled(Card)`
 
 const Positioning = () => {
   const history = useHistory();
-  const name = history.location.state;
+
   return (
     <CenterContent>
       <StyledCard>
@@ -40,9 +40,7 @@ const Positioning = () => {
           </PinkButton>
           <PinkButton
             type='button'
-            onClick={() =>
-              history.push({ pathname: '/capture-frames', state: name })
-            }
+            onClick={() => history.push('/capture-frames')}
           >
             REDO
           </PinkButton>
