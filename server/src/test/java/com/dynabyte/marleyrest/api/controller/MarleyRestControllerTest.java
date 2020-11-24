@@ -75,7 +75,7 @@ class MarleyRestControllerTest {
 
     @Test
     void predictKnownFaceShouldGiveKnownPersonResponse() throws Exception {
-        ClientPredictionResponse knownPersonResponse = new ClientPredictionResponse(faceId, "Valid Name", true, true);
+        ClientPredictionResponse knownPersonResponse = new ClientPredictionResponse(faceId, "Valid Name", true, true, true);
         when(predictionUseCase.execute(imageRequest)).thenReturn(knownPersonResponse);
 
         mockMvc.perform(
@@ -87,14 +87,15 @@ class MarleyRestControllerTest {
                 .andExpect(jsonPath("id").value(knownPersonResponse.getId()))
                 .andExpect(jsonPath("name").value(knownPersonResponse.getName()))
                 .andExpect(jsonPath("isFace").value(knownPersonResponse.isFace()))
-                .andExpect(jsonPath("isKnownFace").value(knownPersonResponse.isKnownFace()));
+                .andExpect(jsonPath("isKnownFace").value(knownPersonResponse.isKnownFace()))
+                .andExpect(jsonPath("hasAllowedCalendar").value(knownPersonResponse.hasAllowedCalendar()));
 
         verify(predictionUseCase).execute(imageRequest);
     }
 
     @Test
     void predictUnknownFaceShouldGiveUnknownPersonResponse() throws Exception {
-        ClientPredictionResponse knownPersonResponse = new ClientPredictionResponse(null, "Unknown", true, false);
+        ClientPredictionResponse knownPersonResponse = new ClientPredictionResponse(null, "Unknown", true, false, false);
         when(predictionUseCase.execute(imageRequest)).thenReturn(knownPersonResponse);
 
         mockMvc.perform(
@@ -106,14 +107,15 @@ class MarleyRestControllerTest {
                 .andExpect(jsonPath("id").value(knownPersonResponse.getId()))
                 .andExpect(jsonPath("name").value(knownPersonResponse.getName()))
                 .andExpect(jsonPath("isFace").value(knownPersonResponse.isFace()))
-                .andExpect(jsonPath("isKnownFace").value(knownPersonResponse.isKnownFace()));
+                .andExpect(jsonPath("isKnownFace").value(knownPersonResponse.isKnownFace()))
+                .andExpect(jsonPath("hasAllowedCalendar").value(knownPersonResponse.hasAllowedCalendar()));
 
         verify(predictionUseCase).execute(imageRequest);
     }
 
     @Test
     void predictNoFaceShouldGiveNoFaceResponse() throws Exception {
-        ClientPredictionResponse knownPersonResponse = new ClientPredictionResponse(null, "Unknown", false, false);
+        ClientPredictionResponse knownPersonResponse = new ClientPredictionResponse(null, "Unknown", false, false, false);
         when(predictionUseCase.execute(imageRequest)).thenReturn(knownPersonResponse);
 
         mockMvc.perform(
@@ -125,7 +127,8 @@ class MarleyRestControllerTest {
                 .andExpect(jsonPath("id").value(knownPersonResponse.getId()))
                 .andExpect(jsonPath("name").value(knownPersonResponse.getName()))
                 .andExpect(jsonPath("isFace").value(knownPersonResponse.isFace()))
-                .andExpect(jsonPath("isKnownFace").value(knownPersonResponse.isKnownFace()));
+                .andExpect(jsonPath("isKnownFace").value(knownPersonResponse.isKnownFace()))
+                .andExpect(jsonPath("hasAllowedCalendar").value(knownPersonResponse.hasAllowedCalendar()));
 
         verify(predictionUseCase).execute(imageRequest);
     }

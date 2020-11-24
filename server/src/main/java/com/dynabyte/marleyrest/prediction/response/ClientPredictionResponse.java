@@ -1,13 +1,15 @@
 package com.dynabyte.marleyrest.prediction.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 /**
  * Response object to client for prediction requests. Includes information about the person if found in the python api.
  * Predicts faceId and name if the image contains the face of a known person and includes boolean data about the facial detection.
  */
 @Data
+@AllArgsConstructor
 public class ClientPredictionResponse {
 
     private String id;
@@ -16,13 +18,11 @@ public class ClientPredictionResponse {
     private boolean isFace;
     @JsonProperty(value = "isKnownFace")
     private boolean isKnownFace;
+   @Getter(AccessLevel.NONE)
+   @JsonProperty("hasAllowedCalendar")
     private boolean hasAllowedCalendar;
 
-    public ClientPredictionResponse(String id, String name, boolean isFace, boolean isKnownFace, boolean hasAllowedCalendar) {
-        this.id = id;
-        this.name = name;
-        this.isFace = isFace;
-        this.isKnownFace = isKnownFace;
-        this.hasAllowedCalendar = hasAllowedCalendar;
+    public boolean hasAllowedCalendar() {
+        return hasAllowedCalendar;
     }
 }
