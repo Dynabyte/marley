@@ -1,6 +1,5 @@
 package com.dynabyte.marleyrest.api.controller;
 
-import com.dynabyte.marleyrest.api.exception.ResponseBodyNotFoundException;
 import com.dynabyte.marleyrest.deletion.DeleteUseCase;
 import com.dynabyte.marleyrest.prediction.PredictionUseCase;
 import com.dynabyte.marleyrest.registration.RegistrationUseCase;
@@ -13,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Objects;
 
 /**
  * Rest controller for the Marley rest api that is the communication hub for all Marley related requests.
@@ -46,8 +43,6 @@ public class MarleyRestController {
     @PostMapping("/predict")
     public ResponseEntity<ClientPredictionResponse> predict(@RequestBody ImageRequest imageRequest) {
 
-        validateNotNull(imageRequest);
-
         ClientPredictionResponse clientPredictionResponse = predictionUseCase.execute(imageRequest);
 
         LOGGER.info("Successful prediction: " + clientPredictionResponse);
@@ -65,8 +60,6 @@ public class MarleyRestController {
     @PostMapping("/register")
     public HttpStatus register(@RequestBody RegistrationRequest registrationRequest) {
 
-        validateNotNull(registrationRequest);
-
         registrationUseCase.execute(registrationRequest);
 
         LOGGER.info("Registration request successful");
@@ -81,28 +74,4 @@ public class MarleyRestController {
         LOGGER.info("Person with faceId " + id + " deleted");
         return HttpStatus.OK;
     }
-
-
-    /**
-     * Validates that image request is not null
-     * @param imageRequest request to be validated
-     */
-    private void validateNotNull(ImageRequest imageRequest) {
-        if (Objects.isNull(imageRequest)) {
-            throw new ResponseBodyNotFoundException("Image request missing!");
-        }
-    }
-
-    /**
-     * Validates that registration request is not null
-     * @param registrationRequest request to be validated
-     */
-    private void validateNotNull(RegistrationRequest registrationRequest) {
-        if (Objects.isNull(registrationRequest)) {
-            throw new ResponseBodyNotFoundException("Registration request missing!");
-        }
-    }
-
-
-
 }
