@@ -10,6 +10,7 @@ The face recognition service is a python rest api that uses the library [face_re
 
 - [Use Cases](#use-cases)
 - [Backend Information](#backend-information)
+- [Google Calendar Integration](#google-calendar-integration)
 - [Getting Started](#getting-started)
 - [Client - React App](#client---react-app)
 - [Person Recognition - Java Rest API](#person-recognition---java-rest-api)
@@ -70,7 +71,7 @@ face-recognition	(Python rest API)
 <ol>
 	<li>Make sure Docker is installed. If on windows or mac, Docker Desktop is recommended. If you don't have Docker Desktop then Docker Compose will need to be installed separetely</li>
 	<li>Clone the github repository</li>
-	<li>Navigate to the resourses folder inside server. Add the file created following the step under [Google Calendar Integration](#google-calendar-integration) </li>
+	<li>Navigate to the resourses folder inside server. Add the file created following the step under section "Google Calendar Integration"</li>
 	<li>In the top folder of the project a file with the exact name “.env” must be created with the variables listed in example.env, also found in the top folder. These variables are used in docker-compose.yml to run the backend docker containers. FACE_REC_URL should reference face-recognition (the docker container), NOT localhost and can be copied from example.env.</li>
     <li>A mongoDB database must be created with a collection called faces, which then face-recognition (the python rest API) can connect to.</li>
     <li>In the terminal, navigate to the root folder and run “docker-compose up” to launch the backend, which will be built if necessary. “docker-compose config” can be used to verify environment variables and setup before running "docker-compose up".</li>
