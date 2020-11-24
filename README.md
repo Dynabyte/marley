@@ -72,7 +72,6 @@ face-recognition	(Python rest API)
 	<li>Clone the github repository</li>
 	<li>Navigate to the resourses folder inside server. Add the file created following the step under [Google Calendar Integration](#google-calendar-integration) </li>
 	<li>In the top folder of the project a file with the exact name “.env” must be created with the variables listed in example.env, also found in the top folder. These variables are used in docker-compose.yml to run the backend docker containers. FACE_REC_URL should reference face-recognition (the docker container), NOT localhost and can be copied from example.env.</li>
-
     <li>A mongoDB database must be created with a collection called faces, which then face-recognition (the python rest API) can connect to.</li>
     <li>In the terminal, navigate to the root folder and run “docker-compose up” to launch the backend, which will be built if necessary. “docker-compose config” can be used to verify environment variables and setup before running "docker-compose up".</li>
     <li>(optional) The postgresql database can be viewed at http://localhost:5555 when the docker container network is running. Use credentials for pgadmin entered into the .env file to login. Use the host name "marley-postgres" and credentials you saved in the .env file to establish a connection.</li>
@@ -80,7 +79,6 @@ face-recognition	(Python rest API)
     <li>Yarn must be installed. Run “yarn” to install dependencies, then “yarn start” can run the client application.</li>
     <li>Now the client application should start automatically in the default browser at http://localhost:3000</li>
     <li>(optional) Use Docker Desktop to view the running backend containers and their respective logs</li>
-
 </ol>
 
 ## Client - React App
