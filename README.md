@@ -10,8 +10,8 @@ The face recognition service is a python rest api that uses the library [face_re
 
 - [Use Cases](#use-cases)
 - [Backend Information](#backend-information)
-- [Google Calendar Integration](#google-calendar-integration)
 - [Getting Started](#getting-started)
+- [Google Calendar Integration](#google-calendar-integration)
 - [Client - React App](#client---react-app)
 - [Person Recognition - Java Rest API](#person-recognition---java-rest-api)
 - [Face Recognition - Python Rest API](#face-recognition---python-rest-api)
@@ -20,7 +20,7 @@ The face recognition service is a python rest api that uses the library [face_re
 
 ### PREDICTION
 
-The client application takes images and sends requests to the backend to check if a face can be found in the image, and if so predict which person it is. If Marley recognizes a person, it will greet them by name. If not, that person will still be greeted without a name and asked to register.
+The client application takes images and sends requests to the backend to check if a face can be found in the image, and if so predict which person it is. If Marley recognizes a person, it will greet them by name. Known persons have access to a settings menu. If not, that person will still be greeted without a name and asked to register.
 ![Prediction Use Case](https://github.com/Dynabyte/marley/blob/production/Diagrams/Prediction%20Request.png)
 
 ### REGISTRATION
@@ -30,12 +30,15 @@ If a person chooses to register, up to 60 face encodings are saved along with th
 
 ### DELETION
 
-A person can choose to no longer be recognized by Marley, in which case their personal data and face encodings will be removed.
+A person can choose to no longer be recognized by Marley, in which case their personal data, face encodings and potential Google Calendar tokens will be removed.
 ![Deletion Use Case](https://github.com/Dynabyte/marley/blob/production/Diagrams/Deletion%20Request.png)
 
-### REMOVE GOOGLE CALENDAR ACCESS
+### GOOGLE CALENDAR NOTIFICATIONS
+During registration a user can choose to enable Google calendar notifications in which case the next upcoming or ongoing Dynabyte event (only if it's for today) as well as how long time remains until the event will be shown when the person is recognized by the system. 
 
-If a person no longer wants to see there calendar notifications they can choose to remove the Google Calendar access.
+### UPDATE GOOGLE CALENDAR ACCESS STATUS
+
+If a person no longer wants to activate calendar notifications or disable calendar notifications they can choose to remove the Google Calendar access.
 
 ### MOTION DETECTION
 
@@ -56,16 +59,6 @@ person-recognition	(Java rest API)
 face-recognition	(Python rest API)
 </pre>
 
-## Google Calendar Integration
-
-<ol>
-	<li>Go to http://console.cloud.google.com</li>
-	<li>Select Marley project. If you don't have access, ask Alexandra Onegård, Niklas Furberg or Tao Wan to be granted access.</li>
-	<li>Select "APIS & Services" in the menu.</li>
-	<li>Go to "Credentials". Press the download button to the right under "OAuth 2.0 Client IDs". It generates a file that you will add in the project to get access to the Google Calendar API.</li>
-	<li>Copy the API key, it will be added to the .env file in the backend.</li>
-</ol>
-
 ## Getting Started
 
 <ol>
@@ -80,6 +73,15 @@ face-recognition	(Python rest API)
     <li>Yarn must be installed. Run “yarn” to install dependencies, then “yarn start” can run the client application.</li>
     <li>Now the client application should start automatically in the default browser at http://localhost:3000</li>
     <li>(optional) Use Docker Desktop to view the running backend containers and their respective logs</li>
+</ol>
+
+## Setting up Google Calendar API Integration
+<ol>
+	<li>Go to http://console.cloud.google.com</li>
+	<li>Select Marley project. If you don't have access, ask Alexandra Onegård, Niklas Furberg or Tao Wan to be granted access.</li>
+	<li>Select "APIS & Services" in the menu.</li>
+	<li>Go to "Credentials". Press the download button to the right under "OAuth 2.0 Client IDs". It generates a file that you will add in the project to get access to the Google Calendar API. Place the file in server/src/main/resources and name it "google-credentials.json"</li>
+	<li>Copy the API key and add it to GOOGLE_CALENDAR_API_KEY in the .env file in the main project folder. See example.env in the same folder for reference. </li>
 </ol>
 
 ## Client - React App
@@ -98,7 +100,8 @@ Request:
 </pre>
 
 **REGISTRATION**<br>
-If a face is found but the person is unknown to Marley, the user can register with their name as prompted by the application. Upon registering the user will is asked to enter their name and then stand still for a few seconds as the application records a 2 second video, splits that into 60 images and sends a registration request to the backend with the following format:
+If a face is found but the person is unknown to Marley, the user can register with their name as prompted by the application. Upon registering the user will is asked to enter their name and they have the option to enable Google calendar notifications. If they choose to enable notifications a Google calendar consent window is shown.
+After that the user is asked to stand still for a few seconds as the application records a 2 second video, splits that into 60 images and sends a registration request to the backend with the following format:
 
 <pre>
 {
@@ -107,13 +110,16 @@ If a face is found but the person is unknown to Marley, the user can register wi
 }
 </pre>
 
-This data is handled by the backend and saved so that the person may be recognized by Marley during prediction requests. The application will wait for the registration request to be completed before sending more prediction requests.
+This data is handled by the backend and saved so that the person may be recognized by Marley during prediction requests. The application will wait for the registration request to be completed before sending more prediction requests. If calendar notifications was chosen to be enabled then the auth code received from Google will be sent to the backend so access tokens can be generated and saved for that user.
 
 **DELETION**<br>
 If a user chooses to be removed from the system a request is sent to the backend with the id supplied in a path variable.
 
+**ADD GOOGLE CALENDAR ACCESS**<br>
+Whenever a user chooses to add calendar notifications a request is sent to Google using credentials received from the backend. If they choose to allow calendar access, a one time use authentication code is received from Google and sent to the backend so access tokens for the Google Calendar API can be saved and related to that user.
+
 **REMOVE GOOGLE CALENDAR ACCESS**<br>
-If a use choose to remove their calendar notifications, a request is sent to the backend with supplied in a path variable.
+If a use choose to remove their calendar notifications, a request is sent to the backend with the id supplied in a path variable.
 
 **MOTION DETECTION**<br>
 To save CPU usage, the app will switch to motion detection when not detecting faces. A timer is running when doing face recognition and each time a face is detected the timer is refreshed. If the timer expires then face recognition requests are no longer sent and motion detection is turned on. If motion is detected then the app switches back to face recognition.<br><br>
@@ -129,14 +135,24 @@ The person recognition backend is a java rest API using Spring Boot and function
 
 ### Database
 
-The database is a simple postgresql database with a single table representing a person using two columns:<br>
+The database is a simple postgresql database with a table representing a person as well as a table for google calendar api tokens:<br>
 
 <pre>
+TABLE PERSON
 faceId: String
 name: String
+googleTokens: GoogleTokens
 </pre>
 
-The faceId is received from the face recognition service at the time of registration. This way the api can aggregate information from the two databases.
+<pre>
+TABLE GOOGLE_TOKENS
+faceId: String
+accessToken: String
+refreshToken: String
+expirationSystemTime: bigint
+</pre>
+
+The faceId is received from the face recognition service at the time of registration. This way the api can aggregate information from the postgresql database as well as the mongodb database connected to the face recognition service.
 
 ### Endpoints
 
@@ -148,7 +164,8 @@ The request base64 image is sent to face recognition. If a known face is found, 
 	“id”: String,
 	”name”: String,
 	“isFace”: boolean,
-	“isKnownFace”: boolean
+	“isKnownFace”: boolean,
+	“hasAllowedCalendar”: boolean
 }
 </pre>
 
@@ -164,7 +181,7 @@ The supplied id is used to remove the person from postgreSql as well as the face
 Recieve Google API key and Client ID for Google Calendar API. Uses the information to access Google Auth2 which gives us an authorization code for the user.
 
 **/calendar/tokens (POST)**<br>
-Sends the Authorization code (from the endpoint above) and faceId to backend. Backend exchanges the authorization code to get access token and refresh token. These are used to get information from the Google Calendar API.
+Sends the Authorization code (from the endpoint above) and faceId to backend. Backend exchanges the authorization code to get access token and refresh token. These saved to a database and are used to get information from the Google Calendar API for the person they are connected to.
 
 **/calendar/{id} (GET)**<br>
 Get calendar events if the user has allowed it. The backend fetch data from the Google Calendar API with the generated access token.
