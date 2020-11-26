@@ -1,15 +1,11 @@
 package com.dynabyte.marleyrest.calendar.util;
 
 import com.google.api.services.calendar.model.Event;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Clock;
-import java.time.Instant;
 import java.util.Date;
 
 
@@ -21,18 +17,24 @@ public class CalendarDateUtil {
     public static boolean isEventToday(Event event){
         Date eventDateWithTime = new Date(event.getStart().getDateTime().getValue());
         Date eventDate = removeTime(eventDateWithTime);
-
-        Date currentDateWithTime = Date.from(Instant.now(clock));
+        Date currentDateWithTime = Date.from(clock.instant());
         Date currentDate = removeTime(currentDateWithTime);
 
         //If the event date is today, return true, else false
         return eventDate.compareTo(currentDate) == 0;
     }
 
+    //TODO is this correct clock behavior? Round up for minutes left, round down for minutes passed (negative value)
     public static int getMinutesRemaining(Event event){
         long eventSystemTime = event.getStart().getDateTime().getValue();
         long remainingSeconds = (eventSystemTime - clock.millis())/1000;
-        return (int) Math.ceil(remainingSeconds/60.0);
+        double minutesRemaining = remainingSeconds/60.0;
+        if (minutesRemaining >=0){
+            return (int) Math.ceil(minutesRemaining);
+        }
+        else{
+            return (int) Math.floor(minutesRemaining);
+        }
     }
 
     private static Date removeTime(Date date){

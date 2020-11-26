@@ -10,19 +10,15 @@ import org.junit.jupiter.api.Test;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 class CalendarDateUtilTest {
 
-    private static Clock fixedClock;
-
     @BeforeAll
     static void setUp() {
-        fixedClock = Clock.fixed(Instant.parse("2020-01-01T10:10:10.00Z"),
+        Clock fixedClock = Clock.fixed(Instant.parse("2020-01-01T10:10:10.00Z"),
                 ZoneId.systemDefault());
         CalendarDateUtil.setClock(fixedClock);
     }
@@ -60,11 +56,42 @@ class CalendarDateUtilTest {
         assertFalse(CalendarDateUtil.isEventToday(fakeTodayEvent));
     }
 
+    @Test
+    void getMinutesRemainingPositiveShouldRoundUp() {
+        Event event = new Event();
+        EventDateTime eventDateTime = new EventDateTime();
 
+        eventDateTime.setDateTime(new DateTime("2020-01-01T10:10:10.00Z"));
+        event.setStart(eventDateTime);
+        assertEquals(0, CalendarDateUtil.getMinutesRemaining(event));
+
+        eventDateTime.setDateTime(new DateTime("2020-01-01T10:19:19.50Z"));
+        event.setStart(eventDateTime);
+        assertEquals(10, CalendarDateUtil.getMinutesRemaining(event));
+
+
+        eventDateTime.setDateTime(new DateTime("2020-01-01T11:19:19.50Z"));
+        event.setStart(eventDateTime);
+        assertEquals(70, CalendarDateUtil.getMinutesRemaining(event));
+    }
 
     @Test
-    void getMinutesRemaining() {
+    void getMinutesRemainingNegativeShouldRoundDown() {
+        Event event = new Event();
+        EventDateTime eventDateTime = new EventDateTime();
 
+        eventDateTime.setDateTime(new DateTime("2020-01-01T10:09:29.00Z"));
+        event.setStart(eventDateTime);
+        assertEquals(-1, CalendarDateUtil.getMinutesRemaining(event));
+
+        eventDateTime.setDateTime(new DateTime("2020-01-01T09:55:19.50Z"));
+        event.setStart(eventDateTime);
+        assertEquals(-15, CalendarDateUtil.getMinutesRemaining(event));
+
+
+        eventDateTime.setDateTime(new DateTime("2020-01-01T08:09:19.50Z"));
+        event.setStart(eventDateTime);
+        assertEquals(-121, CalendarDateUtil.getMinutesRemaining(event));
     }
 
     @AfterAll
