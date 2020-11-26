@@ -24,7 +24,6 @@ public class CalendarDateUtil {
         return eventDate.compareTo(currentDate) == 0;
     }
 
-    //TODO is this correct clock behavior? Round up for minutes left, round down for minutes passed (negative value)
     public static int getMinutesRemaining(Event event){
         long eventSystemTime = event.getStart().getDateTime().getValue();
         long remainingSeconds = (eventSystemTime - clock.millis())/1000;

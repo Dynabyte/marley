@@ -1,8 +1,7 @@
 package com.dynabyte.marleyrest.calendar.service;
 
 import com.dynabyte.marleyrest.calendar.model.GoogleTokens;
-import com.dynabyte.marleyrest.calendar.repository.GoogleTokensRepository;
-import com.dynabyte.marleyrest.personrecognition.request.ImageRequest;
+import com.dynabyte.marleyrest.calendar.response.GoogleCredentials;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,23 +10,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.ResourceUtils;
+import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class GoogleTokensServiceTest {
+class CalendarServiceTest {
 
     @Mock
-    private GoogleTokensRepository googleTokensRepository;
-
-    @InjectMocks
     private GoogleTokensService googleTokensService;
+
+    @InjectMocks CalendarService calendarService;
 
     private GoogleTokens googleTokens;
     private String faceId;
@@ -45,25 +41,14 @@ class GoogleTokensServiceTest {
     }
 
     @Test
-    void save() {
-        googleTokensService.save(googleTokens);
-        verify(googleTokensRepository).save(googleTokens);
-    }
+    void getCredentials() throws Exception {
+        //This test generates a warning while setting environment variable for the test, but it works
+        EnvironmentVariables environmentVariables = new EnvironmentVariables("GOOGLE_CALENDAR_API_KEY", "api-key");
 
-    @Test
-    void findGoogleTokensById() {
-        when(googleTokensRepository.findById(faceId)).thenReturn(Optional.of(googleTokens));
-
-        Optional<GoogleTokens> googleTokensOptional = googleTokensService.findGoogleTokensById(faceId);
-
-        assertEquals(googleTokens, googleTokensOptional.get());
-
-        verify(googleTokensRepository).findById(faceId);
-    }
-
-    @Test
-    void deleteById() {
-        googleTokensService.deleteById(faceId);
-        verify(googleTokensRepository).deleteById(faceId);
+        environmentVariables.execute(()-> {
+            GoogleCredentials credentials = calendarService.getCredentials();
+            assertTrue(credentials.getClientId().endsWith(".apps.googleusercontent.com"));
+            assertEquals("api-key", credentials.getGoogleCalendarApiKey());
+        });
     }
 }

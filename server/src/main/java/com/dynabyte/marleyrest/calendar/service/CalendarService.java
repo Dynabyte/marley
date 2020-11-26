@@ -16,9 +16,9 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CalendarService {
     private final Logger LOGGER = LoggerFactory.getLogger(CalendarService.class);
 
@@ -38,11 +39,6 @@ public class CalendarService {
 
     private final GoogleTokensService googleTokensService;
     private final GoogleClientSecrets clientSecrets = getGoogleClientSecretsFromJSON();
-
-    @Autowired
-    public CalendarService(GoogleTokensService googleTokensService) {
-        this.googleTokensService = googleTokensService;
-    }
 
     /**
      * Retrieves client id and Google API key which frontend needs in order to request calendar permission
