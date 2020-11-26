@@ -34,7 +34,13 @@ A person can choose to no longer be recognized by Marley, in which case their pe
 ![Deletion Use Case](https://github.com/Dynabyte/marley/blob/production/Diagrams/Deletion%20Request.png)
 
 ### GOOGLE CALENDAR NOTIFICATIONS
-During registration a user can choose to enable Google calendar notifications in which case the next upcoming or ongoing Dynabyte event (only if it's for today) as well as how long time remains until the event will be shown when the person is recognized by the system. 
+During registration a user can choose to enable Google calendar notifications in which case the next upcoming or ongoing Dynabyte event (only if it's for today) as well as how long time remains until the event will be shown when the person is recognized by the system.
+
+Enabling Google Calendar Notifications During Registration:
+![Enabling Google Calendar Notifications](https://github.com/Dynabyte/marley/blob/production/Diagrams/Google%20Calendar%20Registration.png)
+
+Requesting Google Calendar Event from the backend:
+![Requesting Google Calendar Event](https://github.com/Dynabyte/marley/blob/production/Diagrams/Google%20Calendar%20Request.png)
 
 ### UPDATE GOOGLE CALENDAR ACCESS STATUS
 
