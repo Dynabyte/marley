@@ -8,6 +8,7 @@ import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.ServerResponse;
 
 import java.net.URI;
+import java.time.Clock;
 
 import static org.springframework.web.servlet.function.RequestPredicates.GET;
 import static org.springframework.web.servlet.function.RouterFunctions.route;
@@ -33,4 +34,8 @@ public class MarleyApplication {
         return new RestTemplate();
     }
 
+    @Bean
+    public Clock clock() {
+        return Clock.systemDefaultZone();
+    }
 }
