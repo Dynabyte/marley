@@ -11,7 +11,7 @@ The face recognition service is a python rest api that uses the library [face_re
 - [Use Cases](#use-cases)
 - [Backend Information](#backend-information)
 - [Getting Started](#getting-started)
-- [Google Calendar Integration](#google-calendar-integration)
+- [Setting Up Google Calendar Integration](#setting-up-google-calendar-api-integration)
 - [Client - React App](#client---react-app)
 - [Person Recognition - Java Rest API](#person-recognition---java-rest-api)
 - [Face Recognition - Python Rest API](#face-recognition---python-rest-api)
